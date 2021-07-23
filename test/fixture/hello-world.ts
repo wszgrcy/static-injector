@@ -1,6 +1,6 @@
 (global as any).ngDevMode = undefined;
-import { Injectable } from '../src/decorator/injectable';
-import { R3Injector } from '../src/di/r3_injector';
+import { Injectable } from '../../src/decorator/injectable';
+import { R3Injector } from '../../src/di/r3_injector';
 
 @Injectable()
 export class FirstClass {}
