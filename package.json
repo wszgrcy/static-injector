@@ -1,0 +1,16 @@
+{
+  "name": "static-injector",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^16.4.0",
+    "ts-node": "^10.1.0",
+    "typescript": "^4.3.5"
+  }
+}
