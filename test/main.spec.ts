@@ -1,6 +1,6 @@
 import * as ts from "typescript";
 import * as path from "path";
-import { InjectableTransformFactory } from "../src/transform/injectable-transform";
+import { InjectableTransformFactory } from "../src/transform";
 describe("main", () => {
   it("run", () => {
     let program = ts.createProgram({

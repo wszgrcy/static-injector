@@ -4,18 +4,18 @@ import ts, {
   isClassDeclaration,
   SourceFile,
 } from "typescript";
-import { InjectableDecoratorHandler } from "../compiler-cli/src/ngtsc/annotations/src/injectable";
-import { NoopImportRewriter } from "../compiler-cli/src/ngtsc/imports";
+import { InjectableDecoratorHandler } from "./compiler-cli/src/ngtsc/annotations/src/injectable";
+import { NoopImportRewriter } from "./compiler-cli/src/ngtsc/imports";
 import {
   Decorator,
   TypeScriptReflectionHost,
-} from "../compiler-cli/src/ngtsc/reflection";
-import { addImports, CompileResult } from "../compiler-cli/src/ngtsc/transform";
+} from "./compiler-cli/src/ngtsc/reflection";
+import { addImports, CompileResult } from "./compiler-cli/src/ngtsc/transform";
 import {
   ImportManager,
   translateExpression,
   translateStatement,
-} from "../compiler-cli/src/ngtsc/translator";
+} from "./compiler-cli/src/ngtsc/translator";
 import { nodeIteration } from "./node-Iteration";
 const NO_DECORATORS = new Set<ts.Decorator>();
 
@@ -263,7 +263,7 @@ export class InjectableTransformFactory {
     return node;
   }
   /**
-   * Return all decorators on a `Declaration` which are from @angular/core, or an empty set if none
+   * Return all decorators on a `Declaration` which are from static-injector, or an empty set if none
    * are.
    */
   private _angularCoreDecorators(decl: ts.Declaration): Set<ts.Decorator> {
@@ -295,7 +295,7 @@ export class InjectableTransformFactory {
     if (node.decorators === undefined) {
       return undefined;
     }
-    // Build a Set of the decorators on this node from @angular/core.
+    // Build a Set of the decorators on this node from static-injector.
     const coreDecorators = this._angularCoreDecorators(node);
 
     if (coreDecorators.size === node.decorators.length) {
@@ -327,5 +327,5 @@ export class InjectableTransformFactory {
  */
 function isFromAngularCore(decorator: Decorator): boolean {
   return decorator.import !== null;
-  //  && decorator.import.from === "@angular/core";
+  //  && decorator.import.from === "static-injector";
 }
