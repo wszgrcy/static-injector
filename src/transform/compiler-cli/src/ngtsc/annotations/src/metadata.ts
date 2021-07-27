@@ -15,8 +15,8 @@ import {
   R3ClassMetadata,
   ReturnStatement,
   WrappedNodeExpr,
-} from "../../../../../compiler";
-import * as ts from "typescript";
+} from '../../../../../compiler';
+import * as ts from 'typescript';
 
 import {
   CtorParameter,
@@ -24,12 +24,12 @@ import {
   Decorator,
   ReflectionHost,
   TypeValueReferenceKind,
-} from "../../reflection";
+} from '../../reflection';
 
 import {
   valueReferenceToExpression,
   wrapFunctionExpressionsInParens,
-} from "./util";
+} from './util';
 
 /**
  * Given a class declaration, generate a call to `setClassMetadata` with the Angular metadata
@@ -105,7 +105,7 @@ export function extractClassMetadata(
     // corresponding setter.
     throw new Error(
       `Duplicate decorated properties found on class '${clazz.name.text}': ` +
-        duplicateDecoratedMemberNames.join(", ")
+        duplicateDecoratedMemberNames.join(', ')
     );
   }
 
@@ -132,7 +132,7 @@ function ctorParameterToMetadata(
       : new LiteralExpr(undefined);
 
   const mapEntries: { key: string; value: Expression; quoted: false }[] = [
-    { key: "type", value: type, quoted: false },
+    { key: 'type', value: type, quoted: false },
   ];
 
   // If the parameter has decorators, include the ones from Angular.
@@ -141,7 +141,7 @@ function ctorParameterToMetadata(
       .filter((dec) => isAngularDecorator(dec, isCore))
       .map((decorator: Decorator) => decoratorToMetadata(decorator));
     const value = new WrappedNodeExpr(ts.createArrayLiteral(ngDecorators));
-    mapEntries.push({ key: "decorators", value, quoted: false });
+    mapEntries.push({ key: 'decorators', value, quoted: false });
   }
   return literalMap(mapEntries);
 }
@@ -170,13 +170,13 @@ function decoratorToMetadata(
 ): ts.ObjectLiteralExpression {
   if (decorator.identifier === null) {
     throw new Error(
-      "Illegal state: synthesized decorator cannot be emitted in class metadata."
+      'Illegal state: synthesized decorator cannot be emitted in class metadata.'
     );
   }
   // Decorators have a type.
   const properties: ts.ObjectLiteralElementLike[] = [
     ts.createPropertyAssignment(
-      "type",
+      'type',
       ts.getMutableClone(decorator.identifier)
     ),
   ];
@@ -189,7 +189,7 @@ function decoratorToMetadata(
         : expr;
     });
     properties.push(
-      ts.createPropertyAssignment("args", ts.createArrayLiteral(args))
+      ts.createPropertyAssignment('args', ts.createArrayLiteral(args))
     );
   }
   return ts.createObjectLiteral(properties, true);
@@ -203,8 +203,8 @@ function decoratorToMetadata(
  */
 function isAngularDecorator(decorator: Decorator, isCore: boolean): boolean {
   return (
-    isCore || decorator.import !== null
-    // && decorator.import.from === "static-injector"
+    isCore ||
+    (decorator.import !== null && decorator.import.from === 'static-injector')
   );
 }
 

@@ -19,18 +19,18 @@ import {
   ReadPropExpr,
   Statement,
   WrappedNodeExpr,
-} from "../../../../../compiler";
-import { R3FactoryMetadata } from "../../../../../compiler";
-import { FactoryTarget } from "../../../../../compiler/src/render3/partial/api";
-import * as ts from "typescript";
+} from '../../../../../compiler';
+import { R3FactoryMetadata } from '../../../../../compiler';
+import { FactoryTarget } from '../../../../../compiler/src/render3/partial/api';
+import * as ts from 'typescript';
 
 import {
   ErrorCode,
   FatalDiagnosticError,
   makeDiagnostic,
   makeRelatedInformation,
-} from "../../diagnostics";
-import { Reference } from "../../imports";
+} from '../../diagnostics';
+import { Reference } from '../../imports';
 import {
   ClassDeclaration,
   CtorParameter,
@@ -44,8 +44,8 @@ import {
   TypeValueReferenceKind,
   UnavailableValue,
   ValueUnavailableKind,
-} from "../../reflection";
-import { CompileResult } from "../../transform";
+} from '../../reflection';
+import { CompileResult } from '../../transform';
 
 export type ConstructorDeps =
   | {
@@ -90,7 +90,7 @@ export function getConstructorDependencies(
       .forEach((dec) => {
         const name =
           isCore || dec.import === null ? dec.name : dec.import!.name;
-        if (name === "Inject") {
+        if (name === 'Inject') {
           if (dec.args === null || dec.args.length !== 1) {
             throw new FatalDiagnosticError(
               ErrorCode.DECORATOR_ARITY_WRONG,
@@ -99,15 +99,15 @@ export function getConstructorDependencies(
             );
           }
           token = new WrappedNodeExpr(dec.args[0]);
-        } else if (name === "Optional") {
+        } else if (name === 'Optional') {
           optional = true;
-        } else if (name === "SkipSelf") {
+        } else if (name === 'SkipSelf') {
           skipSelf = true;
-        } else if (name === "Self") {
+        } else if (name === 'Self') {
           self = true;
-        } else if (name === "Host") {
+        } else if (name === 'Host') {
           host = true;
-        } else if (name === "Attribute") {
+        } else if (name === 'Attribute') {
           if (dec.args === null || dec.args.length !== 1) {
             throw new FatalDiagnosticError(
               ErrorCode.DECORATOR_ARITY_WRONG,
@@ -138,7 +138,7 @@ export function getConstructorDependencies(
         param.typeValueReference.kind !== TypeValueReferenceKind.UNAVAILABLE
       ) {
         throw new Error(
-          "Illegal state: expected value reference to be unavailable if no token is present"
+          'Illegal state: expected value reference to be unavailable if no token is present'
         );
       }
       errors.push({
@@ -201,7 +201,7 @@ export function valueReferenceToExpression(
  */
 export function unwrapConstructorDependencies(
   deps: ConstructorDeps | null
-): R3DependencyMetadata[] | "invalid" | null {
+): R3DependencyMetadata[] | 'invalid' | null {
   if (deps === null) {
     return null;
   } else if (deps.deps !== null) {
@@ -209,7 +209,7 @@ export function unwrapConstructorDependencies(
     return deps.deps;
   } else {
     // These deps are invalid.
-    return "invalid";
+    return 'invalid';
   }
 }
 
@@ -262,69 +262,69 @@ function createUnsuitableInjectionTokenError(
   switch (reason.kind) {
     case ValueUnavailableKind.UNSUPPORTED:
       chainMessage =
-        "Consider using the @Inject decorator to specify an injection token.";
+        'Consider using the @Inject decorator to specify an injection token.';
       hints = [
         makeRelatedInformation(
           reason.typeNode,
-          "This type is not supported as injection token."
+          'This type is not supported as injection token.'
         ),
       ];
       break;
     case ValueUnavailableKind.NO_VALUE_DECLARATION:
       chainMessage =
-        "Consider using the @Inject decorator to specify an injection token.";
+        'Consider using the @Inject decorator to specify an injection token.';
       hints = [
         makeRelatedInformation(
           reason.typeNode,
-          "This type does not have a value, so it cannot be used as injection token."
+          'This type does not have a value, so it cannot be used as injection token.'
         ),
       ];
       if (reason.decl !== null) {
         hints.push(
-          makeRelatedInformation(reason.decl, "The type is declared here.")
+          makeRelatedInformation(reason.decl, 'The type is declared here.')
         );
       }
       break;
     case ValueUnavailableKind.TYPE_ONLY_IMPORT:
       chainMessage =
-        "Consider changing the type-only import to a regular import, or use the @Inject decorator to specify an injection token.";
+        'Consider changing the type-only import to a regular import, or use the @Inject decorator to specify an injection token.';
       hints = [
         makeRelatedInformation(
           reason.typeNode,
-          "This type is imported using a type-only import, which prevents it from being usable as an injection token."
+          'This type is imported using a type-only import, which prevents it from being usable as an injection token.'
         ),
         makeRelatedInformation(
           reason.importClause,
-          "The type-only import occurs here."
+          'The type-only import occurs here.'
         ),
       ];
       break;
     case ValueUnavailableKind.NAMESPACE:
       chainMessage =
-        "Consider using the @Inject decorator to specify an injection token.";
+        'Consider using the @Inject decorator to specify an injection token.';
       hints = [
         makeRelatedInformation(
           reason.typeNode,
-          "This type corresponds with a namespace, which cannot be used as injection token."
+          'This type corresponds with a namespace, which cannot be used as injection token.'
         ),
         makeRelatedInformation(
           reason.importClause,
-          "The namespace import occurs here."
+          'The namespace import occurs here.'
         ),
       ];
       break;
     case ValueUnavailableKind.UNKNOWN_REFERENCE:
-      chainMessage = "The type should reference a known declaration.";
+      chainMessage = 'The type should reference a known declaration.';
       hints = [
         makeRelatedInformation(
           reason.typeNode,
-          "This type could not be resolved."
+          'This type could not be resolved.'
         ),
       ];
       break;
     case ValueUnavailableKind.MISSING_TYPE:
       chainMessage =
-        "Consider adding a type to the parameter or use the @Inject decorator to specify an injection token.";
+        'Consider adding a type to the parameter or use the @Inject decorator to specify an injection token.';
       break;
   }
 
@@ -355,8 +355,9 @@ function createUnsuitableInjectionTokenError(
 export function isAngularCore(
   decorator: Decorator
 ): decorator is Decorator & { import: Import } {
-  return decorator.import !== null;
-  // && decorator.import.from === "static-injector";
+  return (
+    decorator.import !== null && decorator.import.from === 'static-injector'
+  );
 }
 /** todo 需要改成自己的依赖包 */
 export function isAngularCoreReference(
@@ -364,8 +365,7 @@ export function isAngularCoreReference(
   symbolName: string
 ): boolean {
   return (
-    // reference.ownedByModuleGuess === "static-injector" &&
-
+    reference.ownedByModuleGuess === 'static-injector' &&
     reference.debugName === symbolName
   );
 }
@@ -463,8 +463,9 @@ export function tryUnwrapForwardRef(
   const imp = reflector.getImportOfIdentifier(fn);
   //todo 更换包名
   if (
-    imp === null /**|| imp.from !== "static-injector" */ ||
-    imp.name !== "forwardRef"
+    imp === null ||
+    imp.from !== 'static-injector' ||
+    imp.name !== 'forwardRef'
   ) {
     return null;
   }
@@ -522,7 +523,7 @@ export function wrapTypeReference(
 }
 
 export function toFactoryMetadata(
-  meta: Omit<R3FactoryMetadata, "target">,
+  meta: Omit<R3FactoryMetadata, 'target'>,
   target: FactoryTarget
 ): R3FactoryMetadata {
   return {

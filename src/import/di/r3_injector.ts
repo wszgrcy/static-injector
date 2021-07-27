@@ -8,21 +8,21 @@
 
 // import '../util/ng_dev_mode';
 
-import { OnDestroy } from "../interface/lifecycle_hooks";
-import { Type } from "../interface/type";
-import { FactoryFn, getFactoryDef } from "../render3/definition_factory";
+import { OnDestroy } from '../interface/lifecycle_hooks';
+import { Type } from '../interface/type';
+import { FactoryFn, getFactoryDef } from '../render3/definition_factory';
 import {
   throwCyclicDependencyError,
   throwInvalidProviderError,
   throwMixedMultiProviderError,
-} from "../render3/errors_di";
-import { deepForEach, newArray } from "../util/array_utils";
-import { EMPTY_ARRAY } from "../util/empty";
-import { stringify } from "../util/stringify";
+} from '../render3/errors_di';
+import { deepForEach, newArray } from '../util/array_utils';
+import { EMPTY_ARRAY } from '../util/empty';
+import { stringify } from '../util/stringify';
 
-import { resolveForwardRef } from "./forward_ref";
-import { InjectionToken } from "./injection_token";
-import { Injector } from "./injector";
+import { resolveForwardRef } from './forward_ref';
+import { InjectionToken } from './injection_token';
+import { Injector } from './injector';
 import {
   catchInjectorError,
   injectArgs,
@@ -31,16 +31,16 @@ import {
   THROW_IF_NOT_FOUND,
   USE_VALUE,
   ɵɵinject,
-} from "./injector_compatibility";
-import { INJECTOR } from "./injector_token";
+} from './injector_compatibility';
+import { INJECTOR } from './injector_token';
 import {
   getInjectableDef,
   getInjectorDef,
   InjectorType,
   InjectorTypeWithProviders,
   ɵɵInjectableDeclaration,
-} from "./interface/defs";
-import { InjectFlags } from "./interface/injector";
+} from './interface/defs';
+import { InjectFlags } from './interface/injector';
 import {
   ClassProvider,
   ConstructorProvider,
@@ -50,10 +50,10 @@ import {
   StaticProvider,
   TypeProvider,
   ValueProvider,
-} from "./interface/provider";
-import { NullInjector } from "./null_injector";
-import { ProviderToken } from "./provider_token";
-import { INJECTOR_SCOPE } from "./scope";
+} from './interface/provider';
+import { NullInjector } from './null_injector';
+import { ProviderToken } from './provider_token';
+import { INJECTOR_SCOPE } from './scope';
 
 /**
  * Internal type for a single provider in a deep provider array.
@@ -165,7 +165,7 @@ export class R3Injector {
    * Flag indicating this injector provides the APP_ROOT_SCOPE token, and thus counts as the
    * root scope.
    */
-  private readonly scope: "root" | "platform" | null;
+  private readonly scope: 'root' | 'platform' | null;
 
   readonly source: string | null;
 
@@ -206,7 +206,7 @@ export class R3Injector {
     this.scope = record != null ? record.value : null;
 
     // Source name, used for debugging
-    this.source = source || (typeof def === "object" ? null : stringify(def));
+    this.source = source || (typeof def === 'object' ? null : stringify(def));
   }
 
   /**
@@ -279,7 +279,7 @@ export class R3Injector {
           : notFoundValue;
       return nextInjector.get(token, notFoundValue);
     } catch (e) {
-      if (e.name === "NullInjectorError") {
+      if (e.name === 'NullInjectorError') {
         const path: any[] = (e[NG_TEMP_TOKEN_PATH] =
           e[NG_TEMP_TOKEN_PATH] || []);
         path.unshift(stringify(token));
@@ -288,7 +288,7 @@ export class R3Injector {
           throw e;
         } else {
           // Format & throw the final error message when we don't have any previous injector
-          return catchInjectorError(e, token, "R3InjectorError", this.source);
+          return catchInjectorError(e, token, 'R3InjectorError', this.source);
         }
       } else {
         throw e;
@@ -308,12 +308,12 @@ export class R3Injector {
     const tokens = <string[]>[],
       records = this.records;
     records.forEach((v, token) => tokens.push(stringify(token)));
-    return `R3Injector[${tokens.join(", ")}]`;
+    return `R3Injector[${tokens.join(', ')}]`;
   }
 
   private assertNotDestroyed(): void {
     if (this._destroyed) {
-      throw new Error("Injector has already been destroyed.");
+      throw new Error('Injector has already been destroyed.');
     }
   }
 
@@ -356,11 +356,11 @@ export class R3Injector {
         : ngModule;
 
     // Check for circular dependencies.
-    if (ngDevMode && parents.indexOf(defType) !== -1) {
-      const defName = stringify(defType);
-      const path = parents.map(stringify);
-      throwCyclicDependencyError(defName, path);
-    }
+    // if (ngDevMode && parents.indexOf(defType) !== -1) {
+    //   const defName = stringify(defType);
+    //   const path = parents.map(stringify);
+    //   throwCyclicDependencyError(defName, path);
+    // }
 
     // Check for multiple imports of the same module
     const isDuplicate = dedupStack.indexOf(defType) !== -1;
@@ -382,7 +382,7 @@ export class R3Injector {
     if (def.imports != null && !isDuplicate) {
       // Before processing defType's imports, add it to the set of parents. This way, if it ends
       // up deeply importing itself, this can be detected.
-      ngDevMode && parents.push(defType);
+      // ngDevMode && parents.push(defType);
       // Add it to the set of dedups. This way we can detect multiple imports of the same module
       dedupStack.push(defType);
 
@@ -401,7 +401,7 @@ export class R3Injector {
         });
       } finally {
         // Remove it from the parents set when finished.
-        ngDevMode && parents.pop();
+        // ngDevMode && parents.pop();
       }
 
       // Imports which are declared with providers (TypeWithProviders) need to be processed
@@ -462,9 +462,9 @@ export class R3Injector {
       let multiRecord = this.records.get(token);
       if (multiRecord) {
         // It has. Throw a nice error if
-        if (ngDevMode && multiRecord.multi === undefined) {
-          throwMixedMultiProviderError();
-        }
+        // if (ngDevMode && multiRecord.multi === undefined) {
+        //   throwMixedMultiProviderError();
+        // }
       } else {
         multiRecord = makeRecord(undefined, NOT_YET, true);
         multiRecord.factory = () => injectArgs(multiRecord!.multi!);
@@ -474,22 +474,23 @@ export class R3Injector {
       multiRecord.multi!.push(provider);
     } else {
       const existing = this.records.get(token);
-      if (ngDevMode && existing && existing.multi !== undefined) {
-        throwMixedMultiProviderError();
-      }
+      // if (ngDevMode && existing && existing.multi !== undefined) {
+      //   throwMixedMultiProviderError();
+      // }
     }
     this.records.set(token, record);
   }
 
   private hydrate<T>(token: ProviderToken<T>, record: Record<T>): T {
-    if (ngDevMode && record.value === CIRCULAR) {
-      throwCyclicDependencyError(stringify(token));
-    } else if (record.value === NOT_YET) {
+    // if (ngDevMode && record.value === CIRCULAR) {
+    //   throwCyclicDependencyError(stringify(token));
+    // } else
+    if (record.value === NOT_YET) {
       record.value = CIRCULAR;
       record.value = record.factory!();
     }
     if (
-      typeof record.value === "object" &&
+      typeof record.value === 'object' &&
       record.value &&
       hasOnDestroy(record.value)
     ) {
@@ -503,8 +504,8 @@ export class R3Injector {
       return false;
     }
     const providedIn = resolveForwardRef(def.providedIn);
-    if (typeof providedIn === "string") {
-      return providedIn === "any" || providedIn === this.scope;
+    if (typeof providedIn === 'string') {
+      return providedIn === 'any' || providedIn === this.scope;
     } else {
       return this.injectorDefTypes.has(providedIn);
     }
@@ -535,17 +536,17 @@ function injectableDefOrInjectorDefFactory(
   }
 
   // There was no way to resolve a factory for this token.
-  throw new Error("unreachable");
+  throw new Error('unreachable');
 }
 
 function getUndecoratedInjectableFactory(token: Function) {
   // If the token has parameters then it has dependencies that we cannot resolve implicitly.
   const paramLength = token.length;
   if (paramLength > 0) {
-    const args: string[] = newArray(paramLength, "?");
+    const args: string[] = newArray(paramLength, '?');
     throw new Error(
       `Can't resolve all parameters for ${stringify(token)}: (${args.join(
-        ", "
+        ', '
       )}).`
     );
   }
@@ -606,9 +607,9 @@ export function providerToFactory(
           ((provider as StaticClassProvider | ClassProvider).useClass ||
             provider.provide)
       );
-      if (ngDevMode && !classRef) {
-        throwInvalidProviderError(ngModuleType, providers, provider);
-      }
+      // if (ngDevMode && !classRef) {
+      //   throwInvalidProviderError(ngModuleType, providers, provider);
+      // }
       if (hasDeps(provider)) {
         factory = () => new classRef(...injectArgs(provider.deps));
       } else {
@@ -634,7 +635,7 @@ function makeRecord<T>(
 }
 
 function isValueProvider(value: SingleProvider): value is ValueProvider {
-  return value !== null && typeof value == "object" && USE_VALUE in value;
+  return value !== null && typeof value == 'object' && USE_VALUE in value;
 }
 
 function isExistingProvider(value: SingleProvider): value is ExistingProvider {
@@ -646,7 +647,7 @@ function isFactoryProvider(value: SingleProvider): value is FactoryProvider {
 }
 
 export function isTypeProvider(value: SingleProvider): value is TypeProvider {
-  return typeof value === "function";
+  return typeof value === 'function';
 }
 
 export function isClassProvider(value: SingleProvider): value is ClassProvider {
@@ -662,14 +663,14 @@ function hasDeps(
 function hasOnDestroy(value: any): value is OnDestroy {
   return (
     value !== null &&
-    typeof value === "object" &&
-    typeof (value as OnDestroy).ngOnDestroy === "function"
+    typeof value === 'object' &&
+    typeof (value as OnDestroy).ngOnDestroy === 'function'
   );
 }
 
 function couldBeInjectableType(value: any): value is ProviderToken<any> {
   return (
-    typeof value === "function" ||
-    (typeof value === "object" && value instanceof InjectionToken)
+    typeof value === 'function' ||
+    (typeof value === 'object' && value instanceof InjectionToken)
   );
 }

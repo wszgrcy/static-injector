@@ -6,9 +6,9 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import { Type } from "../interface/type";
-import { stringify } from "../util/stringify";
-import { NG_FACTORY_DEF } from "./fields";
+import { Type } from '../interface/type';
+import { stringify } from '../util/stringify';
+import { NG_FACTORY_DEF } from './fields';
 
 /**
  * Definition of what a factory function should look like.
@@ -33,8 +33,8 @@ export function getFactoryDef<T>(
   throwNotFound?: boolean
 ): FactoryFn<T> | null {
   const hasFactoryDef = type.hasOwnProperty(NG_FACTORY_DEF);
-  if (!hasFactoryDef && throwNotFound === true && ngDevMode) {
-    throw new Error(`Type ${stringify(type)} does not have 'ɵfac' property.`);
-  }
+  // if (!hasFactoryDef && throwNotFound === true && ngDevMode) {
+  //   throw new Error(`Type ${stringify(type)} does not have 'ɵfac' property.`);
+  // }
   return hasFactoryDef ? type[NG_FACTORY_DEF] : null;
 }

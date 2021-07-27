@@ -1,16 +1,20 @@
-(global as any).ngDevMode = undefined;
-import { Injectable } from "../../src/import";
-import { Inject } from "../../src/import";
-import { R3Injector } from "../../src/import";
+import {
+  Injectable,
+  R3Injector,
+  InjectionToken,
+  Inject,
+} from 'static-injector';
 
 @Injectable()
 export class FirstClass {
-  constructor() {}
+  constructor(@Inject(token) token) {
+    console.log('输出', token);
+  }
 }
-
+let token = new InjectionToken('');
 let injector = new R3Injector(
-  { name: "test" } as any,
-  [{ provide: FirstClass }],
+  { name: 'test' } as any,
+  [{ provide: FirstClass }, { provide: token, useValue: 123 }],
   undefined
 );
 let instance = injector.get(FirstClass);

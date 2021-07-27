@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "files": ["./src/import/index.ts"],
+  "include": [],
+  "compilerOptions": {
+    "outDir": "../node_modules/static-injector",
+    "declaration": true
+  }
+}

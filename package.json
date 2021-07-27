@@ -5,6 +5,7 @@
   "main": "index.js",
   "private": true,
   "scripts": {
+    "pretest": "tsc -p ./tsconfig.import-test.json",
     "test": "jest"
   },
   "author": "",

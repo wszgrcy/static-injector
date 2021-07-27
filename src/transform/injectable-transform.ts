@@ -3,20 +3,20 @@ import ts, {
   factory,
   isClassDeclaration,
   SourceFile,
-} from "typescript";
-import { InjectableDecoratorHandler } from "./compiler-cli/src/ngtsc/annotations/src/injectable";
-import { NoopImportRewriter } from "./compiler-cli/src/ngtsc/imports";
+} from 'typescript';
+import { InjectableDecoratorHandler } from './compiler-cli/src/ngtsc/annotations/src/injectable';
+import { NoopImportRewriter } from './compiler-cli/src/ngtsc/imports';
 import {
   Decorator,
   TypeScriptReflectionHost,
-} from "./compiler-cli/src/ngtsc/reflection";
-import { addImports, CompileResult } from "./compiler-cli/src/ngtsc/transform";
+} from './compiler-cli/src/ngtsc/reflection';
+import { addImports, CompileResult } from './compiler-cli/src/ngtsc/transform';
 import {
   ImportManager,
   translateExpression,
   translateStatement,
-} from "./compiler-cli/src/ngtsc/translator";
-import { nodeIteration } from "./node-Iteration";
+} from './compiler-cli/src/ngtsc/translator';
+import { nodeIteration } from './node-Iteration';
 const NO_DECORATORS = new Set<ts.Decorator>();
 
 export class InjectableTransformFactory {
@@ -164,7 +164,7 @@ export class InjectableTransformFactory {
         ts.addSyntheticLeadingComment(
           property,
           ts.SyntaxKind.MultiLineCommentTrivia,
-          "* @nocollapse ",
+          '* @nocollapse ',
           /* hasTrailingNewLine */ false
         );
       }
@@ -326,6 +326,7 @@ export class InjectableTransformFactory {
  * todo 引入
  */
 function isFromAngularCore(decorator: Decorator): boolean {
-  return decorator.import !== null;
-  //  && decorator.import.from === "static-injector";
+  return (
+    decorator.import !== null && decorator.import.from === 'static-injector'
+  );
 }
