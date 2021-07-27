@@ -34,7 +34,6 @@ import {
   CompileResult,
   DecoratorHandler,
   DetectResult,
-  HandlerPrecedence,
 } from "../../transform";
 
 import { CompileFactoryFn, compileNgFactoryDefField } from "./factory";
@@ -51,11 +50,10 @@ import {
   wrapTypeReference,
 } from "./util";
 
-export interface InjectableHandlerData {
+interface InjectableHandlerData {
   meta: R3InjectableMetadata;
   classMetadata: R3ClassMetadata | null;
   ctorDeps: R3DependencyMetadata[] | "invalid" | null;
-  needsFactory: boolean;
 }
 
 /**
@@ -77,9 +75,6 @@ export class InjectableDecoratorHandler
      */
     private errorOnDuplicateProv = true
   ) {}
-
-  readonly precedence = HandlerPrecedence.SHARED;
-  readonly name = InjectableDecoratorHandler.name;
 
   detect(
     node: ClassDeclaration,
@@ -109,7 +104,6 @@ export class InjectableDecoratorHandler
     decorator: Readonly<Decorator>
   ): AnalysisOutput<InjectableHandlerData> {
     const meta = extractInjectableMetadata(node, decorator, this.reflector);
-    const decorators = this.reflector.getDecoratorsOfDeclaration(node);
 
     return {
       analysis: {
@@ -125,12 +119,6 @@ export class InjectableDecoratorHandler
         classMetadata: extractClassMetadata(node, this.reflector, this.isCore),
         // Avoid generating multiple factories if a class has
         // more Angular decorators, apart from Injectable.
-        needsFactory:
-          !decorators ||
-          decorators.every(
-            (current) =>
-              !isAngularCore(current) || current.name === "Injectable"
-          ),
       },
     };
   }
@@ -157,21 +145,19 @@ export class InjectableDecoratorHandler
   ): CompileResult[] {
     const results: CompileResult[] = [];
 
-    if (analysis.needsFactory) {
-      const meta = analysis.meta;
-      const factoryRes = compileFactoryFn(
-        toFactoryMetadata(
-          { ...meta, deps: analysis.ctorDeps },
-          FactoryTarget.Injectable
-        )
+    const meta = analysis.meta;
+    const factoryRes = compileFactoryFn(
+      toFactoryMetadata(
+        { ...meta, deps: analysis.ctorDeps },
+        FactoryTarget.Injectable
+      )
+    );
+    if (analysis.classMetadata !== null) {
+      factoryRes.statements.push(
+        compileClassMetadataFn(analysis.classMetadata).toStmt()
       );
-      if (analysis.classMetadata !== null) {
-        factoryRes.statements.push(
-          compileClassMetadataFn(analysis.classMetadata).toStmt()
-        );
-      }
-      results.push(factoryRes);
     }
+    results.push(factoryRes);
 
     const ɵprov = this.reflector
       .getMembersOfClass(node)

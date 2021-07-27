@@ -11,29 +11,6 @@ import * as ts from "typescript";
 
 import { ClassDeclaration, Decorator } from "../../reflection";
 
-export enum HandlerPrecedence {
-  /**
-   * Handler with PRIMARY precedence cannot overlap - there can only be one on a given class.
-   *
-   * If more than one PRIMARY handler matches a class, an error is produced.
-   */
-  PRIMARY,
-
-  /**
-   * Handlers with SHARED precedence can match any class, possibly in addition to a single PRIMARY
-   * handler.
-   *
-   * It is not an error for a class to have any number of SHARED handlers.
-   */
-  SHARED,
-
-  /**
-   * Handlers with WEAK precedence that match a class are ignored if any handlers with stronger
-   * precedence match a class.
-   */
-  WEAK,
-}
-
 /**
  * A set of options which can be passed to a `DecoratorHandler` by a consumer, to tailor the output
  * of compilation beyond the decorators themselves.
@@ -68,16 +45,6 @@ export enum HandlerFlags {
  * @param `R` The type of resolution metadata produced by `resolve`.
  */
 export interface DecoratorHandler<D, A, S extends null, R> {
-  readonly name: string;
-
-  /**
-   * The precedence of a handler controls how it interacts with other handlers that match the same
-   * class.
-   *
-   * See the descriptions on `HandlerPrecedence` for an explanation of the behaviors involved.
-   */
-  readonly precedence: HandlerPrecedence;
-
   /**
    * Scan a set of reflected decorators and determine if this handler is responsible for compilation
    * of one of them.
@@ -117,21 +84,6 @@ export interface DecoratorHandler<D, A, S extends null, R> {
   ): AnalysisOutput<A>;
 
   /**
-   * React to a change in a resource file by updating the `analysis` or `resolution`, under the
-   * assumption that nothing in the TypeScript code has changed.
-   */
-  updateResources?(node: ClassDeclaration, analysis: A, resolution: R): void;
-
-  /**
-   * Post-process the analysis of a decorator/class combination and record any necessary information
-   * in the larger compilation.
-   *
-   * Registration always occurs for a given decorator/class, regardless of whether analysis was
-   * performed directly or whether the analysis results were reused from the previous program.
-   */
-  register?(node: ClassDeclaration, analysis: A): void;
-
-  /**
    * Generate a description of the field which should be added to the class, including any
    * initialization code to be generated.
    *
@@ -141,20 +93,6 @@ export interface DecoratorHandler<D, A, S extends null, R> {
   compileFull(
     node: ClassDeclaration,
     analysis: Readonly<A>
-  ): CompileResult | CompileResult[];
-
-  /**
-   * Generates code for the decorator using a stable, but intermediate format suitable to be
-   * published to NPM. This code is meant to be processed by the linker to achieve the final AOT
-   * compiled code.
-   *
-   * If present, this method is used if the compilation mode is configured as partial, otherwise
-   * `compileFull` is.
-   */
-  compilePartial?(
-    node: ClassDeclaration,
-    analysis: Readonly<A>,
-    resolution: Readonly<R>
   ): CompileResult | CompileResult[];
 }
 

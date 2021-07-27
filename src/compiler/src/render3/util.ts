@@ -5,8 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-
-import { escapeIdentifier } from "../output/abstract_emitter";
 import * as o from "../output/output_ast";
 
 export function typeWithParameters(
@@ -37,36 +35,9 @@ export interface R3CompiledExpression {
   statements: o.Statement[];
 }
 
-const ANIMATE_SYMBOL_PREFIX = "@";
-export function prepareSyntheticPropertyName(name: string) {
-  return `${ANIMATE_SYMBOL_PREFIX}${name}`;
-}
-
-export function prepareSyntheticListenerName(name: string, phase: string) {
-  return `${ANIMATE_SYMBOL_PREFIX}${name}.${phase}`;
-}
-
-export function getSafePropertyAccessString(
-  accessor: string,
-  name: string
-): string {
-  const escapedName = escapeIdentifier(name, false, false);
-  return escapedName !== name
-    ? `${accessor}[${escapedName}]`
-    : `${accessor}.${name}`;
-}
-
-export function prepareSyntheticListenerFunctionName(
-  name: string,
-  phase: string
-) {
-  return `animation_${name}_${phase}`;
-}
-
-export function jitOnlyGuardedExpression(expr: o.Expression): o.Expression {
-  return guardedExpression("ngJitMode", expr);
-}
-
+/**
+ * todo 相关判断取消或者换一个变量
+ */
 export function devOnlyGuardedExpression(expr: o.Expression): o.Expression {
   return guardedExpression("ngDevMode", expr);
 }
@@ -94,19 +65,4 @@ export function guardedExpression(
     guardUndefinedOrTrue,
     expr
   );
-}
-
-export function wrapReference(value: any): R3Reference {
-  const wrapped = new o.WrappedNodeExpr(value);
-  return { value: wrapped, type: wrapped };
-}
-
-export function refsToArray(
-  refs: R3Reference[],
-  shouldForwardDeclare: boolean
-): o.Expression {
-  const values = o.literalArr(refs.map((ref) => ref.value));
-  return shouldForwardDeclare
-    ? o.fn([], [new o.ReturnStatement(values)])
-    : values;
 }

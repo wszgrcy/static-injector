@@ -88,7 +88,6 @@ export function extractClassMetadata(
   }
 
   // Do the same for property decorators.
-  let metaPropDecorators: Expression | null = null;
   const classMembers = reflection
     .getMembersOfClass(clazz)
     .filter(
@@ -109,24 +108,12 @@ export function extractClassMetadata(
         duplicateDecoratedMemberNames.join(", ")
     );
   }
-  const decoratedMembers = classMembers.map((member) =>
-    classMemberToMetadata(
-      member.nameNode ?? member.name,
-      member.decorators!,
-      isCore
-    )
-  );
-  if (decoratedMembers.length > 0) {
-    metaPropDecorators = new WrappedNodeExpr(
-      ts.createObjectLiteral(decoratedMembers)
-    );
-  }
 
   return {
     type: new WrappedNodeExpr(id),
     decorators: metaDecorators,
     ctorParameters: metaCtorParameters,
-    propDecorators: metaPropDecorators,
+    propDecorators: null,
   };
 }
 
@@ -212,11 +199,13 @@ function decoratorToMetadata(
  * Whether a given decorator should be treated as an Angular decorator.
  *
  * Either it's used in @angular/core, or it's imported from there.
+ * todo 装饰器来源判断
  */
 function isAngularDecorator(decorator: Decorator, isCore: boolean): boolean {
   return (
     isCore ||
-    (decorator.import !== null && decorator.import.from === "@angular/core")
+    decorator.import !== null
+    // && decorator.import.from === "@angular/core"
   );
 }
 

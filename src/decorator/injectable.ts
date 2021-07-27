@@ -1,3 +1,3 @@
-export function Injectable(){
-    return (constructor) => {}
+export function Injectable(options?) {
+  return (constructor) => {};
 }

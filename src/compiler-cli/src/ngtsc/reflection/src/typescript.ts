@@ -132,32 +132,6 @@ export class TypeScriptReflectionHost implements ReflectionHost {
     }
   }
 
-  getExportsOfModule(node: ts.Node): Map<string, Declaration> | null {
-    // In TypeScript code, modules are only ts.SourceFiles. Throw if the node isn't a module.
-    if (!ts.isSourceFile(node)) {
-      throw new Error(
-        `getExportsOfModule() called on non-SourceFile in TS code`
-      );
-    }
-
-    // Reflect the module to a Symbol, and use getExportsOfModule() to get a list of exported
-    // Symbols.
-    const symbol = this.checker.getSymbolAtLocation(node);
-    if (symbol === undefined) {
-      return null;
-    }
-
-    const map = new Map<string, Declaration>();
-    this.checker.getExportsOfModule(symbol).forEach((exportSymbol) => {
-      // Map each exported Symbol to a Declaration and add it to the map.
-      const decl = this.getDeclarationOfSymbol(exportSymbol, null);
-      if (decl !== null) {
-        map.set(exportSymbol.name, decl);
-      }
-    });
-    return map;
-  }
-
   isClass(node: ts.Node): node is ClassDeclaration {
     // For our purposes, classes are "named" ts.ClassDeclarations;
     // (`node.name` can be undefined in unnamed default exports: `default export class { ... }`).
@@ -460,7 +434,6 @@ export class TypeScriptReflectionHost implements ReflectionHost {
     if (!isDecoratorIdentifier(decoratorExpr)) {
       return null;
     }
-
     const decoratorIdentifier = ts.isIdentifier(decoratorExpr)
       ? decoratorExpr
       : decoratorExpr.name;
@@ -582,125 +555,6 @@ export class TypeScriptReflectionHost implements ReflectionHost {
 
     return exportSet;
   }
-}
-
-export function reflectNameOfDeclaration(decl: ts.Declaration): string | null {
-  const id = reflectIdentifierOfDeclaration(decl);
-  return (id && id.text) || null;
-}
-
-export function reflectIdentifierOfDeclaration(
-  decl: ts.Declaration
-): ts.Identifier | null {
-  if (ts.isClassDeclaration(decl) || ts.isFunctionDeclaration(decl)) {
-    return decl.name || null;
-  } else if (ts.isVariableDeclaration(decl)) {
-    if (ts.isIdentifier(decl.name)) {
-      return decl.name;
-    }
-  }
-  return null;
-}
-
-export function reflectTypeEntityToDeclaration(
-  type: ts.EntityName,
-  checker: ts.TypeChecker
-): { node: ts.Declaration; from: string | null } {
-  let realSymbol = checker.getSymbolAtLocation(type);
-  if (realSymbol === undefined) {
-    throw new Error(`Cannot resolve type entity ${type.getText()} to symbol`);
-  }
-  while (realSymbol.flags & ts.SymbolFlags.Alias) {
-    realSymbol = checker.getAliasedSymbol(realSymbol);
-  }
-
-  let node: ts.Declaration | null = null;
-  if (realSymbol.valueDeclaration !== undefined) {
-    node = realSymbol.valueDeclaration;
-  } else if (
-    realSymbol.declarations !== undefined &&
-    realSymbol.declarations.length === 1
-  ) {
-    node = realSymbol.declarations[0];
-  } else {
-    throw new Error(`Cannot resolve type entity symbol to declaration`);
-  }
-
-  if (ts.isQualifiedName(type)) {
-    if (!ts.isIdentifier(type.left)) {
-      throw new Error(`Cannot handle qualified name with non-identifier lhs`);
-    }
-    const symbol = checker.getSymbolAtLocation(type.left);
-    if (
-      symbol === undefined ||
-      symbol.declarations === undefined ||
-      symbol.declarations.length !== 1
-    ) {
-      throw new Error(`Cannot resolve qualified type entity lhs to symbol`);
-    }
-    const decl = symbol.declarations[0];
-    if (ts.isNamespaceImport(decl)) {
-      const clause = decl.parent!;
-      const importDecl = clause.parent!;
-      if (!ts.isStringLiteral(importDecl.moduleSpecifier)) {
-        throw new Error(`Module specifier is not a string`);
-      }
-      return { node, from: importDecl.moduleSpecifier.text };
-    } else if (ts.isModuleDeclaration(decl)) {
-      return { node, from: null };
-    } else {
-      throw new Error(`Unknown import type?`);
-    }
-  } else {
-    return { node, from: null };
-  }
-}
-
-export function filterToMembersWithDecorator(
-  members: ClassMember[],
-  name: string,
-  module?: string
-): { member: ClassMember; decorators: Decorator[] }[] {
-  return members
-    .filter((member) => !member.isStatic)
-    .map((member) => {
-      if (member.decorators === null) {
-        return null;
-      }
-
-      const decorators = member.decorators.filter((dec) => {
-        if (dec.import !== null) {
-          return (
-            dec.import.name === name &&
-            (module === undefined || dec.import.from === module)
-          );
-        } else {
-          return dec.name === name && module === undefined;
-        }
-      });
-
-      if (decorators.length === 0) {
-        return null;
-      }
-
-      return { member, decorators };
-    })
-    .filter(
-      (value): value is { member: ClassMember; decorators: Decorator[] } =>
-        value !== null
-    );
-}
-
-export function findMember(
-  members: ClassMember[],
-  name: string,
-  isStatic: boolean = false
-): ClassMember | null {
-  return (
-    members.find(
-      (member) => member.isStatic === isStatic && member.name === name
-    ) || null
-  );
 }
 
 export function reflectObjectLiteral(

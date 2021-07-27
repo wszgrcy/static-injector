@@ -7,7 +7,7 @@
  */
 
 import * as o from "../output/output_ast";
-
+// todo 更换包名
 const CORE = "@angular/core";
 
 export class Identifiers {

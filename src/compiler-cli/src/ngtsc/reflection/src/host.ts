@@ -92,6 +92,7 @@ export type NamespacedIdentifier = ts.PropertyAccessExpression & {
   expression: ts.Identifier;
   name: ts.Identifier;
 };
+/** 装饰器可能是 Injectable或者xx.Injectable */
 export function isDecoratorIdentifier(
   exp: ts.Expression
 ): exp is DecoratorIdentifier {
@@ -783,20 +784,6 @@ export interface ReflectionHost {
    * otherwise.
    */
   getDeclarationOfIdentifier(id: ts.Identifier): Declaration | null;
-
-  /**
-   * Collect the declarations exported from a module by name.
-   *
-   * Iterates over the exports of a module (including re-exports) and returns a map of export
-   * name to its `Declaration`. If an exported value is itself re-exported from another module,
-   * the `Declaration`'s `viaModule` will reflect that.
-   *
-   * @param node a TypeScript `ts.Node` representing the module (for example a `ts.SourceFile`) for
-   * which to collect exports.
-   *
-   * @returns a map of `Declaration`s for the module's exports, by name.
-   */
-  getExportsOfModule(module: ts.Node): Map<string, Declaration> | null;
 
   /**
    * Check whether the given node actually represents a class.
