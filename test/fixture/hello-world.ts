@@ -3,9 +3,9 @@ import { Injectable } from "../../src/import";
 import { Inject } from "../../src/import";
 import { R3Injector } from "../../src/import";
 
-@Injectable({ providedIn: "root" })
+@Injectable()
 export class FirstClass {
-  constructor(@Inject("aaa") test) {}
+  constructor() {}
 }
 
 let injector = new R3Injector(
