@@ -6,14 +6,13 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-
 /**
  * Special flag indicating that a decorator is of type `Inject`. It's used to make `Inject`
  * decorator tree-shakable (so we don't have to rely on the `instanceof` checks).
  * Note: this flag is not included into the `InjectFlags` since it's an internal-only API.
  */
 export const enum DecoratorFlags {
-  Inject = -1
+  Inject = -1,
 }
 
 /**
@@ -21,29 +20,27 @@ export const enum DecoratorFlags {
  *
  * @publicApi
  */
-export enum InjectFlags {
-  // TODO(alxhub): make this 'const' (and remove `InternalInjectFlags` enum) when ngc no longer
-  // writes exports of it into ngfactory files.
-
+export const enum InjectFlags {
   /** Check self and check parent injector if needed */
-  Default = 0b0000,
+  Default = 0,
 
   /**
    * Specifies that an injector should retrieve a dependency from any injector until reaching the
    * host element of the current component. (Only used with Element Injector)
    */
-  Host = 0b0001,
-
-  /** Don't ascend to ancestors of the node requesting injection. */
-  Self = 0b0010,
-
+  Host = 1 << 0,
+  /** Don't descend into ancestors of the node requesting injection. */
+  Self = 1 << 1,
   /** Skip the node that is requesting injection. */
-  SkipSelf = 0b0100,
-
+  SkipSelf = 1 << 2,
   /** Inject `defaultValue` instead if token not found. */
-  Optional = 0b1000,
+  Optional = 1 << 3,
+  /**
+   * This token is being injected into a pipe.
+   * @internal
+   */
+  ForPipe = 1 << 4,
 }
-
 /**
  * This enum is an exact copy of the `InjectFlags` enum above, but the difference is that this is a
  * const enum, so actual enum values would be inlined in generated code. The `InjectFlags` enum can
