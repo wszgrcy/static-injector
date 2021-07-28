@@ -9,23 +9,27 @@ import {
   Injector,
   InjectFlags,
   INJECTOR_SCOPE,
+  Host,
 } from 'static-injector';
-
+let token = new InjectionToken('token');
+let token2 = new InjectionToken('token2');
 @Injectable()
 export class FirstClass {
   constructor(
-    @Inject(token) token: number,
+    @Inject(token) @Host() token: number,
     @Inject('noValue') @Optional() noValue,
     @Inject(token2) @Optional() @SkipSelf() token2,
     @Inject('factory') factory,
     secondClass: SecondClass | null,
-    rootInjectClass: RootInjectClass
+    rootInjectClass: RootInjectClass,
+    factoryClass: FactoryClass
   ) {
     console.log('输出', token);
     console.log('noValue', noValue);
     console.log(rootInjectClass);
     console.log(factory);
     console.log(secondClass);
+    console.log(factoryClass);
   }
 }
 @Injectable()
@@ -33,9 +37,18 @@ class SecondClass {}
 // todo 修改逻辑支持root
 @Injectable({ providedIn: 'root' })
 class RootInjectClass {}
-
-let token = new InjectionToken('token');
-let token2 = new InjectionToken('token2');
+@Injectable({
+  providedIn: 'root',
+  deps: [token],
+  useFactory: (token) => {
+    return new FactoryClass(token);
+  },
+})
+class FactoryClass {
+  constructor(token) {
+    console.log('使用工厂', token);
+  }
+}
 
 let injector = new R3Injector(
   { name: 'test' } as any,

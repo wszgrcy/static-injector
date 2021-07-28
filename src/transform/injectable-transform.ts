@@ -1,9 +1,4 @@
-import ts, {
-  ClassDeclaration,
-  factory,
-  isClassDeclaration,
-  SourceFile,
-} from 'typescript';
+import ts, { ClassDeclaration, factory, SourceFile } from 'typescript';
 import { InjectableDecoratorHandler } from './compiler-cli/src/ngtsc/annotations/src/injectable';
 import { NoopImportRewriter } from './compiler-cli/src/ngtsc/imports';
 import {
@@ -18,38 +13,40 @@ import {
 } from './compiler-cli/src/ngtsc/translator';
 import { nodeIteration } from './node-Iteration';
 const NO_DECORATORS = new Set<ts.Decorator>();
-
+interface ClassMetadata {
+  /** 要添加的静态方法 */
+  members: ts.PropertyDeclaration[];
+  /** 声明,未用到 */
+  statements;
+  /** 要被移除的装饰器 */
+  decorator: ts.Decorator;
+}
+export function createTransform(program: ts.Program) {
+  let factory = new InjectableTransformFactory(program);
+  return factory.getTransform();
+}
 export class InjectableTransformFactory {
+  typeChecker: ts.TypeChecker;
   reflectionHost: TypeScriptReflectionHost;
-  // partialEvaluator: PartialEvaluator;
   handler: InjectableDecoratorHandler;
-  sfMap = new Map<
-    SourceFile,
-    {
-      map: Map<ts.ClassDeclaration, { members; statements; decorator }>;
-      imports;
-      importManager;
-    }
-  >();
-  constructor(
-    private program: ts.Program,
-    private typeChecker: ts.TypeChecker
-  ) {
+
+  constructor(private program: ts.Program) {
+    this.typeChecker = this.program.getTypeChecker();
     this.reflectionHost = new TypeScriptReflectionHost(this.typeChecker);
-    // this.partialEvaluator = new PartialEvaluator(this.reflectionHost, typeChecker, null);
     this.handler = new InjectableDecoratorHandler(
       this.reflectionHost,
       false,
       false
     );
   }
-  getTransform(context: ts.TransformationContext) {
-    return this.transform(context);
+  getTransform() {
+    // return;
+    return (context: ts.TransformationContext) => this.transform(context);
   }
-  visit(
+  private visit(
     node: ts.Node,
     context: ts.TransformationContext,
-    map: Map<ts.ClassDeclaration, { members; statements; decorator }>
+    map: Map<ts.ClassDeclaration, ClassMetadata>
   ) {
     return ts.visitEachChild(
       node,
@@ -77,28 +74,17 @@ export class InjectableTransformFactory {
       context
     );
   }
-  addImportsTransform(context: ts.TransformationContext) {
-    return (sf: SourceFile) => {
-      let map = this.sfMap.get(ts.getOriginalNode(sf).getSourceFile());
-      if (map && map.importManager && map.imports && map.imports.length) {
-        return addImports(map.importManager, sf);
-      }
-      return sf;
-    };
-  }
-  transform(context: ts.TransformationContext) {
+
+  private transform(context: ts.TransformationContext) {
     return (sf: SourceFile) => {
       let map = this.preAnalysis(sf);
-
-      return this.visit(sf, context, map);
+      sf = this.updateStatements(sf, map.importManager);
+      return this.visit(sf, context, map.classMetadataMap);
     };
   }
 
-  preAnalysis(sf: SourceFile) {
-    let map = new Map<
-      ts.ClassDeclaration,
-      { members; statements; decorator }
-    >();
+  private preAnalysis(sf: SourceFile) {
+    let classMetadataMap = new Map<ts.ClassDeclaration, ClassMetadata>();
     let write = new NoopImportRewriter();
     let importManager = new ImportManager(write);
     nodeIteration(sf, (node) => {
@@ -116,16 +102,18 @@ export class InjectableTransformFactory {
           analysisOutput.analysis
         );
         let resultNode = this.translate(compileResult, importManager);
-        map.set(node, { ...resultNode, decorator: result.trigger });
+        classMetadataMap.set(node, {
+          ...resultNode,
+          decorator: result.trigger as ts.Decorator,
+        });
       }
     });
 
-    this.sfMap.set(sf, {
-      map,
-      imports: importManager.getAllImports(sf.fileName),
-      importManager: importManager,
-    });
-    return map;
+    // this.sourceFileMetadataMap.set(sf, {
+    //   classMetadataMap,
+    //   importManager: importManager,
+    // });
+    return { classMetadataMap, importManager };
   }
   private translate(
     compileResult: CompileResult[],
@@ -133,7 +121,7 @@ export class InjectableTransformFactory {
   ) {
     // There is at least one field to add.
     const statements: ts.Statement[] = [];
-    const members = [];
+    const members: ts.PropertyDeclaration[] = [];
 
     for (const field of compileResult) {
       // Translate the initializer for the field into TS nodes.
@@ -167,8 +155,6 @@ export class InjectableTransformFactory {
         .forEach((stmt) => statements.push(stmt));
       members.push(property);
     }
-    // let imports = manager.getAllImports(sf.fileName);
-    // let sfa = addImports(manager, sf);
     return { statements, members };
   }
 
@@ -264,6 +250,9 @@ export class InjectableTransformFactory {
     (array.pos as number) = node.decorators.pos;
     (array.end as number) = node.decorators.end;
     return array;
+  }
+  private updateStatements(node: ts.SourceFile, importManager: ImportManager) {
+    return addImports(importManager, node);
   }
 }
 /**

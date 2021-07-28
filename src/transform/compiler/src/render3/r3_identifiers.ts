@@ -10,17 +10,7 @@ import * as o from '../output/output_ast';
 const CORE = 'static-injector';
 
 export class Identifiers {
-  /* Methods */
-  static NEW_METHOD = 'factory';
-  static TRANSFORM_METHOD = 'transform';
-  static PATCH_DEPS = 'patchedDeps';
-
   static inject: o.ExternalReference = { name: 'ɵɵinject', moduleName: CORE };
-
-  static injectAttribute: o.ExternalReference = {
-    name: 'ɵɵinjectAttribute',
-    moduleName: CORE,
-  };
 
   static directiveInject: o.ExternalReference = {
     name: 'ɵɵdirectiveInject',
@@ -58,10 +48,7 @@ export class Identifiers {
     name: 'ɵɵFactoryDeclaration',
     moduleName: CORE,
   };
-  static setClassMetadata: o.ExternalReference = {
-    name: 'ɵsetClassMetadata',
-    moduleName: CORE,
-  };
+
   static getInheritedFactory: o.ExternalReference = {
     name: 'ɵɵgetInheritedFactory',
     moduleName: CORE,

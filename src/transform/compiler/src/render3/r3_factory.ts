@@ -293,15 +293,6 @@ function compileInjectDependency(
     }
     const injectFn = getInjectFn(target);
     return outputAst.importExpr(injectFn).callFn(injectArgs);
-  } else {
-    // The `dep.attributeTypeName` value is defined, which indicates that this is an `@Attribute()`
-    // type dependency. For the generated JS we still want to use the `dep.token` value in case the
-    // name given for the attribute is not a string literal. For example given `@Attribute(foo())`,
-    // we want to generate `ɵɵinjectAttribute(foo())`.
-    //
-    // The `dep.attributeTypeName` is only actually used (in `createCtorDepType()`) to generate
-    // typings.
-    return outputAst.importExpr(R3.injectAttribute).callFn([dep.token]);
   }
 }
 
