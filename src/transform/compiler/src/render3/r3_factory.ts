@@ -6,11 +6,11 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import { InjectFlags } from "../core";
-import * as outputAst from "../output/output_ast";
-import { Identifiers as R3 } from "../render3/r3_identifiers";
+import { InjectFlags } from '../core';
+import * as outputAst from '../output/output_ast';
+import { Identifiers as R3 } from '../render3/r3_identifiers';
 
-import { R3CompiledExpression, R3Reference, typeWithParameters } from "./util";
+import { R3CompiledExpression, R3Reference, typeWithParameters } from './util';
 
 /**
  * Metadata required by the factory generator to generate a `factory` function for a type.
@@ -46,7 +46,7 @@ export interface R3ConstructorFactoryMetadata {
    * then one or more of the parameters wasn't resolvable and any attempt to use these deps will
    * result in a runtime error.
    */
-  deps: R3DependencyMetadata[] | "invalid" | null;
+  deps: R3DependencyMetadata[] | 'invalid' | null;
 
   /**
    * Type of the target being created by the factory.
@@ -125,7 +125,7 @@ export interface R3DependencyMetadata {
 export function compileFactoryFunction(
   meta: R3FactoryMetadata
 ): R3CompiledExpression {
-  const t = outputAst.variable("t");
+  const t = outputAst.variable('t');
   let baseFactoryVar: outputAst.ReadVarExpr | null = null;
 
   // The type to instantiate via constructor invocation. If there is no delegated factory, meaning
@@ -144,7 +144,7 @@ export function compileFactoryFunction(
   let ctorExpr: outputAst.Expression | null = null;
   if (meta.deps !== null) {
     // There is a constructor (either explicitly or implicitly defined).
-    if (meta.deps !== "invalid") {
+    if (meta.deps !== 'invalid') {
       ctorExpr = new outputAst.InstantiateExpr(
         typeForCtor,
         injectDependencies(meta.deps, meta.target)
@@ -162,7 +162,7 @@ export function compileFactoryFunction(
   function makeConditionalFactory(
     nonCtorExpr: outputAst.Expression
   ): outputAst.ReadVarExpr {
-    const r = outputAst.variable("r");
+    const r = outputAst.variable('r');
     body.push(r.set(outputAst.NULL_EXPR).toDeclStmt());
     const ctorStmt =
       ctorExpr !== null
@@ -211,7 +211,7 @@ export function compileFactoryFunction(
   }
 
   let factoryFn: outputAst.Expression = outputAst.fn(
-    [new outputAst.FnParam("t", outputAst.DYNAMIC_TYPE)],
+    [new outputAst.FnParam('t', outputAst.DYNAMIC_TYPE)],
     body,
     outputAst.INFERRED_TYPE,
     undefined,
@@ -241,7 +241,7 @@ export function compileFactoryFunction(
 
 export function createFactoryType(meta: R3FactoryMetadata) {
   const ctorDepsType =
-    meta.deps !== null && meta.deps !== "invalid"
+    meta.deps !== null && meta.deps !== 'invalid'
       ? createCtorDepsType(meta.deps)
       : outputAst.NONE_TYPE;
   return outputAst.expressionType(
@@ -333,37 +333,30 @@ function createCtorDepType(
     value: outputAst.Expression;
   }[] = [];
 
-  if (dep.attributeNameType !== null) {
-    entries.push({
-      key: "attribute",
-      value: dep.attributeNameType,
-      quoted: false,
-    });
-  }
   if (dep.optional) {
     entries.push({
-      key: "optional",
+      key: 'optional',
       value: outputAst.literal(true),
       quoted: false,
     });
   }
   if (dep.host) {
     entries.push({
-      key: "host",
+      key: 'host',
       value: outputAst.literal(true),
       quoted: false,
     });
   }
   if (dep.self) {
     entries.push({
-      key: "self",
+      key: 'self',
       value: outputAst.literal(true),
       quoted: false,
     });
   }
   if (dep.skipSelf) {
     entries.push({
-      key: "skipSelf",
+      key: 'skipSelf',
       value: outputAst.literal(true),
       quoted: false,
     });

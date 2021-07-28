@@ -9,7 +9,6 @@
 // Base URL for the error details page.
 // Keep this value in sync with a similar const in
 // `packages/compiler-cli/src/ngtsc/diagnostics/src/error_code.ts`.
-const ERROR_DETAILS_PAGE_BASE_URL = 'https://angular.io/errors';
 
 export const enum RuntimeErrorCode {
   // Internal Errors
@@ -44,17 +43,6 @@ export class RuntimeError extends Error {
   }
 }
 
-// Contains a set of error messages that have details guides at angular.io.
-// Full list of available error guides can be found at https://angular.io/errors
-/* tslint:disable:no-toplevel-property-access */
-export const RUNTIME_ERRORS_WITH_GUIDES = new Set([
-  RuntimeErrorCode.EXPRESSION_CHANGED_AFTER_CHECKED,
-  RuntimeErrorCode.CYCLIC_DI_DEPENDENCY,
-  RuntimeErrorCode.PROVIDER_NOT_FOUND,
-  RuntimeErrorCode.MULTIPLE_COMPONENTS_MATCH,
-  RuntimeErrorCode.EXPORT_NOT_FOUND,
-  RuntimeErrorCode.PIPE_NOT_FOUND,
-]);
 /* tslint:enable:no-toplevel-property-access */
 
 /** Called to format a runtime error */

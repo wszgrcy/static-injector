@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import { ParseSourceSpan } from "../parse_util";
+import { ParseSourceSpan } from '../parse_util';
 
 //// Types
 export enum TypeModifier {
@@ -458,7 +458,7 @@ export class ReadVarExpr extends Expression {
     sourceSpan?: ParseSourceSpan | null
   ) {
     super(type, sourceSpan);
-    if (typeof name === "string") {
+    if (typeof name === 'string') {
       this.name = name;
       this.builtin = null;
     } else {
@@ -659,7 +659,7 @@ export class InvokeMethodExpr extends Expression {
     sourceSpan?: ParseSourceSpan | null
   ) {
     super(type, sourceSpan);
-    if (typeof method === "string") {
+    if (typeof method === 'string') {
       this.name = method;
       this.builtin = null;
     } else {
@@ -839,51 +839,11 @@ export interface CookedRawString {
   range: ParseSourceSpan | null;
 }
 
-const escapeSlashes = (str: string): string => str.replace(/\\/g, "\\\\");
-const escapeStartingColon = (str: string): string => str.replace(/^:/, "\\:");
-const escapeColons = (str: string): string => str.replace(/:/g, "\\:");
+const escapeSlashes = (str: string): string => str.replace(/\\/g, '\\\\');
+const escapeStartingColon = (str: string): string => str.replace(/^:/, '\\:');
+const escapeColons = (str: string): string => str.replace(/:/g, '\\:');
 const escapeForTemplateLiteral = (str: string): string =>
-  str.replace(/`/g, "\\`").replace(/\${/g, "$\\{");
-
-/**
- * Creates a `{cooked, raw}` object from the `metaBlock` and `messagePart`.
- *
- * The `raw` text must have various character sequences escaped:
- * * "\" would otherwise indicate that the next character is a control character.
- * * "`" and "${" are template string control sequences that would otherwise prematurely indicate
- *   the end of a message part.
- * * ":" inside a metablock would prematurely indicate the end of the metablock.
- * * ":" at the start of a messagePart with no metablock would erroneously indicate the start of a
- *   metablock.
- *
- * @param metaBlock Any metadata that should be prepended to the string
- * @param messagePart The message part of the string
- */
-function createCookedRawString(
-  metaBlock: string,
-  messagePart: string,
-  range: ParseSourceSpan | null
-): CookedRawString {
-  if (metaBlock === "") {
-    return {
-      cooked: messagePart,
-      raw: escapeForTemplateLiteral(
-        escapeStartingColon(escapeSlashes(messagePart))
-      ),
-      range,
-    };
-  } else {
-    return {
-      cooked: `:${metaBlock}:${messagePart}`,
-      raw: escapeForTemplateLiteral(
-        `:${escapeColons(escapeSlashes(metaBlock))}:${escapeSlashes(
-          messagePart
-        )}`
-      ),
-      range,
-    };
-  }
-}
+  str.replace(/`/g, '\\`').replace(/\${/g, '$\\{');
 
 export class ExternalExpr extends Expression {
   constructor(
@@ -1345,7 +1305,7 @@ export class LeadingComment {
 }
 export class JSDocComment extends LeadingComment {
   constructor(public tags: JSDocTag[]) {
-    super("", /* multiline */ true, /* trailingNewline */ true);
+    super('', /* multiline */ true, /* trailingNewline */ true);
   }
   override toString(): string {
     return serializeTags(this.tags);
@@ -1738,9 +1698,9 @@ export function isNull(exp: Expression): boolean {
 
 // The list of JSDoc tags that we currently support. Extend it if needed.
 export const enum JSDocTagName {
-  Desc = "desc",
-  Id = "id",
-  Meaning = "meaning",
+  Desc = 'desc',
+  Id = 'id',
+  Meaning = 'meaning',
 }
 
 /*
@@ -1767,7 +1727,7 @@ export type JSDocTag =
  * Returns a string like " @foo {bar} baz" (note the leading whitespace before `@foo`).
  */
 function tagToString(tag: JSDocTag): string {
-  let out = "";
+  let out = '';
   if (tag.tagName) {
     out += ` @${tag.tagName}`;
   }
@@ -1775,26 +1735,26 @@ function tagToString(tag: JSDocTag): string {
     if (tag.text.match(/\/\*|\*\//)) {
       throw new Error('JSDoc text cannot contain "/*" and "*/"');
     }
-    out += " " + tag.text.replace(/@/g, "\\@");
+    out += ' ' + tag.text.replace(/@/g, '\\@');
   }
   return out;
 }
 
 function serializeTags(tags: JSDocTag[]): string {
-  if (tags.length === 0) return "";
+  if (tags.length === 0) return '';
 
   if (tags.length === 1 && tags[0].tagName && !tags[0].text) {
     // The JSDOC comment is a single simple tag: e.g `/** @tagname */`.
     return `*${tagToString(tags[0])} `;
   }
 
-  let out = "*\n";
+  let out = '*\n';
   for (const tag of tags) {
-    out += " *";
+    out += ' *';
     // If the tagToString is multi-line, insert " * " prefixes on lines.
-    out += tagToString(tag).replace(/\n/g, "\n * ");
-    out += "\n";
+    out += tagToString(tag).replace(/\n/g, '\n * ');
+    out += '\n';
   }
-  out += " ";
+  out += ' ';
   return out;
 }

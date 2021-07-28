@@ -68,12 +68,4 @@ export const enum InternalInjectFlags {
 
   /** Inject `defaultValue` instead if token not found. */
   Optional = 0b1000,
-
-  /**
-   * This token is being injected into a pipe.
-   *
-   * This flag is intentionally not in the public facing `InjectFlags` because it is only added by
-   * the compiler and is not a developer applicable flag.
-   */
-  ForPipe = 0b10000,
 }

@@ -7,7 +7,6 @@
  */
 
 import { Type } from '../interface/type';
-import { assertLessThan } from '../util/assert';
 
 import { ɵɵdefineInjectable } from './interface/defs';
 
@@ -83,8 +82,4 @@ export class InjectionToken<T> {
   toString(): string {
     return `InjectionToken ${this._desc}`;
   }
-}
-
-export interface InjectableDefToken<T> extends InjectionToken<T> {
-  ɵprov: unknown;
 }

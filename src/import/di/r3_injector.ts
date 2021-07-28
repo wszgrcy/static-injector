@@ -11,11 +11,7 @@
 import { OnDestroy } from '../interface/lifecycle_hooks';
 import { Type } from '../interface/type';
 import { FactoryFn, getFactoryDef } from '../render3/definition_factory';
-import {
-  throwCyclicDependencyError,
-  throwInvalidProviderError,
-  throwMixedMultiProviderError,
-} from '../render3/errors_di';
+
 import { deepForEach, newArray } from '../util/array_utils';
 import { EMPTY_ARRAY } from '../util/empty';
 import { stringify } from '../util/stringify';
@@ -473,7 +469,7 @@ export class R3Injector {
       token = provider;
       multiRecord.multi!.push(provider);
     } else {
-      const existing = this.records.get(token);
+      // const existing = this.records.get(token);
       // if (ngDevMode && existing && existing.multi !== undefined) {
       //   throwMixedMultiProviderError();
       // }

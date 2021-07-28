@@ -6,9 +6,9 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import { stringify } from "../util/stringify";
+import { stringify } from '../util/stringify';
 
-import { resolveForwardRef } from "./forward_ref";
+import { resolveForwardRef } from './forward_ref';
 import {
   catchInjectorError,
   formatError,
@@ -17,11 +17,11 @@ import {
   THROW_IF_NOT_FOUND,
   USE_VALUE,
   ɵɵinject,
-} from "./injector_compatibility";
-import { InjectorMarkers } from "./injector_marker";
-import { INJECTOR } from "./injector_token";
-import { getInjectableDef, ɵɵdefineInjectable } from "./interface/defs";
-import { InjectFlags } from "./interface/injector";
+} from './injector_compatibility';
+import { InjectorMarkers } from './injector_marker';
+import { INJECTOR } from './injector_token';
+import { getInjectableDef, ɵɵdefineInjectable } from './interface/defs';
+import { InjectFlags } from './interface/injector';
 import {
   ConstructorProvider,
   ExistingProvider,
@@ -29,12 +29,12 @@ import {
   StaticClassProvider,
   StaticProvider,
   ValueProvider,
-} from "./interface/provider";
-import { Inject, Optional, Self, SkipSelf } from "./metadata";
-import { NullInjector } from "./null_injector";
-import { ProviderToken } from "./provider_token";
-import { createInjector } from "./r3_injector";
-import { INJECTOR_SCOPE } from "./scope";
+} from './interface/provider';
+import { Inject, Optional, Self, SkipSelf } from './metadata';
+import { NullInjector } from './null_injector';
+import { ProviderToken } from './provider_token';
+import { createInjector } from './r3_injector';
+import { INJECTOR_SCOPE } from './scope';
 
 export function INJECTOR_IMPL__POST_R3__(
   providers: StaticProvider[],
@@ -91,11 +91,6 @@ export abstract class Injector {
   abstract get(token: any, notFoundValue?: any): any;
 
   /**
-   * @deprecated from v5 use the new signature Injector.create(options)
-   */
-  static create(providers: StaticProvider[], parent?: Injector): Injector;
-
-  /**
    * Creates a new injector instance that provides one or more dependencies,
    * according to a given type or types of `StaticProvider`.
    *
@@ -120,12 +115,12 @@ export abstract class Injector {
     parent?: Injector
   ): Injector {
     if (Array.isArray(options)) {
-      return INJECTOR_IMPL(options, parent, "");
+      return INJECTOR_IMPL(options, parent, '');
     } else {
       return INJECTOR_IMPL(
         options.providers,
         options.parent,
-        options.name || ""
+        options.name || ''
       );
     }
   }
@@ -133,7 +128,7 @@ export abstract class Injector {
   /** @nocollapse */
   static ɵprov = /** @pureOrBreakMyCode */ ɵɵdefineInjectable({
     token: Injector,
-    providedIn: "any",
+    providedIn: 'any',
     factory: () => ɵɵinject(INJECTOR),
   });
 
@@ -159,7 +154,7 @@ const enum OptionFlags {
   CheckParent = 1 << 2,
   Default = CheckSelf | CheckParent,
 }
-const NO_NEW_LINE = "ɵ";
+const NO_NEW_LINE = 'ɵ';
 
 export class StaticInjector implements Injector {
   readonly parent: Injector;
@@ -209,7 +204,7 @@ export class StaticInjector implements Injector {
         const providedIn =
           injectableDef && resolveForwardRef(injectableDef.providedIn);
         if (
-          providedIn === "any" ||
+          providedIn === 'any' ||
           (providedIn != null && providedIn === this.scope)
         ) {
           records.set(
@@ -238,7 +233,7 @@ export class StaticInjector implements Injector {
         flags
       );
     } catch (e) {
-      return catchInjectorError(e, token, "StaticInjectorError", this.source);
+      return catchInjectorError(e, token, 'StaticInjectorError', this.source);
     } finally {
       setCurrentInjector(lastInjector);
     }
@@ -248,7 +243,7 @@ export class StaticInjector implements Injector {
     const tokens = <string[]>[],
       records = this._records;
     records.forEach((v, token) => tokens.push(stringify(token)));
-    return `StaticInjector[${tokens.join(", ")}]`;
+    return `StaticInjector[${tokens.join(', ')}]`;
   }
 }
 
@@ -287,12 +282,12 @@ function resolveProvider(provider: SupportedProvider): Record {
   } else if ((provider as StaticClassProvider).useClass) {
     useNew = true;
     fn = resolveForwardRef((provider as StaticClassProvider).useClass);
-  } else if (typeof provide == "function") {
+  } else if (typeof provide == 'function') {
     useNew = true;
     fn = provide;
   } else {
     throw staticError(
-      "StaticProvider does not have [useValue|useFactory|useExisting|useClass] or [provide] is not newable",
+      'StaticProvider does not have [useValue|useFactory|useExisting|useClass] or [provide] is not newable',
       provider
     );
   }
@@ -300,7 +295,7 @@ function resolveProvider(provider: SupportedProvider): Record {
 }
 
 function multiProviderMixError(token: any) {
-  return staticError("Cannot mix multi providers and regular providers", token);
+  return staticError('Cannot mix multi providers and regular providers', token);
 }
 
 function recursivelyProcessProviders(
@@ -315,11 +310,11 @@ function recursivelyProcessProviders(
       for (let i = 0; i < provider.length; i++) {
         scope = recursivelyProcessProviders(records, provider[i]) || scope;
       }
-    } else if (typeof provider === "function") {
+    } else if (typeof provider === 'function') {
       // Functions were supported in ReflectiveInjector, but are not here. For safety give useful
       // error messages
-      throw staticError("Function/Class not supported", provider);
-    } else if (provider && typeof provider === "object" && provider.provide) {
+      throw staticError('Function/Class not supported', provider);
+    } else if (provider && typeof provider === 'object' && provider.provide) {
       // At this point we have what looks like a provider: {provide: ?, ....}
       let token = resolveForwardRef(provider.provide);
       const resolvedProvider = resolveProvider(provider);
@@ -356,7 +351,7 @@ function recursivelyProcessProviders(
       }
       records.set(token, resolvedProvider);
     } else {
-      throw staticError("Unexpected provider", provider);
+      throw staticError('Unexpected provider', provider);
     }
   }
   return scope;
@@ -401,7 +396,7 @@ function resolveToken(
     // to resolve it.
     value = record.value;
     if (value == CIRCULAR) {
-      throw Error(NO_NEW_LINE + "Circular dependency");
+      throw Error(NO_NEW_LINE + 'Circular dependency');
     } else if (value === EMPTY) {
       record.value = CIRCULAR;
       let obj = undefined;
@@ -451,7 +446,7 @@ function resolveToken(
   } else {
     value = Injector.NULL.get(
       token,
-      typeof notFoundValue !== "undefined" ? notFoundValue : null
+      typeof notFoundValue !== 'undefined' ? notFoundValue : null
     );
   }
   return value;
@@ -496,5 +491,5 @@ function computeDeps(provider: StaticProvider): DependencyRecord[] {
 }
 
 function staticError(text: string, obj: any): Error {
-  return new Error(formatError(text, obj, "StaticInjectorError"));
+  return new Error(formatError(text, obj, 'StaticInjectorError'));
 }

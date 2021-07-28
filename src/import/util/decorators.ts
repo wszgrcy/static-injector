@@ -6,9 +6,9 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import { Type } from "../interface/type";
+import { Type } from '../interface/type';
 
-import { noSideEffects } from "./closure";
+import { noSideEffects } from './closure';
 
 /**
  * An interface implemented by all Angular type decorators, which allows them to be used as
@@ -38,63 +38,8 @@ export interface TypeDecorator {
   ): void;
 }
 
-export const ANNOTATIONS = "__annotations__";
-export const PARAMETERS = "__parameters__";
-export const PROP_METADATA = "__prop__metadata__";
-
-/**
- * @suppress {globalThis}
- */
-export function makeDecorator<T>(
-  name: string,
-  props?: (...args: any[]) => any,
-  parentClass?: any,
-  additionalProcessing?: (type: Type<T>) => void,
-  typeFn?: (type: Type<T>, ...args: any[]) => void
-): {
-  new (...args: any[]): any;
-  (...args: any[]): any;
-  (...args: any[]): (cls: any) => any;
-} {
-  return noSideEffects(() => {
-    const metaCtor = makeMetadataCtor(props);
-
-    function DecoratorFactory(
-      this: unknown | typeof DecoratorFactory,
-      ...args: any[]
-    ): (cls: Type<T>) => any {
-      if (this instanceof DecoratorFactory) {
-        metaCtor.call(this, ...args);
-        return this as typeof DecoratorFactory;
-      }
-
-      const annotationInstance = new (DecoratorFactory as any)(...args);
-      return function TypeDecorator(cls: Type<T>) {
-        if (typeFn) typeFn(cls, ...args);
-        // Use of Object.defineProperty is important since it creates non-enumerable property which
-        // prevents the property is copied during subclassing.
-        const annotations = cls.hasOwnProperty(ANNOTATIONS)
-          ? (cls as any)[ANNOTATIONS]
-          : (Object.defineProperty(cls, ANNOTATIONS, { value: [] }) as any)[
-              ANNOTATIONS
-            ];
-        annotations.push(annotationInstance);
-
-        if (additionalProcessing) additionalProcessing(cls);
-
-        return cls;
-      };
-    }
-
-    if (parentClass) {
-      DecoratorFactory.prototype = Object.create(parentClass.prototype);
-    }
-
-    DecoratorFactory.prototype.ngMetadataName = name;
-    (DecoratorFactory as any).annotationCls = DecoratorFactory;
-    return DecoratorFactory as any;
-  });
-}
+export const ANNOTATIONS = '__annotations__';
+export const PARAMETERS = '__parameters__';
 
 function makeMetadataCtor(props?: (...args: any[]) => any): any {
   return function ctor(this: any, ...args: any[]) {
@@ -150,53 +95,5 @@ export function makeParamDecorator(
     ParamDecoratorFactory.prototype.ngMetadataName = name;
     (<any>ParamDecoratorFactory).annotationCls = ParamDecoratorFactory;
     return ParamDecoratorFactory;
-  });
-}
-
-export function makePropDecorator(
-  name: string,
-  props?: (...args: any[]) => any,
-  parentClass?: any,
-  additionalProcessing?: (target: any, name: string, ...args: any[]) => void
-): any {
-  return noSideEffects(() => {
-    const metaCtor = makeMetadataCtor(props);
-
-    function PropDecoratorFactory(
-      this: unknown | typeof PropDecoratorFactory,
-      ...args: any[]
-    ): any {
-      if (this instanceof PropDecoratorFactory) {
-        metaCtor.apply(this, args);
-        return this;
-      }
-
-      const decoratorInstance = new (<any>PropDecoratorFactory)(...args);
-
-      function PropDecorator(target: any, name: string) {
-        const constructor = target.constructor;
-        // Use of Object.defineProperty is important because it creates a non-enumerable property
-        // which prevents the property from being copied during subclassing.
-        const meta = constructor.hasOwnProperty(PROP_METADATA)
-          ? (constructor as any)[PROP_METADATA]
-          : Object.defineProperty(constructor, PROP_METADATA, { value: {} })[
-              PROP_METADATA
-            ];
-        meta[name] = (meta.hasOwnProperty(name) && meta[name]) || [];
-        meta[name].unshift(decoratorInstance);
-
-        if (additionalProcessing) additionalProcessing(target, name, ...args);
-      }
-
-      return PropDecorator;
-    }
-
-    if (parentClass) {
-      PropDecoratorFactory.prototype = Object.create(parentClass.prototype);
-    }
-
-    PropDecoratorFactory.prototype.ngMetadataName = name;
-    (<any>PropDecoratorFactory).annotationCls = PropDecoratorFactory;
-    return PropDecoratorFactory;
   });
 }

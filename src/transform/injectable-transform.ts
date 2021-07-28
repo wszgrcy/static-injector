@@ -107,7 +107,6 @@ export class InjectableTransformFactory {
         node.decorators &&
         this.reflectionHost.isClass(node)
       ) {
-        // let list = [];
         const decorators = this.reflectionHost.getDecoratorsOfDeclaration(node);
 
         let result = this.handler.detect(node, decorators);
@@ -117,16 +116,10 @@ export class InjectableTransformFactory {
           analysisOutput.analysis
         );
         let resultNode = this.translate(compileResult, importManager);
-        // list.push(node);
-        // list.push(resultNode)
         map.set(node, { ...resultNode, decorator: result.trigger });
       }
     });
-    // list.forEach((item) => {
-    //   let decorators = item.decorators;
-    //   let decorator = decorators.find((item) => (item.expression as any).expression.getText() === "Injectable");
-    //   dList.push({ classDecaration: item, decorator });
-    // });
+
     this.sfMap.set(sf, {
       map,
       imports: importManager.getAllImports(sf.fileName),
@@ -198,55 +191,6 @@ export class InjectableTransformFactory {
         node.type,
         node.initializer
       ) as T & ts.ParameterDeclaration;
-    } else if (ts.isMethodDeclaration(node) && node.decorators !== undefined) {
-      // Strip decorators of methods.
-      node = ts.updateMethod(
-        node,
-        this._nonCoreDecoratorsOnly(node),
-        node.modifiers,
-        node.asteriskToken,
-        node.name,
-        node.questionToken,
-        node.typeParameters,
-        node.parameters,
-        node.type,
-        node.body
-      ) as T & ts.MethodDeclaration;
-    } else if (
-      ts.isPropertyDeclaration(node) &&
-      node.decorators !== undefined
-    ) {
-      // Strip decorators of properties.
-      node = ts.updateProperty(
-        node,
-        this._nonCoreDecoratorsOnly(node),
-        node.modifiers,
-        node.name,
-        node.questionToken,
-        node.type,
-        node.initializer
-      ) as T & ts.PropertyDeclaration;
-    } else if (ts.isGetAccessor(node)) {
-      // Strip decorators of getters.
-      node = ts.updateGetAccessor(
-        node,
-        this._nonCoreDecoratorsOnly(node),
-        node.modifiers,
-        node.name,
-        node.parameters,
-        node.type,
-        node.body
-      ) as T & ts.GetAccessorDeclaration;
-    } else if (ts.isSetAccessor(node)) {
-      // Strip decorators of setters.
-      node = ts.updateSetAccessor(
-        node,
-        this._nonCoreDecoratorsOnly(node),
-        node.modifiers,
-        node.name,
-        node.parameters,
-        node.body
-      ) as T & ts.SetAccessorDeclaration;
     } else if (ts.isConstructorDeclaration(node)) {
       // For constructors, strip decorators of the parameters.
       const parameters = node.parameters.map((param) =>

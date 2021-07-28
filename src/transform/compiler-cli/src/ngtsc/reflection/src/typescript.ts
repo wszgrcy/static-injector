@@ -6,24 +6,21 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import * as ts from "typescript";
+import * as ts from 'typescript';
 
 import {
   ClassDeclaration,
   ClassMember,
   ClassMemberKind,
   CtorParameter,
-  Declaration,
-  DeclarationKind,
   DeclarationNode,
   Decorator,
-  FunctionDefinition,
   Import,
   isDecoratorIdentifier,
   ReflectionHost,
-} from "./host";
-import { typeToValue } from "./type_to_value";
-import { isNamedClassDeclaration } from "./util";
+} from './host';
+import { typeToValue } from './type_to_value';
+import { isNamedClassDeclaration } from './util';
 
 /**
  * reflector.ts implements static reflection of declarations using the TypeScript `ts.TypeChecker`.
@@ -162,43 +159,11 @@ export class TypeScriptReflectionHost implements ReflectionHost {
     return extendsType.expression;
   }
 
-  getDeclarationOfIdentifier(id: ts.Identifier): Declaration | null {
-    // Resolve the identifier to a Symbol, and return the declaration of that.
-    let symbol: ts.Symbol | undefined = this.checker.getSymbolAtLocation(id);
-    if (symbol === undefined) {
-      return null;
-    }
-    return this.getDeclarationOfSymbol(symbol, id);
-  }
-
-  getDefinitionOfFunction(node: ts.Node): FunctionDefinition | null {
-    if (
-      !ts.isFunctionDeclaration(node) &&
-      !ts.isMethodDeclaration(node) &&
-      !ts.isFunctionExpression(node)
-    ) {
-      return null;
-    }
-    return {
-      node,
-      body: node.body !== undefined ? Array.from(node.body.statements) : null,
-      parameters: node.parameters.map((param) => {
-        const name = parameterName(param.name);
-        const initializer = param.initializer || null;
-        return { name, node: param, initializer };
-      }),
-    };
-  }
-
   getGenericArityOfClass(clazz: ClassDeclaration): number | null {
     if (!ts.isClassDeclaration(clazz)) {
       return null;
     }
     return clazz.typeParameters !== undefined ? clazz.typeParameters.length : 0;
-  }
-
-  getVariableValue(declaration: ts.VariableDeclaration): ts.Expression | null {
-    return declaration.initializer || null;
   }
 
   getDtsDeclaration(_: ClassDeclaration): ts.Declaration | null {
@@ -211,44 +176,6 @@ export class TypeScriptReflectionHost implements ReflectionHost {
 
   getAdjacentNameOfClass(clazz: ClassDeclaration): ts.Identifier {
     return clazz.name;
-  }
-
-  isStaticallyExported(clazz: ClassDeclaration): boolean {
-    // First check if there's an `export` modifier directly on the class declaration.
-    let topLevel: ts.Node = clazz;
-    if (
-      ts.isVariableDeclaration(clazz) &&
-      ts.isVariableDeclarationList(clazz.parent)
-    ) {
-      topLevel = clazz.parent.parent;
-    }
-    if (
-      topLevel.modifiers !== undefined &&
-      topLevel.modifiers.some(
-        (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword
-      )
-    ) {
-      // The node is part of a declaration that's directly exported.
-      return true;
-    }
-
-    // If `topLevel` is not directly exported via a modifier, then it might be indirectly exported,
-    // e.g.:
-    //
-    // class Foo {}
-    // export {Foo};
-    //
-    // The only way to check this is to look at the module level for exports of the class. As a
-    // performance optimization, this check is only performed if the class is actually declared at
-    // the top level of the file and thus eligible for exporting in the first place.
-    if (topLevel.parent === undefined || !ts.isSourceFile(topLevel.parent)) {
-      return false;
-    }
-
-    const localExports = this.getLocalExportedClassesOfSourceFile(
-      clazz.getSourceFile()
-    );
-    return localExports.has(clazz);
   }
 
   protected getDirectImportOfIdentifier(id: ts.Identifier): Import | null {
@@ -338,84 +265,6 @@ export class TypeScriptReflectionHost implements ReflectionHost {
     };
   }
 
-  /**
-   * Resolve a `ts.Symbol` to its declaration, keeping track of the `viaModule` along the way.
-   */
-  protected getDeclarationOfSymbol(
-    symbol: ts.Symbol,
-    originalId: ts.Identifier | null
-  ): Declaration | null {
-    // If the symbol points to a ShorthandPropertyAssignment, resolve it.
-    let valueDeclaration: ts.Declaration | undefined = undefined;
-    if (symbol.valueDeclaration !== undefined) {
-      valueDeclaration = symbol.valueDeclaration;
-    } else if (
-      symbol.declarations !== undefined &&
-      symbol.declarations.length > 0
-    ) {
-      valueDeclaration = symbol.declarations[0];
-    }
-    if (
-      valueDeclaration !== undefined &&
-      ts.isShorthandPropertyAssignment(valueDeclaration)
-    ) {
-      const shorthandSymbol =
-        this.checker.getShorthandAssignmentValueSymbol(valueDeclaration);
-      if (shorthandSymbol === undefined) {
-        return null;
-      }
-      return this.getDeclarationOfSymbol(shorthandSymbol, originalId);
-    } else if (
-      valueDeclaration !== undefined &&
-      ts.isExportSpecifier(valueDeclaration)
-    ) {
-      const targetSymbol =
-        this.checker.getExportSpecifierLocalTargetSymbol(valueDeclaration);
-      if (targetSymbol === undefined) {
-        return null;
-      }
-      return this.getDeclarationOfSymbol(targetSymbol, originalId);
-    }
-
-    const importInfo = originalId && this.getImportOfIdentifier(originalId);
-    const viaModule =
-      importInfo !== null &&
-      importInfo.from !== null &&
-      !importInfo.from.startsWith(".")
-        ? importInfo.from
-        : null;
-
-    // Now, resolve the Symbol to its declaration by following any and all aliases.
-    while (symbol.flags & ts.SymbolFlags.Alias) {
-      symbol = this.checker.getAliasedSymbol(symbol);
-    }
-
-    // Look at the resolved Symbol's declarations and pick one of them to return. Value declarations
-    // are given precedence over type declarations.
-    if (symbol.valueDeclaration !== undefined) {
-      return {
-        node: symbol.valueDeclaration,
-        known: null,
-        viaModule,
-        identity: null,
-        kind: DeclarationKind.Concrete,
-      };
-    } else if (
-      symbol.declarations !== undefined &&
-      symbol.declarations.length > 0
-    ) {
-      return {
-        node: symbol.declarations[0],
-        known: null,
-        viaModule,
-        identity: null,
-        kind: DeclarationKind.Concrete,
-      };
-    } else {
-      return null;
-    }
-  }
-
   private _reflectDecorator(node: ts.Decorator): Decorator | null {
     // Attempt to resolve the decorator expression into a reference to a concrete Identifier. The
     // expression may contain a call to a function which returns the decorator function, in which
@@ -470,7 +319,7 @@ export class TypeScriptReflectionHost implements ReflectionHost {
     }
 
     if (ts.isConstructorDeclaration(node)) {
-      name = "constructor";
+      name = 'constructor';
     } else if (ts.isIdentifier(node.name)) {
       name = node.name.text;
       nameNode = node.name;
@@ -497,63 +346,6 @@ export class TypeScriptReflectionHost implements ReflectionHost {
       value,
       isStatic,
     };
-  }
-
-  /**
-   * Get the set of classes declared in `file` which are exported.
-   */
-  private getLocalExportedClassesOfSourceFile(
-    file: ts.SourceFile
-  ): Set<ClassDeclaration> {
-    const cacheSf: SourceFileWithCachedExports =
-      file as SourceFileWithCachedExports;
-    if (cacheSf[LocalExportedClasses] !== undefined) {
-      // TS does not currently narrow symbol-keyed fields, hence the non-null assert is needed.
-      return cacheSf[LocalExportedClasses]!;
-    }
-
-    const exportSet = new Set<ClassDeclaration>();
-    cacheSf[LocalExportedClasses] = exportSet;
-
-    const sfSymbol = this.checker.getSymbolAtLocation(cacheSf);
-
-    if (sfSymbol === undefined || sfSymbol.exports === undefined) {
-      return exportSet;
-    }
-
-    // Scan the exported symbol of the `ts.SourceFile` for the original `symbol` of the class
-    // declaration.
-    //
-    // Note: when checking multiple classes declared in the same file, this repeats some operations.
-    // In theory, this could be expensive if run in the context of a massive input file (like a
-    // large FESM in ngcc). If performance does become an issue here, it should be possible to
-    // create a `Set<>`
-
-    // Unfortunately, `ts.Iterator` doesn't implement the iterator protocol, so iteration here is
-    // done manually.
-    const iter = sfSymbol.exports.values();
-    let item = iter.next();
-    while (item.done !== true) {
-      let exportedSymbol = item.value;
-
-      // If this exported symbol comes from an `export {Foo}` statement, then the symbol is actually
-      // for the export declaration, not the original declaration. Such a symbol will be an alias,
-      // so unwrap aliasing if necessary.
-      if (exportedSymbol.flags & ts.SymbolFlags.Alias) {
-        exportedSymbol = this.checker.getAliasedSymbol(exportedSymbol);
-      }
-
-      if (
-        exportedSymbol.valueDeclaration !== undefined &&
-        exportedSymbol.valueDeclaration.getSourceFile() === file &&
-        this.isClass(exportedSymbol.valueDeclaration)
-      ) {
-        exportSet.add(exportedSymbol.valueDeclaration);
-      }
-      item = iter.next();
-    }
-
-    return exportSet;
   }
 }
 
@@ -670,7 +462,7 @@ function getExportedName(
     : originalId.text;
 }
 
-const LocalExportedClasses = Symbol("LocalExportedClasses");
+const LocalExportedClasses = Symbol('LocalExportedClasses');
 
 /**
  * A `ts.SourceFile` expando which includes a cached `Set` of local `ClassDeclarations` that are

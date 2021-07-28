@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import * as ts from "typescript";
+import * as ts from 'typescript';
 
 /**
  * Metadata extracted from an instance of a decorator on another declaration, or synthesized from
@@ -719,28 +719,6 @@ export interface ReflectionHost {
   getConstructorParameters(clazz: ClassDeclaration): CtorParameter[] | null;
 
   /**
-   * Reflect over a function and return metadata about its parameters and body.
-   *
-   * Functions in TypeScript and ES5 code have different AST representations, in particular around
-   * default values for parameters. A TypeScript function has its default value as the initializer
-   * on the parameter declaration, whereas an ES5 function has its default value set in a statement
-   * of the form:
-   *
-   * if (param === void 0) { param = 3; }
-   *
-   * This method abstracts over these details, and interprets the function declaration and body to
-   * extract parameter default values and the "real" body.
-   *
-   * A current limitation is that this metadata has no representation for shorthand assignment of
-   * parameter objects in the function signature.
-   *
-   * @param fn a TypeScript `ts.Declaration` node representing the function over which to reflect.
-   *
-   * @returns a `FunctionDefinition` giving metadata about the function definition.
-   */
-  getDefinitionOfFunction(fn: ts.Node): FunctionDefinition | null;
-
-  /**
    * Determine if an identifier was imported from another module and return `Import` metadata
    * describing its origin.
    *
@@ -750,40 +728,6 @@ export interface ReflectionHost {
    * `null` if the identifier doesn't resolve to an import but instead is locally defined.
    */
   getImportOfIdentifier(id: ts.Identifier): Import | null;
-
-  /**
-   * Trace an identifier to its declaration, if possible.
-   *
-   * This method attempts to resolve the declaration of the given identifier, tracing back through
-   * imports and re-exports until the original declaration statement is found. A `Declaration`
-   * object is returned if the original declaration is found, or `null` is returned otherwise.
-   *
-   * If the declaration is in a different module, and that module is imported via an absolute path,
-   * this method also returns the absolute path of the imported module. For example, if the code is:
-   *
-   * ```
-   * import {RouterModule} from 'static-injector';
-   *
-   * export const ROUTES = RouterModule.forRoot([...]);
-   * ```
-   *
-   * and if `getDeclarationOfIdentifier` is called on `RouterModule` in the `ROUTES` expression,
-   * then it would trace `RouterModule` via its import from `static-injector`, and note that the
-   * definition was imported from `static-injector` into the application where it was referenced.
-   *
-   * If the definition is re-exported several times from different absolute module names, only
-   * the first one (the one by which the application refers to the module) is returned.
-   *
-   * This module name is returned in the `viaModule` field of the `Declaration`. If The declaration
-   * is relative to the application itself and there was no import through an absolute path, then
-   * `viaModule` is `null`.
-   *
-   * @param id a TypeScript `ts.Identifier` to trace back to a declaration.
-   *
-   * @returns metadata about the `Declaration` if the original declaration is found, or `null`
-   * otherwise.
-   */
-  getDeclarationOfIdentifier(id: ts.Identifier): Declaration | null;
 
   /**
    * Check whether the given node actually represents a class.
@@ -818,18 +762,6 @@ export interface ReflectionHost {
   getGenericArityOfClass(clazz: ClassDeclaration): number | null;
 
   /**
-   * Find the assigned value of a variable declaration.
-   *
-   * Normally this will be the initializer of the declaration, but where the variable is
-   * not a `const` we may need to look elsewhere for the variable's value.
-   *
-   * @param declaration a TypeScript variable declaration, whose value we want.
-   * @returns the value of the variable, as a TypeScript expression node, or `undefined`
-   * if the value cannot be computed.
-   */
-  getVariableValue(declaration: ts.VariableDeclaration): ts.Expression | null;
-
-  /**
    * Take an exported declaration (maybe a class down-leveled to a variable) and look up the
    * declaration of its type in a separate .d.ts tree.
    *
@@ -862,14 +794,4 @@ export interface ReflectionHost {
    * have a different name than it does externally.
    */
   getAdjacentNameOfClass(clazz: ClassDeclaration): ts.Identifier;
-
-  /**
-   * Returns `true` if a class is exported from the module in which it's defined.
-   *
-   * Not all mechanisms by which a class is exported can be statically detected, especially when
-   * processing already compiled JavaScript. A `false` result does not indicate that the class is
-   * never visible outside its module, only that it was not exported via one of the export
-   * mechanisms that the `ReflectionHost` is capable of statically checking.
-   */
-  isStaticallyExported(clazz: ClassDeclaration): boolean;
 }

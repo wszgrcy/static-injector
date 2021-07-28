@@ -9,15 +9,9 @@
 import {
   Expression,
   ExternalExpr,
-  LiteralExpr,
-  ParseLocation,
-  ParseSourceFile,
-  ParseSourceSpan,
-  R3CompiledExpression,
   R3DependencyMetadata,
   R3Reference,
   ReadPropExpr,
-  Statement,
   WrappedNodeExpr,
 } from '../../../../../compiler';
 import { R3FactoryMetadata } from '../../../../../compiler';
@@ -27,10 +21,8 @@ import * as ts from 'typescript';
 import {
   ErrorCode,
   FatalDiagnosticError,
-  makeDiagnostic,
   makeRelatedInformation,
 } from '../../diagnostics';
-import { Reference } from '../../imports';
 import {
   ClassDeclaration,
   CtorParameter,
@@ -45,7 +37,6 @@ import {
   UnavailableValue,
   ValueUnavailableKind,
 } from '../../reflection';
-import { CompileResult } from '../../transform';
 
 export type ConstructorDeps =
   | {
@@ -107,23 +98,6 @@ export function getConstructorDependencies(
           self = true;
         } else if (name === 'Host') {
           host = true;
-        } else if (name === 'Attribute') {
-          if (dec.args === null || dec.args.length !== 1) {
-            throw new FatalDiagnosticError(
-              ErrorCode.DECORATOR_ARITY_WRONG,
-              Decorator.nodeForError(dec),
-              `Unexpected number of arguments to @Attribute().`
-            );
-          }
-          const attributeName = dec.args[0];
-          token = new WrappedNodeExpr(attributeName);
-          if (ts.isStringLiteralLike(attributeName)) {
-            attributeNameType = new LiteralExpr(attributeName.text);
-          } else {
-            attributeNameType = new WrappedNodeExpr(
-              ts.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword)
-            );
-          }
         } else {
           throw new FatalDiagnosticError(
             ErrorCode.DECORATOR_UNEXPECTED,
@@ -357,16 +331,6 @@ export function isAngularCore(
 ): decorator is Decorator & { import: Import } {
   return (
     decorator.import !== null && decorator.import.from === 'static-injector'
-  );
-}
-/** todo 需要改成自己的依赖包 */
-export function isAngularCoreReference(
-  reference: Reference,
-  symbolName: string
-): boolean {
-  return (
-    reference.ownedByModuleGuess === 'static-injector' &&
-    reference.debugName === symbolName
   );
 }
 
