@@ -18,6 +18,7 @@ describe('default', () => {
       }
     );
   });
+
   it('parameters-decorator', () => {
     createTestTransform(
       [path.resolve(__dirname, './fixture/parameters-decorator.ts')],
@@ -69,8 +70,6 @@ describe('default', () => {
       undefined,
       {
         writeFile: (fileName, data) => {
-          console.log(data);
-
           let result = runTranspileScript(data);
           let out = result.instance.out();
           expect(out.token).toBe(111);

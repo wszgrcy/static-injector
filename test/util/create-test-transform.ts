@@ -1,5 +1,8 @@
 import ts from 'typescript';
-import { createTransform } from '../../src/transform';
+import {
+  createTransform,
+  InjectableTransformFactoryOptions,
+} from '../../src/transform';
 
 export function createTestTransform(
   rootNames: string[],
@@ -7,10 +10,11 @@ export function createTestTransform(
   emitOptions: {
     writeFile?: ts.WriteFileCallback;
     emitOnlyDtsFiles?: boolean;
-  } = {}
+  } = {},
+  transformOptions: InjectableTransformFactoryOptions = {}
 ) {
   let program = ts.createProgram({ rootNames: rootNames, options });
-  let transform = createTransform(program);
+  let transform = createTransform(program, transformOptions);
   program.emit(
     undefined,
     emitOptions.writeFile,

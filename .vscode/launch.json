@@ -5,12 +5,12 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "测试",
+      "name": "测试error",
       "type": "node",
       "request": "launch",
       "cwd": "${workspaceRoot}",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run-script", "test", "--", "-t", "main"],
+      "runtimeArgs": ["run-script", "test", "--", "-t", "error"],
       "port": 5858
     },
     {
