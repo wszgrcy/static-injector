@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import * as o from "../../output/output_ast";
+import * as o from '../../output/output_ast';
 
 export interface R3PartialDeclaration {
   /**
@@ -61,7 +61,7 @@ export interface R3DeclareFactoryMetadata extends R3PartialDeclaration {
    * If this is `'invalid'`, then one or more of the parameters wasn't resolvable and any attempt to
    * use these deps will result in a runtime error.
    */
-  deps: R3DeclareDependencyMetadata[] | "invalid" | null;
+  deps: R3DeclareDependencyMetadata[] | 'invalid' | null;
 
   /**
    * Type of the target being created by the factory.
@@ -142,12 +142,6 @@ export interface R3DeclareDependencyMetadata {
    * Default: false.
    */
   attribute?: boolean;
-
-  /**
-   * Whether the dependency has an @Host qualifier.
-   * Default: false,
-   */
-  host?: boolean;
 
   /**
    * Whether the dependency has an @Optional qualifier.

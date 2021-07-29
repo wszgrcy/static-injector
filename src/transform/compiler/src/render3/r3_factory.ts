@@ -99,11 +99,6 @@ export interface R3DependencyMetadata {
   attributeNameType: outputAst.Expression | null;
 
   /**
-   * Whether the dependency has an @Host qualifier.
-   */
-  host: boolean;
-
-  /**
    * Whether the dependency has an @Optional qualifier.
    */
   optional: boolean;
@@ -275,7 +270,6 @@ function compileInjectDependency(
       InjectFlags.Default |
       (dep.self ? InjectFlags.Self : 0) |
       (dep.skipSelf ? InjectFlags.SkipSelf : 0) |
-      (dep.host ? InjectFlags.Host : 0) |
       (dep.optional ? InjectFlags.Optional : 0);
 
     // If this dependency is optional or otherwise has non-default flags, then additional
@@ -331,13 +325,7 @@ function createCtorDepType(
       quoted: false,
     });
   }
-  if (dep.host) {
-    entries.push({
-      key: 'host',
-      value: outputAst.literal(true),
-      quoted: false,
-    });
-  }
+
   if (dep.self) {
     entries.push({
       key: 'self',

@@ -350,7 +350,6 @@ function getDep(
   const meta: R3DependencyMetadata = {
     token: new WrappedNodeExpr(dep),
     attributeNameType: null,
-    host: false,
     optional: false,
     self: false,
     skipSelf: false,
@@ -360,10 +359,10 @@ function getDep(
     dec: ts.Identifier,
     reflector: ReflectionHost,
     token?: ts.Expression
-  ): void {
+  ): boolean {
     const source = reflector.getImportOfIdentifier(dec);
     if (source === null || source.from !== 'static-injector') {
-      return;
+      return false;
     }
     switch (source.name) {
       case 'Inject':
@@ -380,18 +379,29 @@ function getDep(
       case 'Self':
         meta.self = true;
         break;
+      default:
+        return false;
     }
+    return true;
   }
 
   if (ts.isArrayLiteralExpression(dep)) {
     dep.elements.forEach((el) => {
+      let isParametersDecorator = false;
       if (ts.isIdentifier(el)) {
-        maybeUpdateDecorator(el, reflector);
+        isParametersDecorator = maybeUpdateDecorator(el, reflector);
       } else if (ts.isNewExpression(el) && ts.isIdentifier(el.expression)) {
         const token =
           (el.arguments && el.arguments.length > 0 && el.arguments[0]) ||
           undefined;
-        maybeUpdateDecorator(el.expression, reflector, token);
+        isParametersDecorator = maybeUpdateDecorator(
+          el.expression,
+          reflector,
+          token
+        );
+      }
+      if (!isParametersDecorator) {
+        meta.token = new WrappedNodeExpr(el);
       }
     });
   }

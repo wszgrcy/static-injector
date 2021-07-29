@@ -73,8 +73,7 @@ export function getConstructorDependencies(
     let attributeNameType: Expression | null = null;
     let optional = false,
       self = false,
-      skipSelf = false,
-      host = false;
+      skipSelf = false;
 
     (param.decorators || [])
       .filter((dec) => isCore || isAngularCore(dec))
@@ -96,8 +95,6 @@ export function getConstructorDependencies(
           skipSelf = true;
         } else if (name === 'Self') {
           self = true;
-        } else if (name === 'Host') {
-          host = true;
         } else {
           throw new FatalDiagnosticError(
             ErrorCode.DECORATOR_UNEXPECTED,
@@ -121,7 +118,7 @@ export function getConstructorDependencies(
         reason: param.typeValueReference.reason,
       });
     } else {
-      deps.push({ token, attributeNameType, optional, self, skipSelf, host });
+      deps.push({ token, attributeNameType, optional, self, skipSelf });
     }
   });
   if (errors.length === 0) {

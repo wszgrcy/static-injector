@@ -1,5 +1,9 @@
 import { Injectable, Injector } from 'static-injector';
 @Injectable()
-class MyClass {}
+export class MyClass {
+  hello() {
+    return 'hello';
+  }
+}
 let injector = Injector.create({ providers: [{ provide: MyClass }] });
-injector.get(MyClass);
+export const instance = injector.get(MyClass);

@@ -9,14 +9,13 @@ import {
   Injector,
   InjectFlags,
   INJECTOR_SCOPE,
-  Host,
 } from 'static-injector';
 let token = new InjectionToken('token');
 let token2 = new InjectionToken('token2');
 @Injectable()
 export class FirstClass {
   constructor(
-    @Inject(token) @Host() token: number,
+    @Inject(token) token: number,
     @Inject('noValue') @Optional() noValue,
     @Inject(token2) @Optional() @SkipSelf() token2,
     @Inject('factory') factory,

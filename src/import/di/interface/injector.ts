@@ -27,12 +27,6 @@ export enum InjectFlags {
   /** Check self and check parent injector if needed */
   Default = 0b0000,
 
-  /**
-   * Specifies that an injector should retrieve a dependency from any injector until reaching the
-   * host element of the current component. (Only used with Element Injector)
-   */
-  Host = 0b0001,
-
   /** Don't ascend to ancestors of the node requesting injection. */
   Self = 0b0010,
 
@@ -53,12 +47,6 @@ export enum InjectFlags {
 export const enum InternalInjectFlags {
   /** Check self and check parent injector if needed */
   Default = 0b0000,
-
-  /**
-   * Specifies that an injector should retrieve a dependency from any injector until reaching the
-   * host element of the current component. (Only used with Element Injector)
-   */
-  Host = 0b0001,
 
   /** Don't ascend to ancestors of the node requesting injection. */
   Self = 0b0010,

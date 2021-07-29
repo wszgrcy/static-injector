@@ -12,6 +12,15 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run-script", "test", "--", "-t", "main"],
       "port": 5858
+    },
+    {
+      "name": "测试default",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceRoot}",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run-script", "test", "--", "-t", "default"],
+      "port": 5858
     }
   ]
 }
