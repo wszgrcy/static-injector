@@ -184,14 +184,6 @@ export abstract class Expression {
     return new ReadPropExpr(this, name, null, sourceSpan);
   }
 
-  key(
-    index: Expression,
-    type?: Type | null,
-    sourceSpan?: ParseSourceSpan | null
-  ): ReadKeyExpr {
-    return new ReadKeyExpr(this, index, type, sourceSpan);
-  }
-
   callMethod(
     name: string | BuiltinMethod,
     params: Expression[],
@@ -206,234 +198,6 @@ export abstract class Expression {
     pure?: boolean
   ): InvokeFunctionExpr {
     return new InvokeFunctionExpr(this, params, null, sourceSpan, pure);
-  }
-
-  instantiate(
-    params: Expression[],
-    type?: Type | null,
-    sourceSpan?: ParseSourceSpan | null
-  ): InstantiateExpr {
-    return new InstantiateExpr(this, params, type, sourceSpan);
-  }
-
-  conditional(
-    trueCase: Expression,
-    falseCase: Expression | null = null,
-    sourceSpan?: ParseSourceSpan | null
-  ): ConditionalExpr {
-    return new ConditionalExpr(this, trueCase, falseCase, null, sourceSpan);
-  }
-
-  equals(
-    rhs: Expression,
-    sourceSpan?: ParseSourceSpan | null
-  ): BinaryOperatorExpr {
-    return new BinaryOperatorExpr(
-      BinaryOperator.Equals,
-      this,
-      rhs,
-      null,
-      sourceSpan
-    );
-  }
-  notEquals(
-    rhs: Expression,
-    sourceSpan?: ParseSourceSpan | null
-  ): BinaryOperatorExpr {
-    return new BinaryOperatorExpr(
-      BinaryOperator.NotEquals,
-      this,
-      rhs,
-      null,
-      sourceSpan
-    );
-  }
-  identical(
-    rhs: Expression,
-    sourceSpan?: ParseSourceSpan | null
-  ): BinaryOperatorExpr {
-    return new BinaryOperatorExpr(
-      BinaryOperator.Identical,
-      this,
-      rhs,
-      null,
-      sourceSpan
-    );
-  }
-  notIdentical(
-    rhs: Expression,
-    sourceSpan?: ParseSourceSpan | null
-  ): BinaryOperatorExpr {
-    return new BinaryOperatorExpr(
-      BinaryOperator.NotIdentical,
-      this,
-      rhs,
-      null,
-      sourceSpan
-    );
-  }
-  minus(
-    rhs: Expression,
-    sourceSpan?: ParseSourceSpan | null
-  ): BinaryOperatorExpr {
-    return new BinaryOperatorExpr(
-      BinaryOperator.Minus,
-      this,
-      rhs,
-      null,
-      sourceSpan
-    );
-  }
-  plus(
-    rhs: Expression,
-    sourceSpan?: ParseSourceSpan | null
-  ): BinaryOperatorExpr {
-    return new BinaryOperatorExpr(
-      BinaryOperator.Plus,
-      this,
-      rhs,
-      null,
-      sourceSpan
-    );
-  }
-  divide(
-    rhs: Expression,
-    sourceSpan?: ParseSourceSpan | null
-  ): BinaryOperatorExpr {
-    return new BinaryOperatorExpr(
-      BinaryOperator.Divide,
-      this,
-      rhs,
-      null,
-      sourceSpan
-    );
-  }
-  multiply(
-    rhs: Expression,
-    sourceSpan?: ParseSourceSpan | null
-  ): BinaryOperatorExpr {
-    return new BinaryOperatorExpr(
-      BinaryOperator.Multiply,
-      this,
-      rhs,
-      null,
-      sourceSpan
-    );
-  }
-  modulo(
-    rhs: Expression,
-    sourceSpan?: ParseSourceSpan | null
-  ): BinaryOperatorExpr {
-    return new BinaryOperatorExpr(
-      BinaryOperator.Modulo,
-      this,
-      rhs,
-      null,
-      sourceSpan
-    );
-  }
-  and(
-    rhs: Expression,
-    sourceSpan?: ParseSourceSpan | null
-  ): BinaryOperatorExpr {
-    return new BinaryOperatorExpr(
-      BinaryOperator.And,
-      this,
-      rhs,
-      null,
-      sourceSpan
-    );
-  }
-  bitwiseAnd(
-    rhs: Expression,
-    sourceSpan?: ParseSourceSpan | null,
-    parens: boolean = true
-  ): BinaryOperatorExpr {
-    return new BinaryOperatorExpr(
-      BinaryOperator.BitwiseAnd,
-      this,
-      rhs,
-      null,
-      sourceSpan,
-      parens
-    );
-  }
-  or(rhs: Expression, sourceSpan?: ParseSourceSpan | null): BinaryOperatorExpr {
-    return new BinaryOperatorExpr(
-      BinaryOperator.Or,
-      this,
-      rhs,
-      null,
-      sourceSpan
-    );
-  }
-  lower(
-    rhs: Expression,
-    sourceSpan?: ParseSourceSpan | null
-  ): BinaryOperatorExpr {
-    return new BinaryOperatorExpr(
-      BinaryOperator.Lower,
-      this,
-      rhs,
-      null,
-      sourceSpan
-    );
-  }
-  lowerEquals(
-    rhs: Expression,
-    sourceSpan?: ParseSourceSpan | null
-  ): BinaryOperatorExpr {
-    return new BinaryOperatorExpr(
-      BinaryOperator.LowerEquals,
-      this,
-      rhs,
-      null,
-      sourceSpan
-    );
-  }
-  bigger(
-    rhs: Expression,
-    sourceSpan?: ParseSourceSpan | null
-  ): BinaryOperatorExpr {
-    return new BinaryOperatorExpr(
-      BinaryOperator.Bigger,
-      this,
-      rhs,
-      null,
-      sourceSpan
-    );
-  }
-  biggerEquals(
-    rhs: Expression,
-    sourceSpan?: ParseSourceSpan | null
-  ): BinaryOperatorExpr {
-    return new BinaryOperatorExpr(
-      BinaryOperator.BiggerEquals,
-      this,
-      rhs,
-      null,
-      sourceSpan
-    );
-  }
-  isBlank(sourceSpan?: ParseSourceSpan | null): Expression {
-    // Note: We use equals by purpose here to compare to null and undefined in JS.
-    // We use the typed null to allow strictNullChecks to narrow types.
-    return this.equals(TYPED_NULL_EXPR, sourceSpan);
-  }
-  cast(type: Type, sourceSpan?: ParseSourceSpan | null): Expression {
-    return new CastExpr(this, type, sourceSpan);
-  }
-  nullishCoalesce(
-    rhs: Expression,
-    sourceSpan?: ParseSourceSpan | null
-  ): BinaryOperatorExpr {
-    return new BinaryOperatorExpr(
-      BinaryOperator.NullishCoalesce,
-      this,
-      rhs,
-      null,
-      sourceSpan
-    );
   }
 
   toStmt(): Statement {
@@ -713,38 +477,6 @@ export class InvokeFunctionExpr extends Expression {
 
   override visitExpression(visitor: ExpressionVisitor, context: any): any {
     return visitor.visitInvokeFunctionExpr(this, context);
-  }
-}
-
-export class TaggedTemplateExpr extends Expression {
-  constructor(
-    public tag: Expression,
-    public template: TemplateLiteral,
-    type?: Type | null,
-    sourceSpan?: ParseSourceSpan | null
-  ) {
-    super(type, sourceSpan);
-  }
-
-  override isEquivalent(e: Expression): boolean {
-    return (
-      e instanceof TaggedTemplateExpr &&
-      this.tag.isEquivalent(e.tag) &&
-      areAllEquivalentPredicate(
-        this.template.elements,
-        e.template.elements,
-        (a, b) => a.text === b.text
-      ) &&
-      areAllEquivalent(this.template.expressions, e.template.expressions)
-    );
-  }
-
-  override isConstant() {
-    return false;
-  }
-
-  override visitExpression(visitor: ExpressionVisitor, context: any): any {
-    return visitor.visitTaggedTemplateExpr(this, context);
   }
 }
 
@@ -1250,7 +982,7 @@ export interface ExpressionVisitor {
   visitWritePropExpr(expr: WritePropExpr, context: any): any;
   visitInvokeMethodExpr(ast: InvokeMethodExpr, context: any): any;
   visitInvokeFunctionExpr(ast: InvokeFunctionExpr, context: any): any;
-  visitTaggedTemplateExpr(ast: TaggedTemplateExpr, context: any): any;
+
   visitInstantiateExpr(ast: InstantiateExpr, context: any): any;
   visitLiteralExpr(ast: LiteralExpr, context: any): any;
   visitExternalExpr(ast: ExternalExpr, context: any): any;
@@ -1531,43 +1263,6 @@ export class IfStmt extends Statement {
   }
 }
 
-export class TryCatchStmt extends Statement {
-  constructor(
-    public bodyStmts: Statement[],
-    public catchStmts: Statement[],
-    sourceSpan: ParseSourceSpan | null = null,
-    leadingComments?: LeadingComment[]
-  ) {
-    super([], sourceSpan, leadingComments);
-  }
-  override isEquivalent(stmt: Statement): boolean {
-    return (
-      stmt instanceof TryCatchStmt &&
-      areAllEquivalent(this.bodyStmts, stmt.bodyStmts) &&
-      areAllEquivalent(this.catchStmts, stmt.catchStmts)
-    );
-  }
-  override visitStatement(visitor: StatementVisitor, context: any): any {
-    return visitor.visitTryCatchStmt(this, context);
-  }
-}
-
-export class ThrowStmt extends Statement {
-  constructor(
-    public error: Expression,
-    sourceSpan: ParseSourceSpan | null = null,
-    leadingComments?: LeadingComment[]
-  ) {
-    super([], sourceSpan, leadingComments);
-  }
-  override isEquivalent(stmt: ThrowStmt): boolean {
-    return stmt instanceof TryCatchStmt && this.error.isEquivalent(stmt.error);
-  }
-  override visitStatement(visitor: StatementVisitor, context: any): any {
-    return visitor.visitThrowStmt(this, context);
-  }
-}
-
 export interface StatementVisitor {
   visitDeclareVarStmt(stmt: DeclareVarStmt, context: any): any;
   visitDeclareFunctionStmt(stmt: DeclareFunctionStmt, context: any): any;
@@ -1575,8 +1270,6 @@ export interface StatementVisitor {
   visitReturnStmt(stmt: ReturnStatement, context: any): any;
   visitDeclareClassStmt(stmt: ClassStmt, context: any): any;
   visitIfStmt(stmt: IfStmt, context: any): any;
-  visitTryCatchStmt(stmt: TryCatchStmt, context: any): any;
-  visitThrowStmt(stmt: ThrowStmt, context: any): any;
 }
 
 export function variable(
@@ -1673,15 +1366,6 @@ export function ifStmt(
     sourceSpan,
     leadingComments
   );
-}
-
-export function taggedTemplate(
-  tag: Expression,
-  template: TemplateLiteral,
-  type?: Type | null,
-  sourceSpan?: ParseSourceSpan | null
-): TaggedTemplateExpr {
-  return new TaggedTemplateExpr(tag, template, type, sourceSpan);
 }
 
 export function literal(

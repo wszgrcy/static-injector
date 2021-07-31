@@ -5,8 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import * as o from "../../../../../compiler";
-import { createTaggedTemplate } from "typescript";
+import * as o from '../../../../../compiler';
 
 import {
   AstFactory,
@@ -16,33 +15,33 @@ import {
   TemplateElement,
   TemplateLiteral,
   UnaryOperator,
-} from "./api/ast_factory";
-import { ImportGenerator } from "./api/import_generator";
-import { Context } from "./context";
+} from './api/ast_factory';
+import { ImportGenerator } from './api/import_generator';
+import { Context } from './context';
 
 const UNARY_OPERATORS = new Map<o.UnaryOperator, UnaryOperator>([
-  [o.UnaryOperator.Minus, "-"],
-  [o.UnaryOperator.Plus, "+"],
+  [o.UnaryOperator.Minus, '-'],
+  [o.UnaryOperator.Plus, '+'],
 ]);
 
 const BINARY_OPERATORS = new Map<o.BinaryOperator, BinaryOperator>([
-  [o.BinaryOperator.And, "&&"],
-  [o.BinaryOperator.Bigger, ">"],
-  [o.BinaryOperator.BiggerEquals, ">="],
-  [o.BinaryOperator.BitwiseAnd, "&"],
-  [o.BinaryOperator.Divide, "/"],
-  [o.BinaryOperator.Equals, "=="],
-  [o.BinaryOperator.Identical, "==="],
-  [o.BinaryOperator.Lower, "<"],
-  [o.BinaryOperator.LowerEquals, "<="],
-  [o.BinaryOperator.Minus, "-"],
-  [o.BinaryOperator.Modulo, "%"],
-  [o.BinaryOperator.Multiply, "*"],
-  [o.BinaryOperator.NotEquals, "!="],
-  [o.BinaryOperator.NotIdentical, "!=="],
-  [o.BinaryOperator.Or, "||"],
-  [o.BinaryOperator.Plus, "+"],
-  [o.BinaryOperator.NullishCoalesce, "??"],
+  [o.BinaryOperator.And, '&&'],
+  [o.BinaryOperator.Bigger, '>'],
+  [o.BinaryOperator.BiggerEquals, '>='],
+  [o.BinaryOperator.BitwiseAnd, '&'],
+  [o.BinaryOperator.Divide, '/'],
+  [o.BinaryOperator.Equals, '=='],
+  [o.BinaryOperator.Identical, '==='],
+  [o.BinaryOperator.Lower, '<'],
+  [o.BinaryOperator.LowerEquals, '<='],
+  [o.BinaryOperator.Minus, '-'],
+  [o.BinaryOperator.Modulo, '%'],
+  [o.BinaryOperator.Multiply, '*'],
+  [o.BinaryOperator.NotEquals, '!='],
+  [o.BinaryOperator.NotIdentical, '!=='],
+  [o.BinaryOperator.Or, '||'],
+  [o.BinaryOperator.Plus, '+'],
+  [o.BinaryOperator.NullishCoalesce, '??'],
 ]);
 
 export type RecordWrappedNodeFn<TExpression> = (
@@ -76,10 +75,10 @@ export class ExpressionTranslatorVisitor<TStatement, TExpression>
 
   visitDeclareVarStmt(stmt: o.DeclareVarStmt, context: Context): TStatement {
     const varType = this.downlevelVariableDeclarations
-      ? "var"
+      ? 'var'
       : stmt.hasModifier(o.StmtModifier.Final)
-      ? "const"
-      : "let";
+      ? 'const'
+      : 'let';
     return this.attachComments(
       this.factory.createVariableDeclaration(
         stmt.name,
@@ -128,7 +127,7 @@ export class ExpressionTranslatorVisitor<TStatement, TExpression>
   }
 
   visitDeclareClassStmt(_stmt: o.ClassStmt, _context: Context): never {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
 
   visitIfStmt(stmt: o.IfStmt, context: Context): TStatement {
@@ -143,19 +142,6 @@ export class ExpressionTranslatorVisitor<TStatement, TExpression>
               this.visitStatements(stmt.falseCase, context.withStatementMode)
             )
           : null
-      ),
-      stmt.leadingComments
-    );
-  }
-
-  visitTryCatchStmt(_stmt: o.TryCatchStmt, _context: Context): never {
-    throw new Error("Method not implemented.");
-  }
-
-  visitThrowStmt(stmt: o.ThrowStmt, context: Context): TStatement {
-    return this.attachComments(
-      this.factory.createThrowStatement(
-        stmt.error.visitExpression(this, context.withExpressionMode)
       ),
       stmt.leadingComments
     );
@@ -237,30 +223,6 @@ export class ExpressionTranslatorVisitor<TStatement, TExpression>
     );
   }
 
-  visitTaggedTemplateExpr(
-    ast: o.TaggedTemplateExpr,
-    context: Context
-  ): TExpression {
-    return this.setSourceMapRange(
-      this.createTaggedTemplateExpression(
-        ast.tag.visitExpression(this, context),
-        {
-          elements: ast.template.elements.map((e) =>
-            createTemplateElement({
-              cooked: e.text,
-              raw: e.rawText,
-              range: e.sourceSpan ?? ast.sourceSpan,
-            })
-          ),
-          expressions: ast.template.expressions.map((e) =>
-            e.visitExpression(this, context)
-          ),
-        }
-      ),
-      ast.sourceSpan
-    );
-  }
-
   visitInstantiateExpr(ast: o.InstantiateExpr, context: Context): TExpression {
     return this.factory.createNewExpression(
       ast.classExpr.visitExpression(this, context),
@@ -275,74 +237,10 @@ export class ExpressionTranslatorVisitor<TStatement, TExpression>
     );
   }
 
-  private createTaggedTemplateExpression(
-    tag: TExpression,
-    template: TemplateLiteral<TExpression>
-  ): TExpression {
-    return this.downlevelTaggedTemplates
-      ? this.createES5TaggedTemplateFunctionCall(tag, template)
-      : this.factory.createTaggedTemplate(tag, template);
-  }
-
-  /**
-   * Translate the tagged template literal into a call that is compatible with ES5, using the
-   * imported `__makeTemplateObject` helper for ES5 formatted output.
-   */
-  private createES5TaggedTemplateFunctionCall(
-    tagHandler: TExpression,
-    { elements, expressions }: TemplateLiteral<TExpression>
-  ): TExpression {
-    // Ensure that the `__makeTemplateObject()` helper has been imported.
-    const { moduleImport, symbol } = this.imports.generateNamedImport(
-      "tslib",
-      "__makeTemplateObject"
-    );
-    const __makeTemplateObjectHelper =
-      moduleImport === null
-        ? this.factory.createIdentifier(symbol)
-        : this.factory.createPropertyAccess(moduleImport, symbol);
-
-    // Collect up the cooked and raw strings into two separate arrays.
-    const cooked: TExpression[] = [];
-    const raw: TExpression[] = [];
-    for (const element of elements) {
-      cooked.push(
-        this.factory.setSourceMapRange(
-          this.factory.createLiteral(element.cooked),
-          element.range
-        )
-      );
-      raw.push(
-        this.factory.setSourceMapRange(
-          this.factory.createLiteral(element.raw),
-          element.range
-        )
-      );
-    }
-
-    // Generate the helper call in the form: `__makeTemplateObject([cooked], [raw]);`
-    const templateHelperCall = this.factory.createCallExpression(
-      __makeTemplateObjectHelper,
-      [
-        this.factory.createArrayLiteral(cooked),
-        this.factory.createArrayLiteral(raw),
-      ],
-      /* pure */ false
-    );
-
-    // Finally create the tagged handler call in the form:
-    // `tag(__makeTemplateObject([cooked], [raw]), ...expressions);`
-    return this.factory.createCallExpression(
-      tagHandler,
-      [templateHelperCall, ...expressions],
-      /* pure */ false
-    );
-  }
-
   visitExternalExpr(ast: o.ExternalExpr, _context: Context): TExpression {
     if (ast.value.name === null) {
       if (ast.value.moduleName === null) {
-        throw new Error("Invalid import without name nor moduleName");
+        throw new Error('Invalid import without name nor moduleName');
       }
       return this.imports.generateNamespaceImport(ast.value.moduleName);
     }
@@ -404,7 +302,7 @@ export class ExpressionTranslatorVisitor<TStatement, TExpression>
 
   visitNotExpr(ast: o.NotExpr, context: Context): TExpression {
     return this.factory.createUnaryExpression(
-      "!",
+      '!',
       ast.condition.visitExpression(this, context)
     );
   }
@@ -486,7 +384,7 @@ export class ExpressionTranslatorVisitor<TStatement, TExpression>
   }
 
   visitCommaExpr(ast: o.CommaExpr, context: Context): never {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
 
   visitWrappedNodeExpr(ast: o.WrappedNodeExpr<any>, _context: Context): any {
@@ -540,21 +438,6 @@ export class ExpressionTranslatorVisitor<TStatement, TExpression>
     }
     return statement;
   }
-}
-
-/**
- * Convert a cooked-raw string object into one that can be used by the AST factories.
- */
-function createTemplateElement({
-  cooked,
-  raw,
-  range,
-}: {
-  cooked: string;
-  raw: string;
-  range: o.ParseSourceSpan | null;
-}): TemplateElement {
-  return { cooked, raw, range: createRange(range) };
 }
 
 /**

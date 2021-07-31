@@ -49,7 +49,6 @@ export class InjectableTransformFactory {
     );
   }
   getTransform() {
-    // return;
     return (context: ts.TransformationContext) => this.transform(context);
   }
   private visit(
