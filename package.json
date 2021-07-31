@@ -1,16 +1,22 @@
 {
   "name": "static-injector",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.0.1",
+  "description": "Angular的静态注入器独立使用版本",
+  "keywords": [
+    "angular",
+    "injector",
+    "typescript",
+    "injectable"
+  ],
   "main": "import/index.js",
   "private": false,
   "scripts": {
     "pretest": "tsc -p ./tsconfig.import-test.json",
     "test": "jest",
-    "build": "rimraf dist&& cpx ./package.json ./dist&& tsc -p ./tsconfig.build.json"
+    "build": "rimraf dist&& cpx ./package.json ./dist && cpx -v ./readme.md ./dist&& tsc -p ./tsconfig.build.json"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "peerDependencies": {
     "typescript": "^4.0.0"
   },
