@@ -1,10 +1,10 @@
 import * as path from 'path';
 import { FatalDiagnosticError } from '../src/transform/compiler-cli/src/ngtsc/diagnostics/error';
-import { createTestTransform } from './util/create-test-transform';
+import { createTestTransformer } from './util/create-test-transform';
 describe('error', () => {
   it('strict-constructor-deps', () => {
     try {
-      createTestTransform(
+      createTestTransformer(
         [path.resolve(__dirname, './fixture/error/strict-constructor-deps.ts')],
         undefined,
         {
@@ -20,7 +20,7 @@ describe('error', () => {
   });
   it('strict-constructor-union-type-dep', () => {
     try {
-      createTestTransform(
+      createTestTransformer(
         [
           path.resolve(
             __dirname,
@@ -41,7 +41,7 @@ describe('error', () => {
   });
   it('strict-constructor-interface-type-dep', () => {
     try {
-      createTestTransform(
+      createTestTransformer(
         [
           path.resolve(
             __dirname,

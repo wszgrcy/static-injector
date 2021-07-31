@@ -1,9 +1,9 @@
 import path from 'path';
-import { createTestTransform } from './util/create-test-transform';
+import { createTestTransformer } from './util/create-test-transform';
 import { runTranspileScript } from './util/run-transpile-script';
 describe('default', () => {
   it('hello-world', () => {
-    createTestTransform(
+    createTestTransformer(
       [path.resolve(__dirname, './fixture/hello.ts')],
       undefined,
       {
@@ -20,7 +20,7 @@ describe('default', () => {
   });
 
   it('parameters-decorator', () => {
-    createTestTransform(
+    createTestTransformer(
       [path.resolve(__dirname, './fixture/parameters-decorator.ts')],
       undefined,
       {
@@ -36,7 +36,7 @@ describe('default', () => {
     );
   });
   it('inject-class', () => {
-    createTestTransform(
+    createTestTransformer(
       [path.resolve(__dirname, './fixture/inject-class.ts')],
       undefined,
       {
@@ -50,7 +50,7 @@ describe('default', () => {
     );
   });
   it('provider', () => {
-    createTestTransform(
+    createTestTransformer(
       [path.resolve(__dirname, './fixture/provider.ts')],
       undefined,
       {
@@ -65,7 +65,7 @@ describe('default', () => {
     );
   });
   it('injectable', () => {
-    createTestTransform(
+    createTestTransformer(
       [path.resolve(__dirname, './fixture/injectable.ts')],
       undefined,
       {

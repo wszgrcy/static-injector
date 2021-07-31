@@ -21,24 +21,24 @@ interface ClassMetadata {
   /** 要被移除的装饰器 */
   decorator: ts.Decorator;
 }
-export interface InjectableTransformFactoryOptions {
+export interface InjectableTransformerFactoryOptions {
   strictCtorDeps?: boolean;
 }
-export function createTransform(
+export function createTransformer(
   program: ts.Program,
-  options?: InjectableTransformFactoryOptions
+  options?: InjectableTransformerFactoryOptions
 ) {
-  let factory = new InjectableTransformFactory(program, options);
+  let factory = new InjectableTransformerFactory(program, options);
   return factory.getTransform();
 }
-export class InjectableTransformFactory {
+export class InjectableTransformerFactory {
   typeChecker: ts.TypeChecker;
   reflectionHost: TypeScriptReflectionHost;
   handler: InjectableDecoratorHandler;
 
   constructor(
     private program: ts.Program,
-    private options: InjectableTransformFactoryOptions = {}
+    private options: InjectableTransformerFactoryOptions = {}
   ) {
     this.typeChecker = this.program.getTypeChecker();
     this.reflectionHost = new TypeScriptReflectionHost(this.typeChecker);
