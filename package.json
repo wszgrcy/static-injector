@@ -1,6 +1,6 @@
 {
   "name": "static-injector",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Angular的静态注入器独立使用版本",
   "keywords": [
     "angular",
@@ -8,6 +8,14 @@
     "typescript",
     "injectable"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wszgrcy/static-injector.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wszgrcy/static-injector/issues"
+  },
+  "homepage": "https://github.com/wszgrcy/static-injector#readme",
   "main": "import/index.js",
   "private": false,
   "scripts": {
@@ -15,7 +23,7 @@
     "test": "jest",
     "build": "rimraf dist&& cpx ./package.json ./dist && cpx -v ./readme.md ./dist&& tsc -p ./tsconfig.build.json"
   },
-  "author": "",
+  "author": "wszgrcy",
   "license": "MIT",
   "peerDependencies": {
     "typescript": "^4.0.0"
