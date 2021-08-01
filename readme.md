@@ -20,3 +20,7 @@
 
 - 做了一部分的单元测试.保证大部分功能正常使用
 - 因为大部分代码本身就是从 Angular 中提取的,所以稳定性肯定也是有保证
+
+# 模板
+
+- [webpack 下使用](https://github.com/wszgrcy/static-injector-webpack-template)
