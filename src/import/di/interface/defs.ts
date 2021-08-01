@@ -6,8 +6,8 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import { Type } from "../../interface/type";
-import { getClosureSafeProperty } from "../../util/property";
+import { Type } from '../../interface/type';
+import { getClosureSafeProperty } from '../../util/property';
 import {
   ClassProvider,
   ConstructorProvider,
@@ -15,7 +15,7 @@ import {
   FactoryProvider,
   StaticClassProvider,
   ValueProvider,
-} from "./provider";
+} from './provider';
 
 /**
  * Information about how a type or `InjectionToken` interfaces with the DI system.
@@ -41,7 +41,7 @@ export interface ɵɵInjectableDeclaration<T> {
    * - `null`, does not belong to any injector. Must be explicitly listed in the injector
    *   `providers`.
    */
-  providedIn: InjectorType<any> | "root" | "platform" | "any" | null;
+  providedIn: InjectorType<any> | 'root' | 'platform' | 'any' | null;
 
   /**
    * The token to which this definition belongs.
@@ -161,7 +161,7 @@ export interface InjectorTypeWithProviders<T> {
  */
 export function ɵɵdefineInjectable<T>(opts: {
   token: unknown;
-  providedIn?: Type<any> | "root" | "platform" | "any" | null;
+  providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
   factory: () => T;
 }): unknown {
   return {
@@ -171,13 +171,6 @@ export function ɵɵdefineInjectable<T>(opts: {
     value: undefined,
   } as ɵɵInjectableDeclaration<T>;
 }
-
-/**
- * @deprecated in v8, delete after v10. This API should be used only by generated code, and that
- * code should now use ɵɵdefineInjectable instead.
- * @publicApi
- */
-export const defineInjectable = ɵɵdefineInjectable;
 
 /**
  * Construct an `InjectorDef` which configures an injector.
