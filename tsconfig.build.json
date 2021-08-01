@@ -2,8 +2,9 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "module": "ES2015",
-    "moduleResolution": "node"
+    // "module": "ES2015",
+    "moduleResolution": "node",
+    "importHelpers": true
   },
   "include": ["./src"]
 }

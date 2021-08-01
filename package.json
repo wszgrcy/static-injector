@@ -1,6 +1,6 @@
 {
   "name": "static-injector",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Angular的静态注入器独立使用版本",
   "keywords": [
     "angular",
@@ -41,6 +41,7 @@
     "rimraf": "^3.0.2",
     "ts-jest": "^27.0.4",
     "ts-node": "^10.1.0",
+    "tslib": "^2.3.0",
     "typescript": "^4.3.5"
   }
 }
