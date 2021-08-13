@@ -4,7 +4,10 @@
   "files": [],
   "references": [
     {
-      "path": "./tsconfig.build.json"
+      "path": "./tsconfig.import.json"
+    },
+    {
+      "path": "./tsconfig.transform.json"
     },
     {
       "path": "./tsconfig.import-test.json"

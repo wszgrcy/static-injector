@@ -21,7 +21,9 @@
   "scripts": {
     "pretest": "tsc -p ./tsconfig.import-test.json",
     "test": "jest",
-    "build": "rimraf dist&& cpx ./src/package.json ./dist && cpx -v ./readme.md ./dist&& tsc -p ./tsconfig.build.json"
+    "build": "rimraf dist&& cpx ./src/package.json ./dist && cpx -v ./readme.md ./dist&& npm run build:transform && npm run build:import",
+    "build:transform": "tsc -p ./tsconfig.transform.json",
+    "build:import": "tsc -p ./tsconfig.import.json"
   },
   "author": "wszgrcy",
   "license": "MIT",
@@ -41,7 +43,6 @@
     "rimraf": "^3.0.2",
     "ts-jest": "^27.0.4",
     "ts-node": "^10.1.0",
-    "tslib": "^2.3.0",
     "typescript": "^4.3.5"
   }
 }
