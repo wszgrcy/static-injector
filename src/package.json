@@ -1,6 +1,6 @@
 {
   "name": "static-injector",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Angular的静态注入器独立使用版本",
   "keywords": [
     "angular",
@@ -22,8 +22,7 @@
   "author": "wszgrcy",
   "license": "MIT",
   "peerDependencies": {
-    "typescript": "^4.0.0",
-    "tslib": "^2.3.0"
+    "typescript": "^4.0.0"
   },
   "devDependencies": {},
   "sideEffects": false

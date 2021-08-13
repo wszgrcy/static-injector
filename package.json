@@ -1,22 +1,7 @@
 {
   "name": "static-injector",
-  "version": "1.0.6",
+  "version": "0.0.0",
   "description": "Angular的静态注入器独立使用版本",
-  "keywords": [
-    "angular",
-    "injector",
-    "typescript",
-    "injectable"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/wszgrcy/static-injector.git"
-  },
-  "bugs": {
-    "url": "https://github.com/wszgrcy/static-injector/issues"
-  },
-  "homepage": "https://github.com/wszgrcy/static-injector#readme",
-  "main": "import/index.js",
   "private": true,
   "scripts": {
     "pretest": "tsc -p ./tsconfig.import-test.json",
