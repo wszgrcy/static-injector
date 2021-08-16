@@ -24,3 +24,4 @@
 # 模板
 
 - [webpack 下使用](https://github.com/wszgrcy/static-injector-webpack-template)
+- [rollup 下使用](https://github.com/wszgrcy/static-injector-rollup-template)
