@@ -1,10 +1,10 @@
 import path from 'path';
-import { createTestTransformer } from './util/create-test-transform';
-import { runTranspileScript } from './util/run-transpile-script';
+import { createTestTransformer } from '../util/create-test-transform';
+import { runTranspileScript } from '../util/run-transpile-script';
 describe('default', () => {
   it('hello-world', () => {
     createTestTransformer(
-      [path.resolve(__dirname, './fixture/hello.ts')],
+      [path.resolve(__dirname, '../fixture/hello.ts')],
       undefined,
       {
         writeFile: (fileName, data) => {
@@ -21,7 +21,7 @@ describe('default', () => {
 
   it('parameters-decorator', () => {
     createTestTransformer(
-      [path.resolve(__dirname, './fixture/parameters-decorator.ts')],
+      [path.resolve(__dirname, '../fixture/parameters-decorator.ts')],
       undefined,
       {
         writeFile: (fileName, data) => {
@@ -37,7 +37,7 @@ describe('default', () => {
   });
   it('inject-class', () => {
     createTestTransformer(
-      [path.resolve(__dirname, './fixture/inject-class.ts')],
+      [path.resolve(__dirname, '../fixture/inject-class.ts')],
       undefined,
       {
         writeFile: (fileName, data) => {
@@ -51,7 +51,7 @@ describe('default', () => {
   });
   it('provider', () => {
     createTestTransformer(
-      [path.resolve(__dirname, './fixture/provider.ts')],
+      [path.resolve(__dirname, '../fixture/provider.ts')],
       undefined,
       {
         writeFile: (fileName, data) => {
@@ -66,7 +66,7 @@ describe('default', () => {
   });
   it('injectable', () => {
     createTestTransformer(
-      [path.resolve(__dirname, './fixture/injectable.ts')],
+      [path.resolve(__dirname, '../fixture/injectable.ts')],
       undefined,
       {
         writeFile: (fileName, data) => {

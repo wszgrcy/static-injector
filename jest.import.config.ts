@@ -24,13 +24,13 @@ const config: InitialOptionsTsJest = {
   // collectCoverageFrom: undefined,
 
   // The directory where Jest should output its coverage files
-  coverageDirectory: 'coverage',
+  coverageDirectory: 'coverage-import',
 
   // An array of regexp pattern strings used to skip coverage collection
   // coveragePathIgnorePatterns: [
   //   "\\\\node_modules\\\\"
   // ],
-
+  collectCoverageFrom: ['**/src/import/**/*.ts'],
   // Indicates which provider should be used to instrument code for coverage
   coverageProvider: 'v8',
 
@@ -147,11 +147,7 @@ const config: InitialOptionsTsJest = {
   // testLocationInResults: false,
 
   // The glob patterns Jest uses to detect test files
-  testMatch: [
-    // "**/__tests__/**/*.[jt]s?(x)",
-    // "**/?(*.)+(spec|test).[tj]s?(x)"
-    '**/test/transform/**/*.spec.ts',
-  ],
+  testMatch: ['**/test/import/**/*.spec.ts'],
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
   // testPathIgnorePatterns: [
@@ -198,6 +194,12 @@ const config: InitialOptionsTsJest = {
   globals: {
     'ts-jest': {
       tsconfig: 'tsconfig.spec.json',
+      astTransformers: {
+        before: [
+          './test/util/jest-test-transformer-loader.js',
+          'ts-jest/dist/transformers/path-mapping',
+        ],
+      },
     },
   },
 };

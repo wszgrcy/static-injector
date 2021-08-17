@@ -47,3 +47,5 @@ Thumbs.db
 
 /src/**/*.js
 /test/**/*.js
+!/test/util/jest-test-transformer-loader.js
+coverage-import

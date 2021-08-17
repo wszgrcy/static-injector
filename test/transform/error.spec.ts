@@ -1,11 +1,16 @@
 import * as path from 'path';
-import { FatalDiagnosticError } from '../src/transform/compiler-cli/src/ngtsc/diagnostics/error';
-import { createTestTransformer } from './util/create-test-transform';
+import { FatalDiagnosticError } from '../../src/transform/compiler-cli/src/ngtsc/diagnostics/error';
+import { createTestTransformer } from '../util/create-test-transform';
 describe('error', () => {
   it('strict-constructor-deps', () => {
     try {
       createTestTransformer(
-        [path.resolve(__dirname, './fixture/error/strict-constructor-deps.ts')],
+        [
+          path.resolve(
+            __dirname,
+            '../fixture/error/strict-constructor-deps.ts'
+          ),
+        ],
         undefined,
         {
           writeFile: (fileName, data) => {
@@ -24,7 +29,7 @@ describe('error', () => {
         [
           path.resolve(
             __dirname,
-            './fixture/error/strict-constructor-union-type-dep.ts'
+            '../fixture/error/strict-constructor-union-type-dep.ts'
           ),
         ],
         undefined,
@@ -45,7 +50,7 @@ describe('error', () => {
         [
           path.resolve(
             __dirname,
-            './fixture/error/strict-constructor-interface-type-dep.ts'
+            '../fixture/error/strict-constructor-interface-type-dep.ts'
           ),
         ],
         undefined,
