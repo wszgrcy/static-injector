@@ -51,9 +51,6 @@ import { ɵɵdefineInjectable } from './interface/defs';
  * @publicApi
  */
 export class InjectionToken<T> {
-  /** @internal */
-  readonly ngMetadataName = 'InjectionToken';
-
   readonly ɵprov: unknown;
 
   constructor(

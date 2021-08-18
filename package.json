@@ -4,8 +4,8 @@
   "description": "Angular的静态注入器独立使用版本",
   "private": true,
   "scripts": {
-    "pretest": "tsc -p ./tsconfig.import-test.json",
-    "test": "jest",
+    "test": "npm run test:transform && npm run test:import",
+    "test:transform": "jest --config ./jest.transform.config.ts",
     "test:import": "cross-env TS_NODE_PROJECT=./tsconfig.spec.json jest --config ./jest.import.config.ts",
     "build": "rimraf dist&& cpx ./src/package.json ./dist && cpx -v ./readme.md ./dist&& npm run build:transform && npm run build:import",
     "build:transform": "tsc -p ./tsconfig.transform.json",

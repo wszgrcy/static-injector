@@ -1,6 +1,5 @@
 import path from 'path';
 import { createTestTransformer } from '../util/create-test-transform';
-import { runTranspileScript } from '../util/run-transpile-script';
 describe('default', () => {
   it('hello-world', () => {
     createTestTransformer(
@@ -10,10 +9,6 @@ describe('default', () => {
         writeFile: (fileName, data) => {
           expect(data).toContain(`MyClass.ɵfac`);
           expect(data).toContain(`MyClass.ɵprov`);
-          let result = runTranspileScript(data);
-          let hello = result.instance.hello();
-          expect(hello).toBe('hello');
-          expect(result.instance instanceof result.MyClass).toBe(true);
         },
       }
     );
@@ -25,12 +20,8 @@ describe('default', () => {
       undefined,
       {
         writeFile: (fileName, data) => {
-          let result = runTranspileScript(data);
-          let out = result.instance.out();
-          expect(out.token1).toBe(3);
-          expect(out.noValue).toBe(null);
-          expect(out.token1WithInjectorL2).toBe(2);
-          expect(out.token1WithSelf).toBe(3);
+          expect(data).toContain(`MyClass.ɵfac`);
+          expect(data).toContain(`MyClass.ɵprov`);
         },
       }
     );
@@ -41,10 +32,8 @@ describe('default', () => {
       undefined,
       {
         writeFile: (fileName, data) => {
-          let result = runTranspileScript(data);
-          let out = result.instance.out();
-          expect(out.injectClass.name).toBe('InjectClass');
-          expect(out.rootInjectClass.name).toBe('RootInjectClass');
+          expect(data).toContain(`MyClass.ɵfac`);
+          expect(data).toContain(`MyClass.ɵprov`);
         },
       }
     );
@@ -55,11 +44,8 @@ describe('default', () => {
       undefined,
       {
         writeFile: (fileName, data) => {
-          let result = runTranspileScript(data);
-          let out = result.instance.out();
-          expect(out.useClassClass.name).toBe('UseClassClass');
-          expect(out.useExistingClass.name).toBe('inputValue');
-          expect(out.useFactoryClass.name).toBe('inputValue');
+          expect(data).toContain(`MyClass.ɵfac`);
+          expect(data).toContain(`MyClass.ɵprov`);
         },
       }
     );
@@ -70,9 +56,8 @@ describe('default', () => {
       undefined,
       {
         writeFile: (fileName, data) => {
-          let result = runTranspileScript(data);
-          let out = result.instance.out();
-          expect(out.token).toBe(111);
+          expect(data).toContain(`MyClass.ɵfac`);
+          expect(data).toContain(`MyClass.ɵprov`);
         },
       }
     );

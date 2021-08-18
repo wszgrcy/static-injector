@@ -117,7 +117,6 @@ export interface InjectableType<T> extends Type<T> {
  */
 export interface InjectorType<T> extends Type<T> {
   ɵfac?: unknown;
-  ɵinj: unknown;
 }
 
 /**
@@ -205,10 +204,7 @@ export function ɵɵdefineInjector(options: {
 export function getInjectableDef<T>(
   type: any
 ): ɵɵInjectableDeclaration<T> | null {
-  return (
-    getOwnDefinition(type, NG_PROV_DEF) ||
-    getOwnDefinition(type, NG_INJECTABLE_DEF)
-  );
+  return getOwnDefinition(type, NG_PROV_DEF);
 }
 
 /**
@@ -222,29 +218,6 @@ function getOwnDefinition<T>(
   return type.hasOwnProperty(field) ? type[field] : null;
 }
 
-/**
- * Read the injector def type in a way which is immune to accidentally reading inherited value.
- *
- * @param type type which may have an injector def (`ɵinj`)
- */
-export function getInjectorDef<T>(type: any): ɵɵInjectorDef<T> | null {
-  return type &&
-    (type.hasOwnProperty(NG_INJ_DEF) || type.hasOwnProperty(NG_INJECTOR_DEF))
-    ? (type as any)[NG_INJ_DEF]
-    : null;
-}
-
 export const NG_PROV_DEF = getClosureSafeProperty({
   ɵprov: getClosureSafeProperty,
-});
-export const NG_INJ_DEF = getClosureSafeProperty({
-  ɵinj: getClosureSafeProperty,
-});
-
-// We need to keep these around so we can read off old defs if new defs are unavailable
-export const NG_INJECTABLE_DEF = getClosureSafeProperty({
-  ngInjectableDef: getClosureSafeProperty,
-});
-export const NG_INJECTOR_DEF = getClosureSafeProperty({
-  ngInjectorDef: getClosureSafeProperty,
 });
