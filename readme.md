@@ -23,5 +23,6 @@
 
 # 模板
 
+- [typescript 下使用(使用 Typescript Compiler API)](https://github.com/wszgrcy/static-injector-typescript-template)
 - [webpack 下使用](https://github.com/wszgrcy/static-injector-webpack-template)
 - [rollup 下使用](https://github.com/wszgrcy/static-injector-rollup-template)
