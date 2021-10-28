@@ -9,3 +9,4 @@ export * from './di/injector';
 export * from './di/interface/injector';
 export * from './di/scope';
 export * from './render3/instructions/di';
+export * from './render3/di';
