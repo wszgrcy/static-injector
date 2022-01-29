@@ -104,6 +104,9 @@ export class InjectableTransformerFactory {
         const decorators = this.reflectionHost.getDecoratorsOfDeclaration(node);
 
         let result = this.handler.detect(node, decorators);
+        if (!result) {
+          return;
+        }
         let analysisOutput = this.handler.analyze(node, result.metadata);
         let compileResult = this.handler.compileFull(
           node,

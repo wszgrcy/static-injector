@@ -62,4 +62,18 @@ describe('default', () => {
       }
     );
   });
+  it('other-decorator', () => {
+    createTestTransformer(
+      [path.resolve(__dirname, '../fixture/other-decorator.ts')],
+      undefined,
+      {
+        writeFile: (fileName, data) => {
+          expect(data).not.toContain(`OnlyOtherClass.ɵfac`);
+          expect(data).not.toContain(`OnlyOtherClass.ɵprov`);
+          expect(data).toContain(`BothClass.ɵfac`);
+          expect(data).toContain(`BothClass.ɵprov`);
+        },
+      }
+    );
+  });
 });
