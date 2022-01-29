@@ -76,4 +76,18 @@ describe('default', () => {
       }
     );
   });
+  it('sub-class', () => {
+    createTestTransformer(
+      [path.resolve(__dirname, '../fixture/sub-class.ts')],
+      undefined,
+      {
+        writeFile: (fileName, data) => {
+          expect(data).not.toContain(`FirstClass.ɵfac`);
+          expect(data).not.toContain(`FirstClass.ɵprov`);
+          expect(data).toContain(`SecondClass.ɵfac`);
+          expect(data).toContain(`SecondClass.ɵprov`);
+        },
+      }
+    );
+  });
 });
