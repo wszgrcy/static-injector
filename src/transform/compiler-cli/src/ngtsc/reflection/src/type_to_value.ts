@@ -6,14 +6,14 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import * as ts from "typescript";
+import * as ts from 'typescript';
 
 import {
   TypeValueReference,
   TypeValueReferenceKind,
   UnavailableTypeValueReference,
   ValueUnavailableKind,
-} from "./host";
+} from './host';
 
 /**
  * Potentially convert a `ts.TypeNode` to a `TypeValueReference`, which indicates how to use the
@@ -82,11 +82,15 @@ export function typeToValue(
       // or
       //   import {Foo as Bar} from 'foo';
 
+      if (firstDecl.isTypeOnly) {
+        // The import specifier can't be type-only (e.g. `import {type Foo} from '...')`.
+        return typeOnlyImport(typeNode, firstDecl);
+      }
       if (firstDecl.parent.parent.isTypeOnly) {
-        // Type-only imports cannot be represented as value.
+        // The import specifier can't be inside a type-only import clause
+        // (e.g. `import type {Foo} from '...')`.
         return typeOnlyImport(typeNode, firstDecl.parent.parent);
       }
-
       // Determine the name to import (`Foo`) from the import specifier, as the symbol names of
       // the imported type could refer to a local alias (like `Bar` in the example above).
       const importedName = (firstDecl.propertyName || firstDecl.name).text;
@@ -165,14 +169,14 @@ function noValueDeclaration(
 
 function typeOnlyImport(
   typeNode: ts.TypeNode,
-  importClause: ts.ImportClause
+  node: ts.ImportClause | ts.ImportSpecifier
 ): UnavailableTypeValueReference {
   return {
     kind: TypeValueReferenceKind.UNAVAILABLE,
     reason: {
       kind: ValueUnavailableKind.TYPE_ONLY_IMPORT,
       typeNode,
-      importClause,
+      node: node,
     },
   };
 }
@@ -284,9 +288,16 @@ function resolveTypeSymbols(
 function entityNameToValue(node: ts.EntityName): ts.Expression | null {
   if (ts.isQualifiedName(node)) {
     const left = entityNameToValue(node.left);
-    return left !== null ? ts.createPropertyAccess(left, node.right) : null;
+    return left !== null
+      ? ts.factory.createPropertyAccessExpression(left, node.right)
+      : null;
   } else if (ts.isIdentifier(node)) {
-    return ts.getMutableClone(node);
+    const clone = ts.setOriginalNode(
+      ts.factory.createIdentifier(node.text),
+      node
+    );
+    (clone as any).parent = node.parent;
+    return clone;
   } else {
     return null;
   }
@@ -294,7 +305,7 @@ function entityNameToValue(node: ts.EntityName): ts.Expression | null {
 
 function extractModuleName(node: ts.ImportDeclaration): string {
   if (!ts.isStringLiteral(node.moduleSpecifier)) {
-    throw new Error("not a module specifier");
+    throw new Error('not a module specifier');
   }
   return node.moduleSpecifier.text;
 }

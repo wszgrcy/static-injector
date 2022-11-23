@@ -7,6 +7,7 @@
  */
 
 import * as ts from 'typescript';
+import { getDecorators, getModifiers } from '../../ts_compatibility';
 
 import {
   ClassDeclaration,
@@ -30,15 +31,13 @@ export class TypeScriptReflectionHost implements ReflectionHost {
   constructor(protected checker: ts.TypeChecker) {}
 
   getDecoratorsOfDeclaration(declaration: DeclarationNode): Decorator[] | null {
-    if (
-      declaration.decorators === undefined ||
-      declaration.decorators.length === 0
-    ) {
-      return null;
-    }
-    return declaration.decorators
-      .map((decorator) => this._reflectDecorator(decorator))
-      .filter((dec): dec is Decorator => dec !== null);
+    const decorators = getDecorators(declaration);
+
+    return decorators !== undefined && decorators.length
+      ? decorators
+          .map((decorator) => this._reflectDecorator(decorator))
+          .filter((dec): dec is Decorator => dec !== null)
+      : null;
   }
 
   getMembersOfClass(clazz: ClassDeclaration): ClassMember[] {
@@ -331,9 +330,10 @@ export class TypeScriptReflectionHost implements ReflectionHost {
     }
 
     const decorators = this.getDecoratorsOfDeclaration(node);
+    const modifiers = getModifiers(node);
     const isStatic =
-      node.modifiers !== undefined &&
-      node.modifiers.some((mod) => mod.kind === ts.SyntaxKind.StaticKeyword);
+      modifiers !== undefined &&
+      modifiers.some((mod) => mod.kind === ts.SyntaxKind.StaticKeyword);
 
     return {
       node,

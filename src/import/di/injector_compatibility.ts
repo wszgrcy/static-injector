@@ -6,20 +6,21 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import { Type } from "../interface/type";
-import { getClosureSafeProperty } from "../util/property";
-import { stringify } from "../util/stringify";
+import { Type } from '../interface/type';
+import { getClosureSafeProperty } from '../util/property';
+import { stringify } from '../util/stringify';
 
-import { resolveForwardRef } from "./forward_ref";
-import { injectRootLimpMode } from "./inject_switch";
-import { Injector } from "./injector";
+import { resolveForwardRef } from './forward_ref';
+import { injectRootLimpMode } from './inject_switch';
+import { Injector } from './injector';
 import {
   DecoratorFlags,
   InjectFlags,
+  InjectOptions,
   InternalInjectFlags,
-} from "./interface/injector";
-import { ValueProvider } from "./interface/provider";
-import { ProviderToken } from "./provider_token";
+} from './interface/injector';
+import { ValueProvider } from './interface/provider';
+import { ProviderToken } from './provider_token';
 
 const _THROW_IF_NOT_FOUND = {};
 export const THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
@@ -29,13 +30,13 @@ export const THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
  * InjectFlag this decorator represents. This allows to avoid direct references to the DI decorators
  * in the code, thus making them tree-shakable.
  */
-const DI_DECORATOR_FLAG = "__NG_DI_FLAG__";
+const DI_DECORATOR_FLAG = '__NG_DI_FLAG__';
 
-export const NG_TEMP_TOKEN_PATH = "ngTempTokenPath";
-const NG_TOKEN_PATH = "ngTokenPath";
+export const NG_TEMP_TOKEN_PATH = 'ngTempTokenPath';
+const NG_TOKEN_PATH = 'ngTokenPath';
 const NEW_LINE = /\n/gm;
-const NO_NEW_LINE = "ɵ";
-export const SOURCE = "__source";
+const NO_NEW_LINE = 'ɵ';
+export const SOURCE = '__source';
 
 export const USE_VALUE = getClosureSafeProperty<ValueProvider>({
   provide: String,
@@ -106,38 +107,152 @@ export function ɵɵinject<T>(
 }
 
 /**
- * Injects a token from the currently active injector.
- *
- * Must be used in the context of a factory function such as one defined for an
- * `InjectionToken`. Throws an error if not called from such a context.
- *
- * Within such a factory function, using this function to request injection of a dependency
- * is faster and more type-safe than providing an additional array of dependencies
- * (as has been common with `useFactory` providers).
- *
- * @param token The injection token for the dependency to be injected.
- * @param flags Optional flags that control how injection is executed.
- * The flags correspond to injection strategies that can be specified with
- * parameter decorators `@Host`, `@Self`, `@SkipSef`, and `@Optional`.
- * @returns the injected value if injection is successful, `null` otherwise.
- *
- * @usageNotes
- *
- * ### Example
- *
- * {@example core/di/ts/injector_spec.ts region='ShakableInjectionToken'}
+ * @param token A token that represents a dependency that should be injected.
+ * @returns the injected value if operation is successful, `null` otherwise.
+ * @throws if called outside of a supported context.
  *
  * @publicApi
  */
-export const inject = ɵɵinject;
+export function inject<T>(token: ProviderToken<T>): T;
+/**
+ * @param token A token that represents a dependency that should be injected.
+ * @param flags Control how injection is executed. The flags correspond to injection strategies that
+ *     can be specified with parameter decorators `@Host`, `@Self`, `@SkipSelf`, and `@Optional`.
+ * @returns the injected value if operation is successful, `null` otherwise.
+ * @throws if called outside of a supported context.
+ *
+ * @publicApi
+ * @deprecated prefer an options object instead of `InjectFlags`
+ */
+export function inject<T>(
+  token: ProviderToken<T>,
+  flags?: InjectFlags
+): T | null;
+/**
+ * @param token A token that represents a dependency that should be injected.
+ * @param options Control how injection is executed. Options correspond to injection strategies
+ *     that can be specified with parameter decorators `@Host`, `@Self`, `@SkipSelf`, and
+ *     `@Optional`.
+ * @returns the injected value if operation is successful.
+ * @throws if called outside of a supported context, or if the token is not found.
+ *
+ * @publicApi
+ */
+export function inject<T>(
+  token: ProviderToken<T>,
+  options: InjectOptions & { optional?: false }
+): T;
+/**
+ * @param token A token that represents a dependency that should be injected.
+ * @param options Control how injection is executed. Options correspond to injection strategies
+ *     that can be specified with parameter decorators `@Host`, `@Self`, `@SkipSelf`, and
+ *     `@Optional`.
+ * @returns the injected value if operation is successful,  `null` if the token is not
+ *     found and optional injection has been requested.
+ * @throws if called outside of a supported context, or if the token is not found and optional
+ *     injection was not requested.
+ *
+ * @publicApi
+ */
+export function inject<T>(
+  token: ProviderToken<T>,
+  options: InjectOptions
+): T | null;
+/**
+ * Injects a token from the currently active injector.
+ * `inject` is only supported during instantiation of a dependency by the DI system. It can be used
+ * during:
+ * - Construction (via the `constructor`) of a class being instantiated by the DI system, such
+ * as an `@Injectable` or `@Component`.
+ * - In the initializer for fields of such classes.
+ * - In the factory function specified for `useFactory` of a `Provider` or an `@Injectable`.
+ * - In the `factory` function specified for an `InjectionToken`.
+ *
+ * @param token A token that represents a dependency that should be injected.
+ * @param flags Optional flags that control how injection is executed.
+ * The flags correspond to injection strategies that can be specified with
+ * parameter decorators `@Host`, `@Self`, `@SkipSef`, and `@Optional`.
+ * @returns the injected value if operation is successful, `null` otherwise.
+ * @throws if called outside of a supported context.
+ *
+ * @usageNotes
+ * In practice the `inject()` calls are allowed in a constructor, a constructor parameter and a
+ * field initializer:
+ *
+ * ```typescript
+ * @Injectable({providedIn: 'root'})
+ * export class Car {
+ *   radio: Radio|undefined;
+ *   // OK: field initializer
+ *   spareTyre = inject(Tyre);
+ *
+ *   constructor() {
+ *     // OK: constructor body
+ *     this.radio = inject(Radio);
+ *   }
+ * }
+ * ```
+ *
+ * It is also legal to call `inject` from a provider's factory:
+ *
+ * ```typescript
+ * providers: [
+ *   {provide: Car, useFactory: () => {
+ *     // OK: a class factory
+ *     const engine = inject(Engine);
+ *     return new Car(engine);
+ *   }}
+ * ]
+ * ```
+ *
+ * Calls to the `inject()` function outside of the class creation context will result in error. Most
+ * notably, calls to `inject()` are disallowed after a class instance was created, in methods
+ * (including lifecycle hooks):
+ *
+ * ```typescript
+ * @Component({ ... })
+ * export class CarComponent {
+ *   ngOnInit() {
+ *     // ERROR: too late, the component instance was already created
+ *     const engine = inject(Engine);
+ *     engine.start();
+ *   }
+ * }
+ * ```
+ *
+ * @publicApi
+ */
+export function inject<T>(
+  token: ProviderToken<T>,
+  flags: InjectFlags | InjectOptions = InjectFlags.Default
+): T | null {
+  return ɵɵinject(token, convertToBitFlags(flags));
+}
 
+// Converts object-based DI flags (`InjectOptions`) to bit flags (`InjectFlags`).
+export function convertToBitFlags(
+  flags: InjectOptions | InjectFlags | undefined
+): InjectFlags | undefined {
+  if (typeof flags === 'undefined' || typeof flags === 'number') {
+    return flags;
+  }
+
+  // While TypeScript doesn't accept it without a cast, bitwise OR with false-y values in
+  // JavaScript is a no-op. We can use that for a very codesize-efficient conversion from
+  // `InjectOptions` to `InjectFlags`.
+  return (InternalInjectFlags.Default | // comment to force a line break in the formatter
+    ((flags.optional && InternalInjectFlags.Optional) as number) |
+    ((flags.self && InternalInjectFlags.Self) as number) |
+    ((flags.skipSelf &&
+      InternalInjectFlags.SkipSelf) as number)) as InjectFlags;
+}
 export function injectArgs(types: (ProviderToken<any> | any[])[]): any[] {
   const args: any[] = [];
   for (let i = 0; i < types.length; i++) {
     const arg = resolveForwardRef(types[i]);
     if (Array.isArray(arg)) {
       if (arg.length === 0) {
-        throw new Error("Arguments array must have arguments.");
+        throw new Error('Arguments array must have arguments.');
       }
       let type: Type<any> | undefined = undefined;
       let flags: InjectFlags = InjectFlags.Default;
@@ -145,7 +260,7 @@ export function injectArgs(types: (ProviderToken<any> | any[])[]): any[] {
       for (let j = 0; j < arg.length; j++) {
         const meta = arg[j];
         const flag = getInjectFlag(meta);
-        if (typeof flag === "number") {
+        if (typeof flag === 'number') {
           // Special case when we handle @Inject decorator.
           if (flag === DecoratorFlags.Inject) {
             type = meta.token;
@@ -204,7 +319,7 @@ export function catchInjectorError(
     tokenPath.unshift(token[SOURCE]);
   }
   e.message = formatError(
-    "\n" + e.message,
+    '\n' + e.message,
     tokenPath,
     injectorErrorName,
     source
@@ -221,29 +336,29 @@ export function formatError(
   source: string | null = null
 ): string {
   text =
-    text && text.charAt(0) === "\n" && text.charAt(1) == NO_NEW_LINE
-      ? text.substr(2)
+    text && text.charAt(0) === '\n' && text.charAt(1) == NO_NEW_LINE
+      ? text.slice(2)
       : text;
   let context = stringify(obj);
   if (Array.isArray(obj)) {
-    context = obj.map(stringify).join(" -> ");
-  } else if (typeof obj === "object") {
+    context = obj.map(stringify).join(' -> ');
+  } else if (typeof obj === 'object') {
     let parts = <string[]>[];
     for (let key in obj) {
       if (obj.hasOwnProperty(key)) {
         let value = obj[key];
         parts.push(
           key +
-            ":" +
-            (typeof value === "string"
+            ':' +
+            (typeof value === 'string'
               ? JSON.stringify(value)
               : stringify(value))
         );
       }
     }
-    context = `{${parts.join(", ")}}`;
+    context = `{${parts.join(', ')}}`;
   }
   return `${injectorErrorName}${
-    source ? "(" + source + ")" : ""
-  }[${context}]: ${text.replace(NEW_LINE, "\n  ")}`;
+    source ? '(' + source + ')' : ''
+  }[${context}]: ${text.replace(NEW_LINE, '\n  ')}`;
 }

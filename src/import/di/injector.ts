@@ -6,25 +6,15 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
+import { createInjector } from './create_injector';
 import { THROW_IF_NOT_FOUND, ɵɵinject } from './injector_compatibility';
 import { InjectorMarkers } from './injector_marker';
 import { INJECTOR } from './injector_token';
 import { ɵɵdefineInjectable } from './interface/defs';
-import { InjectFlags } from './interface/injector';
+import { InjectFlags, InjectOptions } from './interface/injector';
 import { StaticProvider } from './interface/provider';
 import { NullInjector } from './null_injector';
 import { ProviderToken } from './provider_token';
-import { createInjector } from './r3_injector';
-
-export function INJECTOR_IMPL__POST_R3__(
-  providers: StaticProvider[],
-  parent: Injector | undefined,
-  name: string
-) {
-  return createInjector({ name: name }, parent, providers, name);
-}
-
-export const INJECTOR_IMPL = INJECTOR_IMPL__POST_R3__;
 
 /**
  * Concrete injectors implement this interface. Injectors are configured
@@ -52,7 +42,14 @@ export const INJECTOR_IMPL = INJECTOR_IMPL__POST_R3__;
  */
 export abstract class Injector {
   static THROW_IF_NOT_FOUND = THROW_IF_NOT_FOUND;
-  static NULL: Injector = new NullInjector();
+  static NULL: Injector = /* @__PURE__ */ new NullInjector();
+
+  /**
+   * Internal note on the `options?: InjectOptions|InjectFlags` override of the `get`
+   * method: consider dropping the `InjectFlags` part in one of the major versions.
+   * It can **not** be done in minor/patch, since it's breaking for custom injectors
+   * that only implement the old `InjectorFlags` interface.
+   */
 
   /**
    * Retrieves an instance from the injector based on the provided token.
@@ -61,14 +58,31 @@ export abstract class Injector {
    */
   abstract get<T>(
     token: ProviderToken<T>,
-    notFoundValue?: T,
-    flags?: InjectFlags
+    notFoundValue: undefined,
+    options: InjectOptions & {
+      optional?: false;
+    }
   ): T;
   /**
-   * @deprecated from v4.0.0 use ProviderToken<T>
-   * @suppress {duplicate}
+   * Retrieves an instance from the injector based on the provided token.
+   * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
+   * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
    */
-  abstract get(token: any, notFoundValue?: any): any;
+  abstract get<T>(
+    token: ProviderToken<T>,
+    notFoundValue: null | undefined,
+    options: InjectOptions
+  ): T | null;
+  /**
+   * Retrieves an instance from the injector based on the provided token.
+   * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
+   * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
+   */
+  abstract get<T>(
+    token: ProviderToken<T>,
+    notFoundValue?: T,
+    options?: InjectOptions | InjectFlags
+  ): T;
 
   /**
    * Creates a new injector instance that provides one or more dependencies,
@@ -95,13 +109,10 @@ export abstract class Injector {
     parent?: Injector
   ): Injector {
     if (Array.isArray(options)) {
-      return INJECTOR_IMPL(options, parent, '');
+      return createInjector({ name: '' }, parent, options, '');
     } else {
-      return INJECTOR_IMPL(
-        options.providers,
-        options.parent,
-        options.name || ''
-      );
+      const name = options.name ?? '';
+      return createInjector({ name }, options.parent, options.providers, name);
     }
   }
 

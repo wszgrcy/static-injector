@@ -8,14 +8,15 @@
 
 import {
   compileInjectable,
-  createR3ProviderExpression,
   FactoryTarget,
   LiteralExpr,
   R3CompiledExpression,
   R3DependencyMetadata,
   R3InjectableMetadata,
-  R3ProviderExpression,
+  MaybeForwardRefExpression,
   WrappedNodeExpr,
+  createMayBeForwardRefExpression,
+  ForwardRefHandling,
 } from '../../../../../compiler';
 import * as ts from 'typescript';
 
@@ -43,7 +44,8 @@ import {
   unwrapConstructorDependencies,
   validateConstructorDependencies,
   wrapTypeReference,
-} from './util';
+} from '../common/src/util';
+import { isAbstractClassDeclaration } from '../common/src/util';
 
 interface InjectableHandlerData {
   meta: R3InjectableMetadata;
@@ -203,7 +205,10 @@ function extractInjectableMetadata(
       type,
       typeArgumentCount,
       internalType,
-      providedIn: createR3ProviderExpression(new LiteralExpr(null), false),
+      providedIn: createMayBeForwardRefExpression(
+        new LiteralExpr(null),
+        ForwardRefHandling.None
+      ),
     };
   } else if (decorator.args.length === 1) {
     const metaNode = decorator.args[0];
@@ -223,7 +228,10 @@ function extractInjectableMetadata(
 
     const providedIn = meta.has('providedIn')
       ? getProviderExpression(meta.get('providedIn')!, reflector)
-      : createR3ProviderExpression(new LiteralExpr(null), false);
+      : createMayBeForwardRefExpression(
+          new LiteralExpr(null),
+          ForwardRefHandling.None
+        );
 
     let deps: R3DependencyMetadata[] | undefined = undefined;
     if ((meta.has('useClass') || meta.has('useFactory')) && meta.has('deps')) {
@@ -279,11 +287,13 @@ function extractInjectableMetadata(
 function getProviderExpression(
   expression: ts.Expression,
   reflector: ReflectionHost
-): R3ProviderExpression {
+): MaybeForwardRefExpression {
   const forwardRefValue = tryUnwrapForwardRef(expression, reflector);
-  return createR3ProviderExpression(
+  return createMayBeForwardRefExpression(
     new WrappedNodeExpr(forwardRefValue ?? expression),
     forwardRefValue !== null
+      ? ForwardRefHandling.Unwrapped
+      : ForwardRefHandling.None
   );
 }
 
@@ -328,12 +338,11 @@ function extractInjectableCtorDeps(
 
     if (
       strictCtorDeps &&
-      meta.useValue === undefined &&
-      meta.useExisting === undefined &&
-      meta.useClass === undefined &&
-      meta.useFactory === undefined
+      !isAbstractClassDeclaration(clazz) &&
+      requiresValidCtor(meta)
     ) {
-      // Since use* was not provided, validate the deps according to strictCtorDeps.
+      // Since use* was not provided for a concrete class, validate the deps according to
+      // strictCtorDeps.
       ctorDeps = validateConstructorDependencies(clazz, rawCtorDeps);
     } else {
       ctorDeps = unwrapConstructorDependencies(rawCtorDeps);
@@ -342,7 +351,14 @@ function extractInjectableCtorDeps(
 
   return ctorDeps;
 }
-
+function requiresValidCtor(meta: R3InjectableMetadata): boolean {
+  return (
+    meta.useValue === undefined &&
+    meta.useExisting === undefined &&
+    meta.useClass === undefined &&
+    meta.useFactory === undefined
+  );
+}
 function getDep(
   dep: ts.Expression,
   reflector: ReflectionHost

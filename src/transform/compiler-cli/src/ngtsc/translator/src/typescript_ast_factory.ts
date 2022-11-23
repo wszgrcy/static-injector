@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import * as ts from "typescript";
+import * as ts from 'typescript';
 
 import {
   AstFactory,
@@ -16,7 +16,7 @@ import {
   TemplateLiteral,
   UnaryOperator,
   VariableDeclarationType,
-} from "./api/ast_factory";
+} from './api/ast_factory';
 
 /**
  * Different optimizers use different annotations on a function or method call to indicate its pure
@@ -28,35 +28,35 @@ enum PureAnnotation {
    * (jsdoc) enabled comment. Thus, the actual comment text for Closure must include the `*` that
    * turns a `/*` comment into a `/**` comment, as well as surrounding whitespace.
    */
-  CLOSURE = "* @pureOrBreakMyCode ",
+  CLOSURE = '* @pureOrBreakMyCode ',
 
-  TERSER = "@__PURE__",
+  TERSER = '@__PURE__',
 }
 
 const UNARY_OPERATORS: Record<UnaryOperator, ts.PrefixUnaryOperator> = {
-  "+": ts.SyntaxKind.PlusToken,
-  "-": ts.SyntaxKind.MinusToken,
-  "!": ts.SyntaxKind.ExclamationToken,
+  '+': ts.SyntaxKind.PlusToken,
+  '-': ts.SyntaxKind.MinusToken,
+  '!': ts.SyntaxKind.ExclamationToken,
 };
 
 const BINARY_OPERATORS: Record<BinaryOperator, ts.BinaryOperator> = {
-  "&&": ts.SyntaxKind.AmpersandAmpersandToken,
-  ">": ts.SyntaxKind.GreaterThanToken,
-  ">=": ts.SyntaxKind.GreaterThanEqualsToken,
-  "&": ts.SyntaxKind.AmpersandToken,
-  "/": ts.SyntaxKind.SlashToken,
-  "==": ts.SyntaxKind.EqualsEqualsToken,
-  "===": ts.SyntaxKind.EqualsEqualsEqualsToken,
-  "<": ts.SyntaxKind.LessThanToken,
-  "<=": ts.SyntaxKind.LessThanEqualsToken,
-  "-": ts.SyntaxKind.MinusToken,
-  "%": ts.SyntaxKind.PercentToken,
-  "*": ts.SyntaxKind.AsteriskToken,
-  "!=": ts.SyntaxKind.ExclamationEqualsToken,
-  "!==": ts.SyntaxKind.ExclamationEqualsEqualsToken,
-  "||": ts.SyntaxKind.BarBarToken,
-  "+": ts.SyntaxKind.PlusToken,
-  "??": ts.SyntaxKind.QuestionQuestionToken,
+  '&&': ts.SyntaxKind.AmpersandAmpersandToken,
+  '>': ts.SyntaxKind.GreaterThanToken,
+  '>=': ts.SyntaxKind.GreaterThanEqualsToken,
+  '&': ts.SyntaxKind.AmpersandToken,
+  '/': ts.SyntaxKind.SlashToken,
+  '==': ts.SyntaxKind.EqualsEqualsToken,
+  '===': ts.SyntaxKind.EqualsEqualsEqualsToken,
+  '<': ts.SyntaxKind.LessThanToken,
+  '<=': ts.SyntaxKind.LessThanEqualsToken,
+  '-': ts.SyntaxKind.MinusToken,
+  '%': ts.SyntaxKind.PercentToken,
+  '*': ts.SyntaxKind.AsteriskToken,
+  '!=': ts.SyntaxKind.ExclamationEqualsToken,
+  '!==': ts.SyntaxKind.ExclamationEqualsEqualsToken,
+  '||': ts.SyntaxKind.BarBarToken,
+  '+': ts.SyntaxKind.PlusToken,
+  '??': ts.SyntaxKind.QuestionQuestionToken,
 };
 
 const VAR_TYPES: Record<VariableDeclarationType, ts.NodeFlags> = {
@@ -77,10 +77,14 @@ export class TypeScriptAstFactory
 
   attachComments = attachComments;
 
-  createArrayLiteral = ts.createArrayLiteral;
+  createArrayLiteral = ts.factory.createArrayLiteralExpression;
 
   createAssignment(target: ts.Expression, value: ts.Expression): ts.Expression {
-    return ts.createBinary(target, ts.SyntaxKind.EqualsToken, value);
+    return ts.factory.createBinaryExpression(
+      target,
+      ts.SyntaxKind.EqualsToken,
+      value
+    );
   }
 
   createBinaryExpression(
@@ -88,7 +92,7 @@ export class TypeScriptAstFactory
     operator: BinaryOperator,
     rightOperand: ts.Expression
   ): ts.Expression {
-    return ts.createBinary(
+    return ts.factory.createBinaryExpression(
       leftOperand,
       BINARY_OPERATORS[operator],
       rightOperand
@@ -96,7 +100,7 @@ export class TypeScriptAstFactory
   }
 
   createBlock(body: ts.Statement[]): ts.Statement {
-    return ts.createBlock(body);
+    return ts.factory.createBlock(body);
   }
 
   createCallExpression(
@@ -104,7 +108,7 @@ export class TypeScriptAstFactory
     args: ts.Expression[],
     pure: boolean
   ): ts.Expression {
-    const call = ts.createCall(callee, undefined, args);
+    const call = ts.factory.createCallExpression(callee, undefined, args);
     if (pure) {
       ts.addSyntheticLeadingComment(
         call,
@@ -118,11 +122,23 @@ export class TypeScriptAstFactory
     return call;
   }
 
-  createConditional = ts.createConditional;
+  createConditional(
+    condition: ts.Expression,
+    whenTrue: ts.Expression,
+    whenFalse: ts.Expression
+  ): ts.Expression {
+    return ts.factory.createConditionalExpression(
+      condition,
+      undefined,
+      whenTrue,
+      undefined,
+      whenFalse
+    );
+  }
 
-  createElementAccess = ts.createElementAccess;
+  createElementAccess = ts.factory.createElementAccessExpression;
 
-  createExpressionStatement = ts.createExpressionStatement;
+  createExpressionStatement = ts.factory.createExpressionStatement;
 
   createFunctionDeclaration(
     functionName: string,
@@ -134,14 +150,19 @@ export class TypeScriptAstFactory
         `Invalid syntax, expected a block, but got ${ts.SyntaxKind[body.kind]}.`
       );
     }
-    return ts.createFunctionDeclaration(
+    return ts.factory.createFunctionDeclaration(
       undefined,
       undefined,
       undefined,
       functionName,
       undefined,
       parameters.map((param) =>
-        ts.createParameter(undefined, undefined, undefined, param)
+        ts.factory.createParameterDeclaration(
+          undefined,
+          undefined,
+          undefined,
+          param
+        )
       ),
       undefined,
       body
@@ -158,38 +179,51 @@ export class TypeScriptAstFactory
         `Invalid syntax, expected a block, but got ${ts.SyntaxKind[body.kind]}.`
       );
     }
-    return ts.createFunctionExpression(
+    return ts.factory.createFunctionExpression(
       undefined,
       undefined,
       functionName ?? undefined,
       undefined,
       parameters.map((param) =>
-        ts.createParameter(undefined, undefined, undefined, param)
+        ts.factory.createParameterDeclaration(
+          undefined,
+          undefined,
+          undefined,
+          param
+        )
       ),
       undefined,
       body
     );
   }
 
-  createIdentifier = ts.createIdentifier;
+  createIdentifier = ts.factory.createIdentifier;
 
   createIfStatement(
     condition: ts.Expression,
     thenStatement: ts.Statement,
     elseStatement: ts.Statement | null
   ): ts.Statement {
-    return ts.createIf(condition, thenStatement, elseStatement ?? undefined);
+    return ts.factory.createIfStatement(
+      condition,
+      thenStatement,
+      elseStatement ?? undefined
+    );
   }
 
   createLiteral(
     value: string | number | boolean | null | undefined
   ): ts.Expression {
     if (value === undefined) {
-      return ts.createIdentifier("undefined");
+      return ts.factory.createIdentifier('undefined');
     } else if (value === null) {
-      return ts.createNull();
+      return ts.factory.createNull();
+    } else if (typeof value === 'boolean') {
+      return value ? ts.factory.createTrue() : ts.factory.createFalse();
+    } else if (typeof value === 'number') {
+      return ts.factory.createNumericLiteral(value);
     } else {
-      return ts.createLiteral(value);
+      return ts.factory.createStringLiteral(value);
     }
   }
 
@@ -197,30 +231,30 @@ export class TypeScriptAstFactory
     expression: ts.Expression,
     args: ts.Expression[]
   ): ts.Expression {
-    return ts.createNew(expression, undefined, args);
+    return ts.factory.createNewExpression(expression, undefined, args);
   }
 
   createObjectLiteral(
     properties: ObjectLiteralProperty<ts.Expression>[]
   ): ts.Expression {
-    return ts.createObjectLiteral(
+    return ts.factory.createObjectLiteralExpression(
       properties.map((prop) =>
-        ts.createPropertyAssignment(
+        ts.factory.createPropertyAssignment(
           prop.quoted
-            ? ts.createLiteral(prop.propertyName)
-            : ts.createIdentifier(prop.propertyName),
+            ? ts.factory.createStringLiteral(prop.propertyName)
+            : ts.factory.createIdentifier(prop.propertyName),
           prop.value
         )
       )
     );
   }
 
-  createParenthesizedExpression = ts.createParen;
+  createParenthesizedExpression = ts.factory.createParenthesizedExpression;
 
-  createPropertyAccess = ts.createPropertyAccess;
+  createPropertyAccess = ts.factory.createPropertyAccessExpression;
 
   createReturnStatement(expression: ts.Expression | null): ts.Statement {
-    return ts.createReturn(expression ?? undefined);
+    return ts.factory.createReturnStatement(expression ?? undefined);
   }
 
   createTaggedTemplate(
@@ -231,7 +265,7 @@ export class TypeScriptAstFactory
     const length = template.elements.length;
     const head = template.elements[0];
     if (length === 1) {
-      templateLiteral = ts.createNoSubstitutionTemplateLiteral(
+      templateLiteral = ts.factory.createNoSubstitutionTemplateLiteral(
         head.cooked,
         head.raw
       );
@@ -244,7 +278,9 @@ export class TypeScriptAstFactory
         if (range !== null) {
           this.setSourceMapRange(middle, range);
         }
-        spans.push(ts.createTemplateSpan(template.expressions[i - 1], middle));
+        spans.push(
+          ts.factory.createTemplateSpan(template.expressions[i - 1], middle)
+        );
       }
       // Create the tail part
       const resolvedExpression = template.expressions[length - 2];
@@ -256,28 +292,37 @@ export class TypeScriptAstFactory
       if (templatePart.range !== null) {
         this.setSourceMapRange(templateTail, templatePart.range);
       }
-      spans.push(ts.createTemplateSpan(resolvedExpression, templateTail));
+      spans.push(
+        ts.factory.createTemplateSpan(resolvedExpression, templateTail)
+      );
       // Put it all together
-      templateLiteral = ts.createTemplateExpression(
-        ts.createTemplateHead(head.cooked, head.raw),
+      templateLiteral = ts.factory.createTemplateExpression(
+        ts.factory.createTemplateHead(head.cooked, head.raw),
         spans
       );
     }
     if (head.range !== null) {
       this.setSourceMapRange(templateLiteral, head.range);
     }
-    return ts.createTaggedTemplate(tag, templateLiteral);
+    return ts.factory.createTaggedTemplateExpression(
+      tag,
+      undefined,
+      templateLiteral
+    );
   }
 
-  createThrowStatement = ts.createThrow;
+  createThrowStatement = ts.factory.createThrowStatement;
 
-  createTypeOfExpression = ts.createTypeOf;
+  createTypeOfExpression = ts.factory.createTypeOfExpression;
 
   createUnaryExpression(
     operator: UnaryOperator,
     operand: ts.Expression
   ): ts.Expression {
-    return ts.createPrefix(UNARY_OPERATORS[operator], operand);
+    return ts.factory.createPrefixUnaryExpression(
+      UNARY_OPERATORS[operator],
+      operand
+    );
   }
 
   createVariableDeclaration(
@@ -285,12 +330,13 @@ export class TypeScriptAstFactory
     initializer: ts.Expression | null,
     type: VariableDeclarationType
   ): ts.Statement {
-    return ts.createVariableStatement(
+    return ts.factory.createVariableStatement(
       undefined,
-      ts.createVariableDeclarationList(
+      ts.factory.createVariableDeclarationList(
         [
-          ts.createVariableDeclaration(
+          ts.factory.createVariableDeclaration(
             variableName,
+            undefined,
             undefined,
             initializer ?? undefined
           ),
@@ -342,7 +388,10 @@ export function createTemplateTail(
   cooked: string,
   raw: string
 ): ts.TemplateTail {
-  const node: ts.TemplateLiteralLikeNode = ts.createTemplateHead(cooked, raw);
+  const node: ts.TemplateLiteralLikeNode = ts.factory.createTemplateHead(
+    cooked,
+    raw
+  );
   (node.kind as ts.SyntaxKind) = ts.SyntaxKind.TemplateTail;
   return node as ts.TemplateTail;
 }
@@ -369,7 +418,7 @@ export function attachComments(
         comment.trailingNewline
       );
     } else {
-      for (const line of comment.toString().split("\n")) {
+      for (const line of comment.toString().split('\n')) {
         ts.addSyntheticLeadingComment(
           statement,
           commentKind,

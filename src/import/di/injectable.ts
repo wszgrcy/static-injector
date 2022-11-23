@@ -6,17 +6,16 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
+import {
+  ValueSansProvider,
+  ExistingSansProvider,
+  StaticClassSansProvider,
+  ConstructorSansProvider,
+  FactorySansProvider,
+  ClassSansProvider,
+} from './interface/provider';
 import { Type } from '../interface/type';
 import { TypeDecorator } from '../util/decorators';
-
-import {
-  ClassSansProvider,
-  ConstructorSansProvider,
-  ExistingSansProvider,
-  FactorySansProvider,
-  StaticClassSansProvider,
-  ValueSansProvider,
-} from './interface/provider';
 
 /**
  * Injectable providers used in `@Injectable` decorator.

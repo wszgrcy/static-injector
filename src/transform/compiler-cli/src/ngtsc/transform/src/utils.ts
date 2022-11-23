@@ -5,9 +5,9 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import * as ts from "typescript";
+import * as ts from 'typescript';
 
-import { ImportManager } from "../../translator";
+import { ImportManager } from '../../translator';
 
 /**
  * Adds extra imports in the import manage for this source file, after the existing imports
@@ -21,16 +21,17 @@ export function addImports(
 ): ts.SourceFile {
   // Generate the import statements to prepend.
   const addedImports = importManager.getAllImports(sf.fileName).map((i) => {
-    const qualifier = ts.createIdentifier(i.qualifier.text);
-    const importClause = ts.createImportClause(
+    const qualifier = ts.factory.createIdentifier(i.qualifier.text);
+    const importClause = ts.factory.createImportClause(
+      /* isTypeOnly */ false,
       /* name */ undefined,
-      /* namedBindings */ ts.createNamespaceImport(qualifier)
+      /* namedBindings */ ts.factory.createNamespaceImport(qualifier)
     );
-    const decl = ts.createImportDeclaration(
+    const decl = ts.factory.createImportDeclaration(
       /* decorators */ undefined,
       /* modifiers */ undefined,
       /* importClause */ importClause,
-      /* moduleSpecifier */ ts.createLiteral(i.specifier)
+      /* moduleSpecifier */ ts.factory.createStringLiteral(i.specifier)
     );
 
     // Set the qualifier's original TS node to the `ts.ImportDeclaration`. This allows downstream
@@ -57,10 +58,10 @@ export function addImports(
     // If we prepend imports, we also prepend NotEmittedStatement to use it as an anchor
     // for @fileoverview Closure annotation. If there is no @fileoverview annotations, this
     // statement would be a noop.
-    const fileoverviewAnchorStmt = ts.createNotEmittedStatement(sf);
-    return ts.updateSourceFileNode(
+    const fileoverviewAnchorStmt = ts.factory.createNotEmittedStatement(sf);
+    return ts.factory.updateSourceFile(
       sf,
-      ts.createNodeArray([
+      ts.factory.createNodeArray([
         fileoverviewAnchorStmt,
         ...existingImports,
         ...addedImports,

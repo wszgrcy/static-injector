@@ -126,10 +126,6 @@ export class ExpressionTranslatorVisitor<TStatement, TExpression>
     );
   }
 
-  visitDeclareClassStmt(_stmt: o.ClassStmt, _context: Context): never {
-    throw new Error('Method not implemented.');
-  }
-
   visitIfStmt(stmt: o.IfStmt, context: Context): TStatement {
     return this.attachComments(
       this.factory.createIfStatement(
@@ -189,23 +185,6 @@ export class ExpressionTranslatorVisitor<TStatement, TExpression>
     return this.factory.createAssignment(
       target,
       expr.value.visitExpression(this, context)
-    );
-  }
-
-  visitInvokeMethodExpr(
-    ast: o.InvokeMethodExpr,
-    context: Context
-  ): TExpression {
-    const target = ast.receiver.visitExpression(this, context);
-    return this.setSourceMapRange(
-      this.factory.createCallExpression(
-        ast.name !== null
-          ? this.factory.createPropertyAccess(target, ast.name)
-          : target,
-        ast.args.map((arg) => arg.visitExpression(this, context)),
-        /* pure */ false
-      ),
-      ast.sourceSpan
     );
   }
 
@@ -305,14 +284,6 @@ export class ExpressionTranslatorVisitor<TStatement, TExpression>
       '!',
       ast.condition.visitExpression(this, context)
     );
-  }
-
-  visitAssertNotNullExpr(ast: o.AssertNotNull, context: Context): TExpression {
-    return ast.condition.visitExpression(this, context);
-  }
-
-  visitCastExpr(ast: o.CastExpr, context: Context): TExpression {
-    return ast.value.visitExpression(this, context);
   }
 
   visitFunctionExpr(ast: o.FunctionExpr, context: Context): TExpression {

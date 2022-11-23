@@ -6,13 +6,40 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import { throwProviderNotFoundError } from "../render3/errors_di";
-import { stringify } from "../util/stringify";
+import { throwProviderNotFoundError } from '../render3/errors_di';
+import { stringify } from '../util/stringify';
 
-import { getInjectableDef, ɵɵInjectableDeclaration } from "./interface/defs";
-import { InjectFlags } from "./interface/injector";
-import { ProviderToken } from "./provider_token";
+import { getInjectableDef, ɵɵInjectableDeclaration } from './interface/defs';
+import { InjectFlags } from './interface/injector';
+import { ProviderToken } from './provider_token';
+/**
+ * Current implementation of inject.
+ *
+ * By default, it is `injectInjectorOnly`, which makes it `Injector`-only aware. It can be changed
+ * to `directiveInject`, which brings in the `NodeInjector` system of ivy. It is designed this
+ * way for two reasons:
+ *  1. `Injector` should not depend on ivy logic.
+ *  2. To maintain tree shake-ability we don't want to bring in unnecessary code.
+ */
+let _injectImplementation:
+  | (<T>(token: ProviderToken<T>, flags?: InjectFlags) => T | null)
+  | undefined;
+export function getInjectImplementation() {
+  return _injectImplementation;
+}
 
+/**
+ * Sets the current inject implementation.
+ */
+export function setInjectImplementation(
+  impl:
+    | (<T>(token: ProviderToken<T>, flags?: InjectFlags) => T | null)
+    | undefined
+): (<T>(token: ProviderToken<T>, flags?: InjectFlags) => T | null) | undefined {
+  const previous = _injectImplementation;
+  _injectImplementation = impl;
+  return previous;
+}
 /**
  * Injects `root` tokens in limp mode.
  *
@@ -27,12 +54,12 @@ export function injectRootLimpMode<T>(
 ): T | null {
   const injectableDef: ɵɵInjectableDeclaration<T> | null =
     getInjectableDef(token);
-  if (injectableDef && injectableDef.providedIn == "root") {
+  if (injectableDef && injectableDef.providedIn == 'root') {
     return injectableDef.value === undefined
       ? (injectableDef.value = injectableDef.factory())
       : injectableDef.value;
   }
   if (flags & InjectFlags.Optional) return null;
   if (notFoundValue !== undefined) return notFoundValue;
-  throwProviderNotFoundError(stringify(token), "Injector");
+  throwProviderNotFoundError(stringify(token), 'Injector');
 }

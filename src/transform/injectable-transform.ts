@@ -11,6 +11,15 @@ import {
   translateExpression,
   translateStatement,
 } from './compiler-cli/src/ngtsc/translator';
+import {
+  combineModifiers,
+  createPropertyDeclaration,
+  getDecorators,
+  getModifiers,
+  updateClassDeclaration,
+  updateConstructorDeclaration,
+  updateParameterDeclaration,
+} from './compiler-cli/src/ngtsc/ts_compatibility';
 import { nodeIteration } from './node-Iteration';
 const NO_DECORATORS = new Set<ts.Decorator>();
 interface ClassMetadata {
@@ -61,13 +70,15 @@ export class InjectableTransformerFactory {
       (node: ClassDeclaration) => {
         let result = map.get(node);
         if (result) {
-          let decoratorList = node.decorators.filter(
+          let decoratorList = getDecorators(node).filter(
             (item) => item !== result.decorator
           );
-          return factory.updateClassDeclaration(
+          return updateClassDeclaration(
             node,
-            decoratorList.length ? decoratorList : undefined,
-            node.modifiers,
+            combineModifiers(
+              decoratorList.length ? decoratorList : undefined,
+              getModifiers(node)
+            ),
             node.name,
             node.typeParameters,
             node.heritageClauses,
@@ -98,7 +109,7 @@ export class InjectableTransformerFactory {
     nodeIteration(sf, (node) => {
       if (
         ts.isClassDeclaration(node) &&
-        node.decorators &&
+        ts.getDecorators(node) &&
         this.reflectionHost.isClass(node)
       ) {
         const decorators = this.reflectionHost.getDecoratorsOfDeclaration(node);
@@ -139,9 +150,8 @@ export class InjectableTransformerFactory {
       const exprNode = translateExpression(field.initializer, importManager);
 
       // Create a static property declaration for the new field.
-      const property = ts.createProperty(
-        undefined,
-        [ts.createToken(ts.SyntaxKind.StaticKeyword)],
+      const property = createPropertyDeclaration(
+        [ts.factory.createToken(ts.SyntaxKind.StaticKeyword)],
         field.name,
         undefined,
         undefined,
@@ -178,10 +188,9 @@ export class InjectableTransformerFactory {
   private _stripAngularDecorators<T extends ts.Node>(node: T): T {
     if (ts.isParameter(node)) {
       // Strip decorators from parameters (probably of the constructor).
-      node = ts.updateParameter(
+      node = updateParameterDeclaration(
         node,
-        this._nonCoreDecoratorsOnly(node),
-        node.modifiers,
+        combineModifiers(this._nonCoreDecoratorsOnly(node), getModifiers(node)),
         node.dotDotDotToken,
         node.name,
         node.questionToken,
@@ -193,10 +202,9 @@ export class InjectableTransformerFactory {
       const parameters = node.parameters.map((param) =>
         this._stripAngularDecorators(param)
       );
-      node = ts.updateConstructor(
+      node = updateConstructorDeclaration(
         node,
-        node.decorators,
-        node.modifiers,
+        getModifiers(node),
         parameters,
         node.body
       ) as T & ts.ConstructorDeclaration;
@@ -232,23 +240,25 @@ export class InjectableTransformerFactory {
   private _nonCoreDecoratorsOnly(
     node: ts.Declaration
   ): ts.NodeArray<ts.Decorator> | undefined {
+    const decorators = getDecorators(node);
+
     // Shortcut if the node has no decorators.
-    if (node.decorators === undefined) {
+    if (decorators === undefined) {
       return undefined;
     }
-    // Build a Set of the decorators on this node from static-injector.
+    // Build a Set of the decorators on this node from @angular/core.
     const coreDecorators = this._angularCoreDecorators(node);
 
-    if (coreDecorators.size === node.decorators.length) {
+    if (coreDecorators.size === decorators.length) {
       // If all decorators are to be removed, return `undefined`.
       return undefined;
     } else if (coreDecorators.size === 0) {
       // If no decorators need to be removed, return the original decorators array.
-      return node.decorators;
+      return nodeArrayFromDecoratorsArray(decorators);
     }
 
     // Filter out the core decorators.
-    const filtered = node.decorators.filter((dec) => !coreDecorators.has(dec));
+    const filtered = decorators.filter((dec) => !coreDecorators.has(dec));
 
     // If no decorators survive, return `undefined`. This can only happen if a core decorator is
     // repeated on the node.
@@ -257,10 +267,7 @@ export class InjectableTransformerFactory {
     }
 
     // Create a new `NodeArray` with the filtered decorators that sourcemaps back to the original.
-    const array = ts.createNodeArray(filtered);
-    (array.pos as number) = node.decorators.pos;
-    (array.end as number) = node.decorators.end;
-    return array;
+    return nodeArrayFromDecoratorsArray(filtered);
   }
   private updateStatements(node: ts.SourceFile, importManager: ImportManager) {
     return addImports(importManager, node);
@@ -273,4 +280,18 @@ function isFromAngularCore(decorator: Decorator): boolean {
   return (
     decorator.import !== null && decorator.import.from === 'static-injector'
   );
+}
+
+/** Creates a `NodeArray` with the correct offsets from an array of decorators. */
+function nodeArrayFromDecoratorsArray(
+  decorators: readonly ts.Decorator[]
+): ts.NodeArray<ts.Decorator> {
+  const array = ts.factory.createNodeArray(decorators);
+
+  if (array.length > 0) {
+    (array.pos as number) = decorators[0].pos;
+    (array.end as number) = decorators[decorators.length - 1].end;
+  }
+
+  return array;
 }

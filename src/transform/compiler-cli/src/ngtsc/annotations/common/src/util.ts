@@ -13,16 +13,16 @@ import {
   R3Reference,
   ReadPropExpr,
   WrappedNodeExpr,
-} from '../../../../../compiler';
-import { R3FactoryMetadata } from '../../../../../compiler';
-import { FactoryTarget } from '../../../../../compiler/src/render3/partial/api';
+} from '../../../../../../compiler';
+import { R3FactoryMetadata } from '../../../../../../compiler';
+import { FactoryTarget } from '../../../../../../compiler/src/render3/partial/api';
 import * as ts from 'typescript';
 
 import {
   ErrorCode,
   FatalDiagnosticError,
   makeRelatedInformation,
-} from '../../diagnostics';
+} from '../../../diagnostics';
 import {
   ClassDeclaration,
   CtorParameter,
@@ -36,7 +36,7 @@ import {
   TypeValueReferenceKind,
   UnavailableValue,
   ValueUnavailableKind,
-} from '../../reflection';
+} from '../../../reflection';
 
 export type ConstructorDeps =
   | {
@@ -265,7 +265,7 @@ function createUnsuitableInjectionTokenError(
           'This type is imported using a type-only import, which prevents it from being usable as an injection token.'
         ),
         makeRelatedInformation(
-          reason.importClause,
+          reason.node,
           'The type-only import occurs here.'
         ),
       ];
@@ -495,4 +495,11 @@ export function toFactoryMetadata(
     deps: meta.deps,
     target,
   };
+}
+
+export function isAbstractClassDeclaration(clazz: ClassDeclaration): boolean {
+  return (
+    clazz.modifiers !== undefined &&
+    clazz.modifiers.some((mod) => mod.kind === ts.SyntaxKind.AbstractKeyword)
+  );
 }

@@ -10,15 +10,16 @@ import { ParseSourceSpan } from '../parse_util';
 
 //// Types
 export enum TypeModifier {
-  Const,
+  None = 0,
+  Const = 1 << 0,
 }
 
 export abstract class Type {
-  constructor(public modifiers: TypeModifier[] = []) {}
+  constructor(public modifiers: TypeModifier = TypeModifier.None) {}
   abstract visitType(visitor: TypeVisitor, context: any): any;
 
   hasModifier(modifier: TypeModifier): boolean {
-    return this.modifiers.indexOf(modifier) !== -1;
+    return (this.modifiers & modifier) !== 0;
   }
 }
 
@@ -34,7 +35,7 @@ export enum BuiltinTypeName {
 }
 
 export class BuiltinType extends Type {
-  constructor(public name: BuiltinTypeName, modifiers?: TypeModifier[]) {
+  constructor(public name: BuiltinTypeName, modifiers?: TypeModifier) {
     super(modifiers);
   }
   override visitType(visitor: TypeVisitor, context: any): any {
@@ -45,7 +46,7 @@ export class BuiltinType extends Type {
 export class ExpressionType extends Type {
   constructor(
     public value: Expression,
-    modifiers?: TypeModifier[],
+    modifiers?: TypeModifier,
     public typeParams: Type[] | null = null
   ) {
     super(modifiers);
@@ -56,7 +57,7 @@ export class ExpressionType extends Type {
 }
 
 export class ArrayType extends Type {
-  constructor(public of: Type, modifiers?: TypeModifier[]) {
+  constructor(public of: Type, modifiers?: TypeModifier) {
     super(modifiers);
   }
   override visitType(visitor: TypeVisitor, context: any): any {
@@ -66,7 +67,7 @@ export class ArrayType extends Type {
 
 export class MapType extends Type {
   public valueType: Type | null;
-  constructor(valueType: Type | null | undefined, modifiers?: TypeModifier[]) {
+  constructor(valueType: Type | null | undefined, modifiers?: TypeModifier) {
     super(modifiers);
     this.valueType = valueType || null;
   }
@@ -184,12 +185,12 @@ export abstract class Expression {
     return new ReadPropExpr(this, name, null, sourceSpan);
   }
 
-  callMethod(
-    name: string | BuiltinMethod,
-    params: Expression[],
+  key(
+    index: Expression,
+    type?: Type | null,
     sourceSpan?: ParseSourceSpan | null
-  ): InvokeMethodExpr {
-    return new InvokeMethodExpr(this, name, params, null, sourceSpan);
+  ): ReadKeyExpr {
+    return new ReadKeyExpr(this, index, type, sourceSpan);
   }
 
   callFn(
@@ -205,38 +206,17 @@ export abstract class Expression {
   }
 }
 
-export enum BuiltinVar {
-  This,
-  Super,
-  CatchError,
-  CatchStack,
-}
-
 export class ReadVarExpr extends Expression {
-  public name: string | null;
-  public builtin: BuiltinVar | null;
-
   constructor(
-    name: string | BuiltinVar,
+    public name: string,
     type?: Type | null,
     sourceSpan?: ParseSourceSpan | null
   ) {
     super(type, sourceSpan);
-    if (typeof name === 'string') {
-      this.name = name;
-      this.builtin = null;
-    } else {
-      this.name = null;
-      this.builtin = name;
-    }
   }
 
   override isEquivalent(e: Expression): boolean {
-    return (
-      e instanceof ReadVarExpr &&
-      this.name === e.name &&
-      this.builtin === e.builtin
-    );
+    return e instanceof ReadVarExpr && this.name === e.name;
   }
 
   override isConstant() {
@@ -248,11 +228,6 @@ export class ReadVarExpr extends Expression {
   }
 
   set(value: Expression): WriteVarExpr {
-    if (!this.name) {
-      throw new Error(
-        `Built in variable ${this.builtin} can not be assigned to.`
-      );
-    }
     return new WriteVarExpr(this.name, value, null, this.sourceSpan);
   }
 }
@@ -329,7 +304,7 @@ export class WriteVarExpr extends Expression {
     return visitor.visitWriteVarExpr(this, context);
   }
 
-  toDeclStmt(type?: Type | null, modifiers?: StmtModifier[]): DeclareVarStmt {
+  toDeclStmt(type?: Type | null, modifiers?: StmtModifier): DeclareVarStmt {
     return new DeclareVarStmt(
       this.name,
       this.value,
@@ -340,7 +315,7 @@ export class WriteVarExpr extends Expression {
   }
 
   toConstDecl(): DeclareVarStmt {
-    return this.toDeclStmt(INFERRED_TYPE, [StmtModifier.Final]);
+    return this.toDeclStmt(INFERRED_TYPE, StmtModifier.Final);
   }
 }
 
@@ -403,51 +378,6 @@ export class WritePropExpr extends Expression {
 
   override visitExpression(visitor: ExpressionVisitor, context: any): any {
     return visitor.visitWritePropExpr(this, context);
-  }
-}
-
-export enum BuiltinMethod {
-  ConcatArray,
-  SubscribeObservable,
-  Bind,
-}
-
-export class InvokeMethodExpr extends Expression {
-  public name: string | null;
-  public builtin: BuiltinMethod | null;
-  constructor(
-    public receiver: Expression,
-    method: string | BuiltinMethod,
-    public args: Expression[],
-    type?: Type | null,
-    sourceSpan?: ParseSourceSpan | null
-  ) {
-    super(type, sourceSpan);
-    if (typeof method === 'string') {
-      this.name = method;
-      this.builtin = null;
-    } else {
-      this.name = null;
-      this.builtin = <BuiltinMethod>method;
-    }
-  }
-
-  override isEquivalent(e: Expression): boolean {
-    return (
-      e instanceof InvokeMethodExpr &&
-      this.receiver.isEquivalent(e.receiver) &&
-      this.name === e.name &&
-      this.builtin === e.builtin &&
-      areAllEquivalent(this.args, e.args)
-    );
-  }
-
-  override isConstant() {
-    return false;
-  }
-
-  override visitExpression(visitor: ExpressionVisitor, context: any): any {
-    return visitor.visitInvokeMethodExpr(this, context);
   }
 }
 
@@ -555,11 +485,9 @@ export class TemplateLiteralElement {
   }
 }
 
-export abstract class MessagePiece {
+export class LiteralPiece {
   constructor(public text: string, public sourceSpan: ParseSourceSpan) {}
 }
-export class LiteralPiece extends MessagePiece {}
-export class PlaceholderPiece extends MessagePiece {}
 
 /**
  * A structure to hold the cooked and raw strings of a template literal element, along with its
@@ -576,6 +504,46 @@ const escapeStartingColon = (str: string): string => str.replace(/^:/, '\\:');
 const escapeColons = (str: string): string => str.replace(/:/g, '\\:');
 const escapeForTemplateLiteral = (str: string): string =>
   str.replace(/`/g, '\\`').replace(/\${/g, '$\\{');
+
+/**
+ * Creates a `{cooked, raw}` object from the `metaBlock` and `messagePart`.
+ *
+ * The `raw` text must have various character sequences escaped:
+ * * "\" would otherwise indicate that the next character is a control character.
+ * * "`" and "${" are template string control sequences that would otherwise prematurely indicate
+ *   the end of a message part.
+ * * ":" inside a metablock would prematurely indicate the end of the metablock.
+ * * ":" at the start of a messagePart with no metablock would erroneously indicate the start of a
+ *   metablock.
+ *
+ * @param metaBlock Any metadata that should be prepended to the string
+ * @param messagePart The message part of the string
+ */
+function createCookedRawString(
+  metaBlock: string,
+  messagePart: string,
+  range: ParseSourceSpan | null
+): CookedRawString {
+  if (metaBlock === '') {
+    return {
+      cooked: messagePart,
+      raw: escapeForTemplateLiteral(
+        escapeStartingColon(escapeSlashes(messagePart))
+      ),
+      range,
+    };
+  } else {
+    return {
+      cooked: `:${metaBlock}:${messagePart}`,
+      raw: escapeForTemplateLiteral(
+        `:${escapeColons(escapeSlashes(metaBlock))}:${escapeSlashes(
+          messagePart
+        )}`
+      ),
+      range,
+    };
+  }
+}
 
 export class ExternalExpr extends Expression {
   constructor(
@@ -667,51 +635,6 @@ export class NotExpr extends Expression {
   }
 }
 
-export class AssertNotNull extends Expression {
-  constructor(
-    public condition: Expression,
-    sourceSpan?: ParseSourceSpan | null
-  ) {
-    super(condition.type, sourceSpan);
-  }
-
-  override isEquivalent(e: Expression): boolean {
-    return (
-      e instanceof AssertNotNull && this.condition.isEquivalent(e.condition)
-    );
-  }
-
-  override isConstant() {
-    return false;
-  }
-
-  override visitExpression(visitor: ExpressionVisitor, context: any): any {
-    return visitor.visitAssertNotNullExpr(this, context);
-  }
-}
-
-export class CastExpr extends Expression {
-  constructor(
-    public value: Expression,
-    type?: Type | null,
-    sourceSpan?: ParseSourceSpan | null
-  ) {
-    super(type, sourceSpan);
-  }
-
-  override isEquivalent(e: Expression): boolean {
-    return e instanceof CastExpr && this.value.isEquivalent(e.value);
-  }
-
-  override isConstant() {
-    return false;
-  }
-
-  override visitExpression(visitor: ExpressionVisitor, context: any): any {
-    return visitor.visitCastExpr(this, context);
-  }
-}
-
 export class FnParam {
   constructor(public name: string, public type: Type | null = null) {}
 
@@ -747,7 +670,7 @@ export class FunctionExpr extends Expression {
     return visitor.visitFunctionExpr(this, context);
   }
 
-  toDeclStmt(name: string, modifiers?: StmtModifier[]): DeclareFunctionStmt {
+  toDeclStmt(name: string, modifiers?: StmtModifier): DeclareFunctionStmt {
     return new DeclareFunctionStmt(
       name,
       this.params,
@@ -980,16 +903,12 @@ export interface ExpressionVisitor {
   visitWriteVarExpr(expr: WriteVarExpr, context: any): any;
   visitWriteKeyExpr(expr: WriteKeyExpr, context: any): any;
   visitWritePropExpr(expr: WritePropExpr, context: any): any;
-  visitInvokeMethodExpr(ast: InvokeMethodExpr, context: any): any;
   visitInvokeFunctionExpr(ast: InvokeFunctionExpr, context: any): any;
-
   visitInstantiateExpr(ast: InstantiateExpr, context: any): any;
   visitLiteralExpr(ast: LiteralExpr, context: any): any;
   visitExternalExpr(ast: ExternalExpr, context: any): any;
   visitConditionalExpr(ast: ConditionalExpr, context: any): any;
   visitNotExpr(ast: NotExpr, context: any): any;
-  visitAssertNotNullExpr(ast: AssertNotNull, context: any): any;
-  visitCastExpr(ast: CastExpr, context: any): any;
   visitFunctionExpr(ast: FunctionExpr, context: any): any;
   visitUnaryOperatorExpr(ast: UnaryOperatorExpr, context: any): any;
   visitBinaryOperatorExpr(ast: BinaryOperatorExpr, context: any): any;
@@ -1002,27 +921,16 @@ export interface ExpressionVisitor {
   visitTypeofExpr(ast: TypeofExpr, context: any): any;
 }
 
-export const THIS_EXPR = new ReadVarExpr(BuiltinVar.This, null, null);
-export const SUPER_EXPR = new ReadVarExpr(BuiltinVar.Super, null, null);
-export const CATCH_ERROR_VAR = new ReadVarExpr(
-  BuiltinVar.CatchError,
-  null,
-  null
-);
-export const CATCH_STACK_VAR = new ReadVarExpr(
-  BuiltinVar.CatchStack,
-  null,
-  null
-);
 export const NULL_EXPR = new LiteralExpr(null, null, null);
 export const TYPED_NULL_EXPR = new LiteralExpr(null, INFERRED_TYPE, null);
 
 //// Statements
 export enum StmtModifier {
-  Final,
-  Private,
-  Exported,
-  Static,
+  None = 0,
+  Final = 1 << 0,
+  Private = 1 << 1,
+  Exported = 1 << 2,
+  Static = 1 << 3,
 }
 
 export class LeadingComment {
@@ -1046,7 +954,7 @@ export class JSDocComment extends LeadingComment {
 
 export abstract class Statement {
   constructor(
-    public modifiers: StmtModifier[] = [],
+    public modifiers: StmtModifier = StmtModifier.None,
     public sourceSpan: ParseSourceSpan | null = null,
     public leadingComments?: LeadingComment[]
   ) {}
@@ -1059,7 +967,7 @@ export abstract class Statement {
   abstract visitStatement(visitor: StatementVisitor, context: any): any;
 
   hasModifier(modifier: StmtModifier): boolean {
-    return this.modifiers.indexOf(modifier) !== -1;
+    return (this.modifiers & modifier) !== 0;
   }
 
   addLeadingComment(leadingComment: LeadingComment): void {
@@ -1074,7 +982,7 @@ export class DeclareVarStmt extends Statement {
     public name: string,
     public value?: Expression,
     type?: Type | null,
-    modifiers?: StmtModifier[],
+    modifiers?: StmtModifier,
     sourceSpan?: ParseSourceSpan | null,
     leadingComments?: LeadingComment[]
   ) {
@@ -1102,7 +1010,7 @@ export class DeclareFunctionStmt extends Statement {
     public params: FnParam[],
     public statements: Statement[],
     type?: Type | null,
-    modifiers?: StmtModifier[],
+    modifiers?: StmtModifier,
     sourceSpan?: ParseSourceSpan | null,
     leadingComments?: LeadingComment[]
   ) {
@@ -1127,7 +1035,7 @@ export class ExpressionStatement extends Statement {
     sourceSpan?: ParseSourceSpan | null,
     leadingComments?: LeadingComment[]
   ) {
-    super([], sourceSpan, leadingComments);
+    super(StmtModifier.None, sourceSpan, leadingComments);
   }
   override isEquivalent(stmt: Statement): boolean {
     return (
@@ -1145,7 +1053,7 @@ export class ReturnStatement extends Statement {
     sourceSpan: ParseSourceSpan | null = null,
     leadingComments?: LeadingComment[]
   ) {
-    super([], sourceSpan, leadingComments);
+    super(StmtModifier.None, sourceSpan, leadingComments);
   }
   override isEquivalent(stmt: Statement): boolean {
     return (
@@ -1157,89 +1065,6 @@ export class ReturnStatement extends Statement {
   }
 }
 
-export class AbstractClassPart {
-  constructor(
-    public type: Type | null = null,
-    public modifiers: StmtModifier[] = []
-  ) {}
-  hasModifier(modifier: StmtModifier): boolean {
-    return this.modifiers.indexOf(modifier) !== -1;
-  }
-}
-
-export class ClassField extends AbstractClassPart {
-  constructor(
-    public name: string,
-    type?: Type | null,
-    modifiers?: StmtModifier[],
-    public initializer?: Expression
-  ) {
-    super(type, modifiers);
-  }
-  isEquivalent(f: ClassField) {
-    return this.name === f.name;
-  }
-}
-
-export class ClassMethod extends AbstractClassPart {
-  constructor(
-    public name: string | null,
-    public params: FnParam[],
-    public body: Statement[],
-    type?: Type | null,
-    modifiers?: StmtModifier[]
-  ) {
-    super(type, modifiers);
-  }
-  isEquivalent(m: ClassMethod) {
-    return this.name === m.name && areAllEquivalent(this.body, m.body);
-  }
-}
-
-export class ClassGetter extends AbstractClassPart {
-  constructor(
-    public name: string,
-    public body: Statement[],
-    type?: Type | null,
-    modifiers?: StmtModifier[]
-  ) {
-    super(type, modifiers);
-  }
-  isEquivalent(m: ClassGetter) {
-    return this.name === m.name && areAllEquivalent(this.body, m.body);
-  }
-}
-
-export class ClassStmt extends Statement {
-  constructor(
-    public name: string,
-    public parent: Expression | null,
-    public fields: ClassField[],
-    public getters: ClassGetter[],
-    public constructorMethod: ClassMethod,
-    public methods: ClassMethod[],
-    modifiers?: StmtModifier[],
-    sourceSpan?: ParseSourceSpan | null,
-    leadingComments?: LeadingComment[]
-  ) {
-    super(modifiers, sourceSpan, leadingComments);
-  }
-  override isEquivalent(stmt: Statement): boolean {
-    return (
-      stmt instanceof ClassStmt &&
-      this.name === stmt.name &&
-      nullSafeIsEquivalent(this.parent, stmt.parent) &&
-      areAllEquivalent(this.fields, stmt.fields) &&
-      areAllEquivalent(this.getters, stmt.getters) &&
-      this.constructorMethod.isEquivalent(stmt.constructorMethod) &&
-      areAllEquivalent(this.methods, stmt.methods)
-    );
-  }
-  override visitStatement(visitor: StatementVisitor, context: any): any {
-    return visitor.visitDeclareClassStmt(this, context);
-  }
-}
-
 export class IfStmt extends Statement {
   constructor(
     public condition: Expression,
@@ -1248,7 +1073,7 @@ export class IfStmt extends Statement {
     sourceSpan?: ParseSourceSpan | null,
     leadingComments?: LeadingComment[]
   ) {
-    super([], sourceSpan, leadingComments);
+    super(StmtModifier.None, sourceSpan, leadingComments);
   }
   override isEquivalent(stmt: Statement): boolean {
     return (
@@ -1268,8 +1093,19 @@ export interface StatementVisitor {
   visitDeclareFunctionStmt(stmt: DeclareFunctionStmt, context: any): any;
   visitExpressionStmt(stmt: ExpressionStatement, context: any): any;
   visitReturnStmt(stmt: ReturnStatement, context: any): any;
-  visitDeclareClassStmt(stmt: ClassStmt, context: any): any;
   visitIfStmt(stmt: IfStmt, context: any): any;
+}
+
+export function leadingComment(
+  text: string,
+  multiline: boolean = false,
+  trailingNewline: boolean = true
+): LeadingComment {
+  return new LeadingComment(text, multiline, trailingNewline);
+}
+
+export function jsDocComment(tags: JSDocTag[] = []): JSDocComment {
+  return new JSDocComment(tags);
 }
 
 export function variable(
@@ -1288,9 +1124,19 @@ export function importExpr(
   return new ExternalExpr(id, null, typeParams, sourceSpan);
 }
 
+export function importType(
+  id: ExternalReference,
+  typeParams?: Type[] | null,
+  typeModifiers?: TypeModifier
+): ExpressionType | null {
+  return id != null
+    ? expressionType(importExpr(id, typeParams, null), typeModifiers)
+    : null;
+}
+
 export function expressionType(
   expr: Expression,
-  typeModifiers?: TypeModifier[],
+  typeModifiers?: TypeModifier,
   typeParams?: Type[] | null
 ): ExpressionType {
   return new ExpressionType(expr, typeModifiers, typeParams);
@@ -1333,13 +1179,6 @@ export function not(
   sourceSpan?: ParseSourceSpan | null
 ): NotExpr {
   return new NotExpr(expr, sourceSpan);
-}
-
-export function assertNotNull(
-  expr: Expression,
-  sourceSpan?: ParseSourceSpan | null
-): AssertNotNull {
-  return new AssertNotNull(expr, sourceSpan);
 }
 
 export function fn(
@@ -1385,6 +1224,7 @@ export const enum JSDocTagName {
   Desc = 'desc',
   Id = 'id',
   Meaning = 'meaning',
+  Suppress = 'suppress',
 }
 
 /*
