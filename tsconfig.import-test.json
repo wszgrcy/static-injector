@@ -4,9 +4,6 @@
   "include": [],
   "compilerOptions": {
     "outDir": "../node_modules/static-injector",
-    "declaration": true,
-    "paths": {
-      "static-injector": ["./src/import"]
-    }
+    "declaration": true
   }
 }

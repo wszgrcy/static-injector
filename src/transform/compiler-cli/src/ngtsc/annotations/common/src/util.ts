@@ -13,7 +13,7 @@ import {
   R3Reference,
   ReadPropExpr,
   WrappedNodeExpr,
-} from '../../../../../../compiler';
+} from 'static-injector/transform/compiler';
 import { R3FactoryMetadata } from '../../../../../../compiler';
 import { FactoryTarget } from '../../../../../../compiler/src/render3/partial/api';
 import * as ts from 'typescript';
