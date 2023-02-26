@@ -17,6 +17,8 @@ import {
 import { Identifiers } from './render3/r3_identifiers';
 import {
   convertFromMaybeForwardRefExpression,
+  ForwardRefHandling,
+  generateForwardRef,
   MaybeForwardRefExpression,
   R3CompiledExpression,
   R3Reference,

@@ -7,6 +7,7 @@
  */
 
 import * as o from '../output/output_ast';
+
 const CORE = 'static-injector';
 
 export class Identifiers {
@@ -38,7 +39,6 @@ export class Identifiers {
     name: 'ɵɵdefineInjectable',
     moduleName: CORE,
   };
-
   static InjectableDeclaration: o.ExternalReference = {
     name: 'ɵɵInjectableDeclaration',
     moduleName: CORE,

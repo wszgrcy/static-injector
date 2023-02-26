@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+
 import * as o from '../../output/output_ast';
 
 export interface R3PartialDeclaration {
@@ -20,7 +21,7 @@ export interface R3PartialDeclaration {
   version: string;
 
   /**
-   * A reference to the `static-injector` ES module, which allows access
+   * A reference to the `@angular/core` ES module, which allows access
    * to all Angular exports, including Ivy instructions.
    */
   ngImport: o.Expression;
