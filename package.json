@@ -14,7 +14,7 @@
   "author": "wszgrcy",
   "license": "MIT",
   "peerDependencies": {
-    "typescript": "^4.0.0"
+    "typescript": "^4.9.3"
   },
   "devDependencies": {
     "@commitlint/cli": "^12.1.4",
@@ -31,7 +31,7 @@
     "ts-jest": "^29.0.3",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^3.14.2",
-    "typescript": "~4.8.4"
+    "typescript": "~4.9.3"
   },
   "dependencies": {
     "cross-env": "^7.0.3"
