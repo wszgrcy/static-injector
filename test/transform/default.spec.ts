@@ -90,4 +90,16 @@ describe('default', () => {
       }
     );
   });
+  it('template-literal', () => {
+    createTestTransformer(
+      [path.resolve(__dirname, '../fixture/template-literal.ts')],
+      undefined,
+      {
+        writeFile: (fileName, data) => {
+          expect(data).toContain(`TemplateLiteralClass.ɵfac`);
+          expect(data).toContain(`TemplateLiteralClass.ɵprov`);
+        },
+      }
+    );
+  });
 });
