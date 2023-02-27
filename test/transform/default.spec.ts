@@ -102,4 +102,16 @@ describe('default', () => {
       }
     );
   });
+  it('mainl', () => {
+    createTestTransformer(
+      [path.resolve(__dirname, '../fixture/main1.ts')],
+      undefined,
+      {
+        writeFile: (fileName, data) => {
+          expect(data).toContain(`ɵfac`);
+          expect(data).toContain(`ɵprov`);
+        },
+      }
+    );
+  });
 });

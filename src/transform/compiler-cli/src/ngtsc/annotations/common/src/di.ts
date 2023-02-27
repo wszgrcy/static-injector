@@ -90,24 +90,7 @@ export function getConstructorDependencies(
         } else if (name === 'Self') {
           self = true;
         } else if (name === 'Host') {
-          host = true;
         } else if (name === 'Attribute') {
-          if (dec.args === null || dec.args.length !== 1) {
-            throw new FatalDiagnosticError(
-              ErrorCode.DECORATOR_ARITY_WRONG,
-              Decorator.nodeForError(dec),
-              `Unexpected number of arguments to @Attribute().`
-            );
-          }
-          const attributeName = dec.args[0];
-          token = new WrappedNodeExpr(attributeName);
-          if (ts.isStringLiteralLike(attributeName)) {
-            attributeNameType = new LiteralExpr(attributeName.text);
-          } else {
-            attributeNameType = new WrappedNodeExpr(
-              ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword)
-            );
-          }
         } else {
           throw new FatalDiagnosticError(
             ErrorCode.DECORATOR_UNEXPECTED,
