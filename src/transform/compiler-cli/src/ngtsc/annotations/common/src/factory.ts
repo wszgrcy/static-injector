@@ -9,9 +9,9 @@
 import {
   compileFactoryFunction,
   R3FactoryMetadata,
-} from "../../../../../compiler";
+} from 'static-injector/transform/compiler';
 
-import { CompileResult } from "../../transform";
+import { CompileResult } from '../../../transform';
 
 export type CompileFactoryFn = (metadata: R3FactoryMetadata) => CompileResult;
 
@@ -20,7 +20,7 @@ export function compileNgFactoryDefField(
 ): CompileResult {
   const res = compileFactoryFunction(metadata);
   return {
-    name: "ɵfac",
+    name: 'ɵfac',
     initializer: res.expression,
     statements: res.statements,
     type: res.type,

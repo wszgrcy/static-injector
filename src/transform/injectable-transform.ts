@@ -11,15 +11,7 @@ import {
   translateExpression,
   translateStatement,
 } from './compiler-cli/src/ngtsc/translator';
-import {
-  combineModifiers,
-  createPropertyDeclaration,
-  getDecorators,
-  getModifiers,
-  updateClassDeclaration,
-  updateConstructorDeclaration,
-  updateParameterDeclaration,
-} from './compiler-cli/src/ngtsc/ts_compatibility';
+
 import { nodeIteration } from './node-Iteration';
 const NO_DECORATORS = new Set<ts.Decorator>();
 interface ClassMetadata {
@@ -70,15 +62,22 @@ export class InjectableTransformerFactory {
       (node: ClassDeclaration) => {
         let result = map.get(node);
         if (result) {
-          let decoratorList = getDecorators(node).filter(
-            (item) => item !== result.decorator
-          );
-          return updateClassDeclaration(
+          const filteredDecorators =
+            // Remove the decorator which triggered this compilation, leaving the others alone.
+            maybeFilterDecorator(ts.getDecorators(node), [result.decorator]);
+          const nodeModifiers = ts.getModifiers(node);
+
+          let updatedModifiers: ts.ModifierLike[] | undefined;
+
+          if (filteredDecorators?.length || nodeModifiers?.length) {
+            updatedModifiers = [
+              ...(filteredDecorators || []),
+              ...(nodeModifiers || []),
+            ];
+          }
+          return ts.factory.updateClassDeclaration(
             node,
-            combineModifiers(
-              decoratorList.length ? decoratorList : undefined,
-              getModifiers(node)
-            ),
+            updatedModifiers,
             node.name,
             node.typeParameters,
             node.heritageClauses,
@@ -150,7 +149,7 @@ export class InjectableTransformerFactory {
       const exprNode = translateExpression(field.initializer, importManager);
 
       // Create a static property declaration for the new field.
-      const property = createPropertyDeclaration(
+      const property = ts.factory.createPropertyDeclaration(
         [ts.factory.createToken(ts.SyntaxKind.StaticKeyword)],
         field.name,
         undefined,
@@ -186,11 +185,22 @@ export class InjectableTransformerFactory {
    * as parameters of constructors.
    */
   private _stripAngularDecorators<T extends ts.Node>(node: T): T {
+    const modifiers = ts.canHaveModifiers(node)
+      ? ts.getModifiers(node)
+      : undefined;
+    const nonCoreDecorators = ts.canHaveDecorators(node)
+      ? this._nonCoreDecoratorsOnly(node)
+      : undefined;
+    const combinedModifiers = [
+      ...(nonCoreDecorators || []),
+      ...(modifiers || []),
+    ];
+
     if (ts.isParameter(node)) {
       // Strip decorators from parameters (probably of the constructor).
-      node = updateParameterDeclaration(
+      node = ts.factory.updateParameterDeclaration(
         node,
-        combineModifiers(this._nonCoreDecoratorsOnly(node), getModifiers(node)),
+        combinedModifiers,
         node.dotDotDotToken,
         node.name,
         node.questionToken,
@@ -202,9 +212,9 @@ export class InjectableTransformerFactory {
       const parameters = node.parameters.map((param) =>
         this._stripAngularDecorators(param)
       );
-      node = updateConstructorDeclaration(
+      node = ts.factory.updateConstructorDeclaration(
         node,
-        getModifiers(node),
+        modifiers,
         parameters,
         node.body
       ) as T & ts.ConstructorDeclaration;
@@ -238,9 +248,9 @@ export class InjectableTransformerFactory {
    * `undefined`.
    */
   private _nonCoreDecoratorsOnly(
-    node: ts.Declaration
+    node: ts.HasDecorators
   ): ts.NodeArray<ts.Decorator> | undefined {
-    const decorators = getDecorators(node);
+    const decorators = ts.getDecorators(node);
 
     // Shortcut if the node has no decorators.
     if (decorators === undefined) {
@@ -294,4 +304,22 @@ function nodeArrayFromDecoratorsArray(
   }
 
   return array;
+}
+function maybeFilterDecorator(
+  decorators: readonly ts.Decorator[] | undefined,
+  toRemove: ts.Decorator[]
+): ts.NodeArray<ts.Decorator> | undefined {
+  if (decorators === undefined) {
+    return undefined;
+  }
+  const filtered = decorators.filter(
+    (dec) =>
+      toRemove.find(
+        (decToRemove) => ts.getOriginalNode(dec) === decToRemove
+      ) === undefined
+  );
+  if (filtered.length === 0) {
+    return undefined;
+  }
+  return ts.factory.createNodeArray(filtered);
 }

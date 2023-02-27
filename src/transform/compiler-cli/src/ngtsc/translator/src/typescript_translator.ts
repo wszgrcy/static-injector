@@ -6,13 +6,13 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import * as o from "../../../../../compiler";
-import * as ts from "typescript";
+import * as o from 'static-injector/transform/compiler';
+import ts from 'typescript';
 
-import { ImportGenerator } from "./api/import_generator";
-import { Context } from "./context";
-import { ExpressionTranslatorVisitor, TranslatorOptions } from "./translator";
-import { TypeScriptAstFactory } from "./typescript_ast_factory";
+import { ImportGenerator } from './api/import_generator';
+import { Context } from './context';
+import { ExpressionTranslatorVisitor, TranslatorOptions } from './translator';
+import { TypeScriptAstFactory } from './typescript_ast_factory';
 
 export function translateExpression(
   expression: o.Expression,

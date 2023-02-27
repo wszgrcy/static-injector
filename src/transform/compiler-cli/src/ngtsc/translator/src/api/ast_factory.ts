@@ -26,7 +26,7 @@ export interface AstFactory<TStatement, TExpression> {
   ): void;
 
   /**
-   * Create a literal array expresion (e.g. `[expr1, expr2]`).
+   * Create a literal array expression (e.g. `[expr1, expr2]`).
    *
    * @param elements a collection of the expressions to appear in each array slot.
    */
@@ -64,7 +64,7 @@ export interface AstFactory<TStatement, TExpression> {
    * Create an expression that is calling the `callee` with the given `args`.
    *
    * @param callee an expression that evaluates to a function to be called.
-   * @param args the arugments to be passed to the call.
+   * @param args the arguments to be passed to the call.
    * @param pure whether to mark the call as pure (having no side-effects).
    */
   createCallExpression(
@@ -277,34 +277,34 @@ export interface AstFactory<TStatement, TExpression> {
 /**
  * The type of a variable declaration.
  */
-export type VariableDeclarationType = "const" | "let" | "var";
+export type VariableDeclarationType = 'const' | 'let' | 'var';
 
 /**
  * The unary operators supported by the `AstFactory`.
  */
-export type UnaryOperator = "+" | "-" | "!";
+export type UnaryOperator = '+' | '-' | '!';
 
 /**
  * The binary operators supported by the `AstFactory`.
  */
 export type BinaryOperator =
-  | "&&"
-  | ">"
-  | ">="
-  | "&"
-  | "/"
-  | "=="
-  | "==="
-  | "<"
-  | "<="
-  | "-"
-  | "%"
-  | "*"
-  | "!="
-  | "!=="
-  | "||"
-  | "+"
-  | "??";
+  | '&&'
+  | '>'
+  | '>='
+  | '&'
+  | '/'
+  | '=='
+  | '==='
+  | '<'
+  | '<='
+  | '-'
+  | '%'
+  | '*'
+  | '!='
+  | '!=='
+  | '||'
+  | '+'
+  | '??';
 
 /**
  * The original location of the start or end of a node created by the `AstFactory`.

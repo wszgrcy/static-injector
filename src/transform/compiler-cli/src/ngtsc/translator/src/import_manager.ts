@@ -5,8 +5,10 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import * as ts from 'typescript';
+import ts from 'typescript';
+
 import { ImportRewriter, NoopImportRewriter } from '../../imports';
+
 import { ImportGenerator, NamedImport } from './api/import_generator';
 
 /**
@@ -15,7 +17,7 @@ import { ImportGenerator, NamedImport } from './api/import_generator';
 export interface Import {
   /** The name of the module that has been imported. */
   specifier: string;
-  /** The `ts.Identifer` by which the imported module is known. */
+  /** The `ts.Identifier` by which the imported module is known. */
   qualifier: ts.Identifier;
 }
 

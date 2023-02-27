@@ -8,43 +8,30 @@
 
 import ts from 'typescript';
 
-/** Whether the current TypeScript version is after 4.8. */
-const IS_AFTER_TS_48 = isAfterVersion(4, 8);
+/** Whether the current TypeScript version is after 4.9. */
+const IS_AFTER_TS_49 = isAfterVersion(4, 9);
 
-/** Equivalent of `ts.ModifierLike` which is only present in TS 4.8+. */
-export type ModifierLike = ts.Modifier | ts.Decorator;
-
-/** Type of `ts.factory.updateParameterDeclaration` in TS 4.8+. */
-type Ts48UpdateParameterDeclarationFn = (
-  node: ts.ParameterDeclaration,
-  modifiers: readonly ModifierLike[] | undefined,
+/** Type of `ts.factory.CreateParameterDeclaration` in TS 4.9+. */
+type Ts49CreateParameterDeclarationFn = (
+  modifiers: readonly ts.ModifierLike[] | undefined,
   dotDotDotToken: ts.DotDotDotToken | undefined,
   name: string | ts.BindingName,
-  questionToken: ts.QuestionToken | undefined,
-  type: ts.TypeNode | undefined,
-  initializer: ts.Expression | undefined
+  questionToken?: ts.QuestionToken | undefined,
+  type?: ts.TypeNode | undefined,
+  initializer?: ts.Expression
 ) => ts.ParameterDeclaration;
 
 /**
- * Updates a `ts.ParameterDeclaration` declaration.
+ * Creates a `ts.ParameterDeclaration` declaration.
  *
- * TODO(crisbeto): this is a backwards-compatibility layer for versions of TypeScript less than 4.8.
+ * TODO(crisbeto): this is a backwards-compatibility layer for versions of TypeScript less than 4.9.
  * We should remove it once we have dropped support for the older versions.
  */
-export const updateParameterDeclaration: Ts48UpdateParameterDeclarationFn =
-  IS_AFTER_TS_48
-    ? (ts.factory.updateParameterDeclaration as any)
-    : (
-        node,
-        modifiers,
-        dotDotDotToken,
-        name,
-        questionToken,
-        type,
-        initializer
-      ) =>
-        (ts.factory.updateParameterDeclaration as any)(
-          node,
+export const createParameterDeclaration: Ts49CreateParameterDeclarationFn =
+  IS_AFTER_TS_49
+    ? (ts.factory.createParameterDeclaration as any)
+    : (modifiers, dotDotDotToken, name, questionToken, type, initializer) =>
+        (ts.factory.createParameterDeclaration as any)(
           ...splitModifiers(modifiers),
           dotDotDotToken,
           name,
@@ -53,27 +40,25 @@ export const updateParameterDeclaration: Ts48UpdateParameterDeclarationFn =
           initializer
         );
 
-/** Type of `ts.factory.updateImportDeclaration` in TS 4.8+. */
-type Ts48UpdateImportDeclarationFn = (
-  node: ts.ImportDeclaration,
+/** Type of `ts.factory.createImportDeclaration` in TS 4.9+. */
+type Ts49CreateImportDeclarationFn = (
   modifiers: readonly ts.Modifier[] | undefined,
   importClause: ts.ImportClause | undefined,
   moduleSpecifier: ts.Expression,
-  assertClause: ts.AssertClause | undefined
+  assertClause?: ts.AssertClause
 ) => ts.ImportDeclaration;
 
 /**
- * Updates a `ts.ImportDeclaration` declaration.
+ * Creates a `ts.ImportDeclaration` declaration.
  *
- * TODO(crisbeto): this is a backwards-compatibility layer for versions of TypeScript less than 4.8.
+ * TODO(crisbeto): this is a backwards-compatibility layer for versions of TypeScript less than 4.9.
  * We should remove it once we have dropped support for the older versions.
  */
-export const updateImportDeclaration: Ts48UpdateImportDeclarationFn =
-  IS_AFTER_TS_48
-    ? (ts.factory.updateImportDeclaration as any)
-    : (node, modifiers, importClause, moduleSpecifier, assertClause) =>
-        (ts.factory.updateImportDeclaration as any)(
-          node,
+export const createImportDeclaration: Ts49CreateImportDeclarationFn =
+  IS_AFTER_TS_49
+    ? (ts.factory.createImportDeclaration as any)
+    : (modifiers, importClause, moduleSpecifier, assertClause) =>
+        (ts.factory.createImportDeclaration as any)(
           undefined,
           modifiers,
           importClause,
@@ -81,407 +66,62 @@ export const updateImportDeclaration: Ts48UpdateImportDeclarationFn =
           assertClause
         );
 
-/** Type of `ts.factory.updateClassDeclaration` in TS 4.8+. */
-type Ts48UpdateClassDeclarationFn = (
-  node: ts.ClassDeclaration,
-  modifiers: readonly ModifierLike[] | undefined,
-  name: ts.Identifier | undefined,
-  typeParameters: readonly ts.TypeParameterDeclaration[] | undefined,
-  heritageClauses: readonly ts.HeritageClause[] | undefined,
-  members: readonly ts.ClassElement[]
-) => ts.ClassDeclaration;
-
-/**
- * Updates a `ts.ClassDeclaration` declaration.
- *
- * TODO(crisbeto): this is a backwards-compatibility layer for versions of TypeScript less than 4.8.
- * We should remove it once we have dropped support for the older versions.
- */
-export const updateClassDeclaration: Ts48UpdateClassDeclarationFn =
-  IS_AFTER_TS_48
-    ? (ts.factory.updateClassDeclaration as any)
-    : (
-        node,
-        combinedModifiers,
-        name,
-        typeParameters,
-        heritageClauses,
-        members
-      ) =>
-        (ts.factory.updateClassDeclaration as any)(
-          node,
-          ...splitModifiers(combinedModifiers),
-          name,
-          typeParameters,
-          heritageClauses,
-          members
-        );
-
-/** Type of `ts.factory.createClassDeclaration` in TS 4.8+. */
-type Ts48CreateClassDeclarationFn = (
-  modifiers: readonly ModifierLike[] | undefined,
-  name: ts.Identifier | undefined,
-  typeParameters: readonly ts.TypeParameterDeclaration[] | undefined,
-  heritageClauses: readonly ts.HeritageClause[] | undefined,
-  members: readonly ts.ClassElement[]
-) => ts.ClassDeclaration;
-
-/**
- * Creates a `ts.ClassDeclaration` declaration.
- *
- * TODO(crisbeto): this is a backwards-compatibility layer for versions of TypeScript less than 4.8.
- * We should remove it once we have dropped support for the older versions.
- */
-export const createClassDeclaration: Ts48CreateClassDeclarationFn =
-  IS_AFTER_TS_48
-    ? (ts.factory.createClassDeclaration as any)
-    : (combinedModifiers, name, typeParameters, heritageClauses, members) =>
-        (ts.factory.createClassDeclaration as any)(
-          ...splitModifiers(combinedModifiers),
-          name,
-          typeParameters,
-          heritageClauses,
-          members
-        );
-
-/** Type of `ts.factory.updateMethodDeclaration` in TS 4.8+. */
-type Ts48UpdateMethodDeclarationFn = (
-  node: ts.MethodDeclaration,
-  modifiers: readonly ModifierLike[] | undefined,
+/** Type of `ts.factory.createFunctionDeclaration` in TS 4.9+. */
+type Ts49CreateFunctionDeclarationFn = (
+  modifiers: readonly ts.ModifierLike[] | undefined,
   asteriskToken: ts.AsteriskToken | undefined,
-  name: ts.PropertyName,
-  questionToken: ts.QuestionToken | undefined,
+  name: string | ts.Identifier | undefined,
   typeParameters: readonly ts.TypeParameterDeclaration[] | undefined,
   parameters: readonly ts.ParameterDeclaration[],
   type: ts.TypeNode | undefined,
   body: ts.Block | undefined
-) => ts.MethodDeclaration;
+) => ts.FunctionDeclaration;
 
 /**
- * Updates a `ts.MethodDeclaration` declaration.
+ * Creates a `ts.FunctionDeclaration` declaration.
  *
- * TODO(crisbeto): this is a backwards-compatibility layer for versions of TypeScript less than 4.8.
+ * TODO(crisbeto): this is a backwards-compatibility layer for versions of TypeScript less than 4.9.
  * We should remove it once we have dropped support for the older versions.
  */
-export const updateMethodDeclaration: Ts48UpdateMethodDeclarationFn =
-  IS_AFTER_TS_48
-    ? (ts.factory.updateMethodDeclaration as any)
+export const createFunctionDeclaration: Ts49CreateFunctionDeclarationFn =
+  IS_AFTER_TS_49
+    ? (ts.factory.createFunctionDeclaration as any)
     : (
-        node,
         modifiers,
         asteriskToken,
         name,
-        questionToken,
         typeParameters,
         parameters,
         type,
         body
       ) =>
-        (ts.factory.updateMethodDeclaration as any)(
-          node,
+        (ts.factory.createFunctionDeclaration as any)(
           ...splitModifiers(modifiers),
           asteriskToken,
           name,
-          questionToken,
           typeParameters,
           parameters,
           type,
           body
         );
 
-/** Type of `ts.factory.createMethodDeclaration` in TS 4.8+. */
-type Ts48CreateMethodDeclarationFn = (
-  modifiers: readonly ModifierLike[] | undefined,
-  asteriskToken: ts.AsteriskToken | undefined,
-  name: ts.PropertyName,
-  questionToken: ts.QuestionToken | undefined,
-  typeParameters: readonly ts.TypeParameterDeclaration[] | undefined,
-  parameters: readonly ts.ParameterDeclaration[],
-  type: ts.TypeNode | undefined,
-  body: ts.Block | undefined
-) => ts.MethodDeclaration;
-
-/**
- * Creates a `ts.MethodDeclaration` declaration.
- *
- * TODO(crisbeto): this is a backwards-compatibility layer for versions of TypeScript less than 4.8.
- * We should remove it once we have dropped support for the older versions.
- */
-export const createMethodDeclaration: Ts48CreateMethodDeclarationFn =
-  IS_AFTER_TS_48
-    ? (ts.factory.createMethodDeclaration as any)
-    : (
-        modifiers,
-        asteriskToken,
-        name,
-        questionToken,
-        typeParameters,
-        parameters,
-        type,
-        body
-      ) =>
-        (ts.factory.createMethodDeclaration as any)(
-          ...splitModifiers(modifiers),
-          asteriskToken,
-          name,
-          questionToken,
-          typeParameters,
-          parameters,
-          type,
-          body
-        );
-
-/** Type of `ts.factory.updatePropertyDeclaration` in TS 4.8+. */
-type Ts48UpdatePropertyDeclarationFn = (
-  node: ts.PropertyDeclaration,
-  modifiers: readonly ModifierLike[] | undefined,
-  name: string | ts.PropertyName,
-  questionOrExclamationToken:
-    | ts.QuestionToken
-    | ts.ExclamationToken
-    | undefined,
-  type: ts.TypeNode | undefined,
-  initializer: ts.Expression | undefined
-) => ts.PropertyDeclaration;
-
-/**
- * Updates a `ts.PropertyDeclaration` declaration.
- *
- * TODO(crisbeto): this is a backwards-compatibility layer for versions of TypeScript less than 4.8.
- * We should remove it once we have dropped support for the older versions.
- */
-export const updatePropertyDeclaration: Ts48UpdatePropertyDeclarationFn =
-  IS_AFTER_TS_48
-    ? (ts.factory.updatePropertyDeclaration as any)
-    : (node, modifiers, name, questionOrExclamationToken, type, initializer) =>
-        (ts.factory.updatePropertyDeclaration as any)(
-          node,
-          ...splitModifiers(modifiers),
-          name,
-          questionOrExclamationToken,
-          type,
-          initializer
-        );
-
-/** Type of `ts.factory.createPropertyDeclaration` in TS 4.8+. */
-type Ts48CreatePropertyDeclarationFn = (
-  modifiers: readonly ModifierLike[] | undefined,
-  name: string | ts.PropertyName,
-  questionOrExclamationToken:
-    | ts.QuestionToken
-    | ts.ExclamationToken
-    | undefined,
-  type: ts.TypeNode | undefined,
-  initializer: ts.Expression | undefined
-) => ts.PropertyDeclaration;
-
-/**
- * Creates a `ts.PropertyDeclaration` declaration.
- *
- * TODO(crisbeto): this is a backwards-compatibility layer for versions of TypeScript less than 4.8.
- * We should remove it once we have dropped support for the older versions.
- */
-export const createPropertyDeclaration: Ts48CreatePropertyDeclarationFn =
-  IS_AFTER_TS_48
-    ? (ts.factory.createPropertyDeclaration as any)
-    : (modifiers, name, questionOrExclamationToken, type, initializer) =>
-        (ts.factory.createPropertyDeclaration as any)(
-          ...splitModifiers(modifiers),
-          name,
-          questionOrExclamationToken,
-          type,
-          initializer
-        );
-
-/** Type of `ts.factory.updateGetAccessorDeclaration` in TS 4.8+. */
-type Ts48UpdateGetAccessorDeclarationFn = (
-  node: ts.GetAccessorDeclaration,
-  modifiers: readonly ModifierLike[] | undefined,
-  name: ts.PropertyName,
-  parameters: readonly ts.ParameterDeclaration[],
-  type: ts.TypeNode | undefined,
-  body: ts.Block | undefined
-) => ts.GetAccessorDeclaration;
-
-/**
- * Updates a `ts.GetAccessorDeclaration` declaration.
- *
- * TODO(crisbeto): this is a backwards-compatibility layer for versions of TypeScript less than 4.8.
- * We should remove it once we have dropped support for the older versions.
- */
-export const updateGetAccessorDeclaration: Ts48UpdateGetAccessorDeclarationFn =
-  IS_AFTER_TS_48
-    ? (ts.factory.updateGetAccessorDeclaration as any)
-    : (node, modifiers, name, parameters, type, body) =>
-        (ts.factory.updateGetAccessorDeclaration as any)(
-          node,
-          ...splitModifiers(modifiers),
-          name,
-          parameters,
-          type,
-          body
-        );
-
-/** Type of `ts.factory.createGetAccessorDeclaration` in TS 4.8+. */
-type Ts48CreateGetAccessorDeclarationFn = (
-  modifiers: readonly ModifierLike[] | undefined,
-  name: ts.PropertyName,
-  parameters: readonly ts.ParameterDeclaration[],
-  type: ts.TypeNode | undefined,
-  body: ts.Block | undefined
-) => ts.GetAccessorDeclaration;
-
-/**
- * Creates a `ts.GetAccessorDeclaration` declaration.
- *
- * TODO(crisbeto): this is a backwards-compatibility layer for versions of TypeScript less than 4.8.
- * We should remove it once we have dropped support for the older versions.
- */
-export const createGetAccessorDeclaration: Ts48CreateGetAccessorDeclarationFn =
-  IS_AFTER_TS_48
-    ? (ts.factory.createGetAccessorDeclaration as any)
-    : (modifiers, name, parameters, type, body) =>
-        (ts.factory.createGetAccessorDeclaration as any)(
-          ...splitModifiers(modifiers),
-          name,
-          parameters,
-          type,
-          body
-        );
-
-/** Type of `ts.factory.updateSetAccessorDeclaration` in TS 4.8+. */
-type Ts48UpdateSetAccessorDeclarationFn = (
-  node: ts.SetAccessorDeclaration,
-  modifiers: readonly ModifierLike[] | undefined,
-  name: ts.PropertyName,
-  parameters: readonly ts.ParameterDeclaration[],
-  body: ts.Block | undefined
-) => ts.SetAccessorDeclaration;
-
-/**
- * Updates a `ts.GetAccessorDeclaration` declaration.
- *
- * TODO(crisbeto): this is a backwards-compatibility layer for versions of TypeScript less than 4.8.
- * We should remove it once we have dropped support for the older versions.
- */
-export const updateSetAccessorDeclaration: Ts48UpdateSetAccessorDeclarationFn =
-  IS_AFTER_TS_48
-    ? (ts.factory.updateSetAccessorDeclaration as any)
-    : (node, modifiers, name, parameters, body) =>
-        (ts.factory.updateSetAccessorDeclaration as any)(
-          node,
-          ...splitModifiers(modifiers),
-          name,
-          parameters,
-          body
-        );
-
-/** Type of `ts.factory.createSetAccessorDeclaration` in TS 4.8+. */
-type Ts48CreateSetAccessorDeclarationFn = (
-  modifiers: readonly ModifierLike[] | undefined,
-  name: ts.PropertyName,
-  parameters: readonly ts.ParameterDeclaration[],
-  body: ts.Block | undefined
-) => ts.SetAccessorDeclaration;
-
-/**
- * Creates a `ts.GetAccessorDeclaration` declaration.
- *
- * TODO(crisbeto): this is a backwards-compatibility layer for versions of TypeScript less than 4.8.
- * We should remove it once we have dropped support for the older versions.
- */
-export const createSetAccessorDeclaration: Ts48CreateSetAccessorDeclarationFn =
-  IS_AFTER_TS_48
-    ? (ts.factory.createSetAccessorDeclaration as any)
-    : (modifiers, name, parameters, body) =>
-        (ts.factory.createSetAccessorDeclaration as any)(
-          ...splitModifiers(modifiers),
-          name,
-          parameters,
-          body
-        );
-
-/** Type of `ts.factory.updateConstructorDeclaration` in TS 4.8+. */
-type Ts48UpdateConstructorDeclarationFn = (
-  node: ts.ConstructorDeclaration,
+/** Type of `ts.factory.createIndexSignature` in TS 4.9+. */
+type Ts49CreateIndexSignatureFn = (
   modifiers: readonly ts.Modifier[] | undefined,
   parameters: readonly ts.ParameterDeclaration[],
-  body: ts.Block | undefined
-) => ts.ConstructorDeclaration;
+  type: ts.TypeNode
+) => ts.IndexSignatureDeclaration;
 
 /**
- * Updates a `ts.ConstructorDeclaration` declaration.
+ * Creates a `ts.IndexSignatureDeclaration` declaration.
  *
- * TODO(crisbeto): this is a backwards-compatibility layer for versions of TypeScript less than 4.8.
+ * TODO(crisbeto): this is a backwards-compatibility layer for versions of TypeScript less than 4.9.
  * We should remove it once we have dropped support for the older versions.
  */
-export const updateConstructorDeclaration: Ts48UpdateConstructorDeclarationFn =
-  IS_AFTER_TS_48
-    ? (ts.factory.updateConstructorDeclaration as any)
-    : (node, modifiers, parameters, body) =>
-        (ts.factory.updateConstructorDeclaration as any)(
-          node,
-          undefined,
-          modifiers,
-          parameters,
-          body
-        );
-
-/**
- * Gets the decorators that have been applied to a node.
- *
- * TODO(crisbeto): this is a backwards-compatibility layer for versions of TypeScript less than 4.8.
- * We should remove it once we have dropped support for the older versions.
- */
-export const getDecorators: (
-  node: ts.Node
-) => readonly ts.Decorator[] | undefined = IS_AFTER_TS_48
-  ? (ts as any).getDecorators
-  : (node) => node.decorators;
-
-/**
- * Gets the modifiers that have been set on a node.
- *
- * TODO(crisbeto): this is a backwards-compatibility layer for versions of TypeScript less than 4.8.
- * We should remove it once we have dropped support for the older versions.
- */
-export const getModifiers: (
-  node: ts.Node
-) => readonly ts.Modifier[] | undefined = IS_AFTER_TS_48
-  ? (ts as any).getModifiers
-  : (node) => node.modifiers;
-
-/**
- * Combines an optional array of decorators with an optional array of modifiers into a single
- * `ts.ModifierLike` array. Used in version of TypeScript after 4.8 where the `decorators` and
- * `modifiers` arrays have been combined.
- *
- * TODO(crisbeto): this is a backwards-compatibility layer for versions of TypeScript less than 4.8.
- * We should remove it once we have dropped support for the older versions.
- */
-export function combineModifiers(
-  decorators: readonly ts.Decorator[] | undefined,
-  modifiers: readonly ModifierLike[] | undefined
-): readonly ModifierLike[] | undefined {
-  const hasDecorators = decorators?.length;
-  const hasModifiers = modifiers?.length;
-
-  // This function can be written more compactly, but it is somewhat performance-sensitive
-  // so we have some additional logic only to create new arrays when necessary.
-  if (hasDecorators && hasModifiers) {
-    return [...decorators, ...modifiers];
-  }
-
-  if (hasDecorators && !hasModifiers) {
-    return decorators;
-  }
-
-  if (hasModifiers && !hasDecorators) {
-    return modifiers;
-  }
-
-  return undefined;
-}
+export const createIndexSignature: Ts49CreateIndexSignatureFn = IS_AFTER_TS_49
+  ? (ts.factory.createIndexSignature as any)
+  : (modifiers, parameters, type) =>
+      (ts.factory.createIndexSignature as any)(modifiers, parameters, type);
 
 /**
  * Splits a `ModifierLike` into two arrays: decorators and modifiers. Used for backwards
@@ -489,7 +129,7 @@ export function combineModifiers(
  * and `modifiers` arrays.
  */
 function splitModifiers(
-  allModifiers: readonly ModifierLike[] | undefined
+  allModifiers: readonly ts.ModifierLike[] | undefined
 ): [ts.Decorator[] | undefined, ts.Modifier[] | undefined] {
   if (!allModifiers) {
     return [undefined, undefined];

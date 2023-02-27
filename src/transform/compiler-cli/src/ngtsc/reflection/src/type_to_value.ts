@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import * as ts from 'typescript';
+import ts from 'typescript';
 
 import {
   TypeValueReference,
@@ -86,11 +86,13 @@ export function typeToValue(
         // The import specifier can't be type-only (e.g. `import {type Foo} from '...')`.
         return typeOnlyImport(typeNode, firstDecl);
       }
+
       if (firstDecl.parent.parent.isTypeOnly) {
         // The import specifier can't be inside a type-only import clause
         // (e.g. `import type {Foo} from '...')`.
         return typeOnlyImport(typeNode, firstDecl.parent.parent);
       }
+
       // Determine the name to import (`Foo`) from the import specifier, as the symbol names of
       // the imported type could refer to a local alias (like `Bar` in the example above).
       const importedName = (firstDecl.propertyName || firstDecl.name).text;
@@ -173,11 +175,7 @@ function typeOnlyImport(
 ): UnavailableTypeValueReference {
   return {
     kind: TypeValueReferenceKind.UNAVAILABLE,
-    reason: {
-      kind: ValueUnavailableKind.TYPE_ONLY_IMPORT,
-      typeNode,
-      node: node,
-    },
+    reason: { kind: ValueUnavailableKind.TYPE_ONLY_IMPORT, typeNode, node },
   };
 }
 

@@ -6,8 +6,8 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import * as ts from "typescript";
-import { ClassDeclaration } from "./host";
+import ts from 'typescript';
+import { ClassDeclaration } from './host';
 
 export function isNamedClassDeclaration(
   node: ts.Node

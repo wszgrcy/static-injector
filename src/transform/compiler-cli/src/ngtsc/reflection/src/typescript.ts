@@ -6,8 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import * as ts from 'typescript';
-import { getDecorators, getModifiers } from '../../ts_compatibility';
+import ts from 'typescript';
 
 import {
   ClassDeclaration,
@@ -31,7 +30,9 @@ export class TypeScriptReflectionHost implements ReflectionHost {
   constructor(protected checker: ts.TypeChecker) {}
 
   getDecoratorsOfDeclaration(declaration: DeclarationNode): Decorator[] | null {
-    const decorators = getDecorators(declaration);
+    const decorators = ts.canHaveDecorators(declaration)
+      ? ts.getDecorators(declaration)
+      : undefined;
 
     return decorators !== undefined && decorators.length
       ? decorators
@@ -282,6 +283,7 @@ export class TypeScriptReflectionHost implements ReflectionHost {
     if (!isDecoratorIdentifier(decoratorExpr)) {
       return null;
     }
+
     const decoratorIdentifier = ts.isIdentifier(decoratorExpr)
       ? decoratorExpr
       : decoratorExpr.name;
@@ -330,7 +332,7 @@ export class TypeScriptReflectionHost implements ReflectionHost {
     }
 
     const decorators = this.getDecoratorsOfDeclaration(node);
-    const modifiers = getModifiers(node);
+    const modifiers = ts.getModifiers(node);
     const isStatic =
       modifiers !== undefined &&
       modifiers.some((mod) => mod.kind === ts.SyntaxKind.StaticKeyword);
@@ -462,10 +464,10 @@ function getExportedName(
     : originalId.text;
 }
 
-const LocalExportedClasses = Symbol('LocalExportedClasses');
+const LocalExportedDeclarations = Symbol('LocalExportedDeclarations');
 
 /**
- * A `ts.SourceFile` expando which includes a cached `Set` of local `ClassDeclarations` that are
+ * A `ts.SourceFile` expando which includes a cached `Set` of local `ts.Declaration`s that are
  * exported either directly (`export class ...`) or indirectly (via `export {...}`).
  *
  * This cache does not cause memory leaks as:
@@ -479,8 +481,8 @@ const LocalExportedClasses = Symbol('LocalExportedClasses');
  */
 interface SourceFileWithCachedExports extends ts.SourceFile {
   /**
-   * Cached `Set` of `ClassDeclaration`s which are locally declared in this file and are exported
+   * Cached `Set` of `ts.Declaration`s which are locally declared in this file and are exported
    * either directly or indirectly.
    */
-  [LocalExportedClasses]?: Set<ClassDeclaration>;
+  [LocalExportedDeclarations]?: Set<ts.Declaration>;
 }

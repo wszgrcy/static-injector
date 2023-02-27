@@ -8,19 +8,21 @@
 
 import {
   compileInjectable,
+  createMayBeForwardRefExpression,
   FactoryTarget,
+  ForwardRefHandling,
   LiteralExpr,
+  MaybeForwardRefExpression,
   R3CompiledExpression,
   R3DependencyMetadata,
   R3InjectableMetadata,
-  MaybeForwardRefExpression,
   WrappedNodeExpr,
-  createMayBeForwardRefExpression,
-  ForwardRefHandling,
-} from '../../../../../compiler';
-import * as ts from 'typescript';
+} from 'static-injector/transform/compiler';
+import ts from 'typescript';
 
+import { isAbstractClassDeclaration } from '../../annotations/common';
 import { ErrorCode, FatalDiagnosticError } from '../../diagnostics';
+
 import {
   ClassDeclaration,
   Decorator,
@@ -33,23 +35,23 @@ import {
   DecoratorHandler,
   DetectResult,
 } from '../../transform';
-
-import { CompileFactoryFn, compileNgFactoryDefField } from './factory';
 import {
+  CompileFactoryFn,
+  compileNgFactoryDefField,
   findAngularDecorator,
   getConstructorDependencies,
   getValidConstructorDependencies,
+  isAngularCore,
   toFactoryMetadata,
   tryUnwrapForwardRef,
   unwrapConstructorDependencies,
   validateConstructorDependencies,
   wrapTypeReference,
-} from '../common/src/util';
-import { isAbstractClassDeclaration } from '../common/src/util';
+} from '../common';
 
-interface InjectableHandlerData {
+export interface InjectableHandlerData {
   meta: R3InjectableMetadata;
-  // classMetadata: R3ClassMetadata | null;
+
   ctorDeps: R3DependencyMetadata[] | 'invalid' | null;
 }
 
@@ -57,7 +59,7 @@ interface InjectableHandlerData {
  * Adapts the `compileInjectable` compiler for `@Injectable` decorators to the Ivy compiler.
  */
 export class InjectableDecoratorHandler
-  implements DecoratorHandler<Decorator, InjectableHandlerData, null, unknown>
+  implements DecoratorHandler<Decorator, InjectableHandlerData, unknown>
 {
   constructor(
     private reflector: ReflectionHost,
@@ -113,6 +115,7 @@ export class InjectableDecoratorHandler
           this.isCore,
           this.strictCtorDeps
         ),
+
         // Avoid generating multiple factories if a class has
         // more Angular decorators, apart from Injectable.
       },
@@ -139,15 +142,17 @@ export class InjectableDecoratorHandler
   ): CompileResult[] {
     const results: CompileResult[] = [];
 
-    const meta = analysis.meta;
-    const factoryRes = compileFactoryFn(
-      toFactoryMetadata(
-        { ...meta, deps: analysis.ctorDeps },
-        FactoryTarget.Injectable
-      )
-    );
+    if (true) {
+      const meta = analysis.meta;
+      const factoryRes = compileFactoryFn(
+        toFactoryMetadata(
+          { ...meta, deps: analysis.ctorDeps },
+          FactoryTarget.Injectable
+        )
+      );
 
-    results.push(factoryRes);
+      results.push(factoryRes);
+    }
 
     const ɵprov = this.reflector
       .getMembersOfClass(node)
@@ -324,7 +329,7 @@ function extractInjectableCtorDeps(
     // To deal with this, @Injectable() without an argument is more lenient, and if the
     // constructor signature does not work for DI then a factory definition (ɵfac) that throws is
     // generated.
-    if (strictCtorDeps) {
+    if (strictCtorDeps && !isAbstractClassDeclaration(clazz)) {
       ctorDeps = getValidConstructorDependencies(clazz, reflector, isCore);
     } else {
       ctorDeps = unwrapConstructorDependencies(
@@ -351,6 +356,7 @@ function extractInjectableCtorDeps(
 
   return ctorDeps;
 }
+
 function requiresValidCtor(meta: R3InjectableMetadata): boolean {
   return (
     meta.useValue === undefined &&
@@ -359,6 +365,7 @@ function requiresValidCtor(meta: R3InjectableMetadata): boolean {
     meta.useFactory === undefined
   );
 }
+
 function getDep(
   dep: ts.Expression,
   reflector: ReflectionHost
@@ -366,6 +373,7 @@ function getDep(
   const meta: R3DependencyMetadata = {
     token: new WrappedNodeExpr(dep),
     attributeNameType: null,
+
     optional: false,
     self: false,
     skipSelf: false,
@@ -403,20 +411,16 @@ function getDep(
 
   if (ts.isArrayLiteralExpression(dep)) {
     dep.elements.forEach((el) => {
-      let isParametersDecorator = false;
+      let isDecorator = false;
       if (ts.isIdentifier(el)) {
-        isParametersDecorator = maybeUpdateDecorator(el, reflector);
+        isDecorator = maybeUpdateDecorator(el, reflector);
       } else if (ts.isNewExpression(el) && ts.isIdentifier(el.expression)) {
         const token =
           (el.arguments && el.arguments.length > 0 && el.arguments[0]) ||
           undefined;
-        isParametersDecorator = maybeUpdateDecorator(
-          el.expression,
-          reflector,
-          token
-        );
+        isDecorator = maybeUpdateDecorator(el.expression, reflector, token);
       }
-      if (!isParametersDecorator) {
+      if (!isDecorator) {
         meta.token = new WrappedNodeExpr(el);
       }
     });

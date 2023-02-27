@@ -6,10 +6,14 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import { Expression, Statement, Type } from "../../../../../compiler";
-import * as ts from "typescript";
+import {
+  Expression,
+  Statement,
+  Type,
+} from 'static-injector/transform/compiler';
+import ts from 'typescript';
 
-import { ClassDeclaration, Decorator } from "../../reflection";
+import { ClassDeclaration, Decorator } from '../../reflection';
 
 /**
  * A set of options which can be passed to a `DecoratorHandler` by a consumer, to tailor the output
@@ -44,7 +48,7 @@ export enum HandlerFlags {
  * @param `A` The type of analysis metadata produced by `analyze`.
  * @param `R` The type of resolution metadata produced by `resolve`.
  */
-export interface DecoratorHandler<D, A, S extends null, R> {
+export interface DecoratorHandler<D, A, R> {
   /**
    * Scan a set of reflected decorators and determine if this handler is responsible for compilation
    * of one of them.

@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import * as ts from 'typescript';
+import ts from 'typescript';
 
 /**
  * Metadata extracted from an instance of a decorator on another declaration, or synthesized from
@@ -92,7 +92,6 @@ export type NamespacedIdentifier = ts.PropertyAccessExpression & {
   expression: ts.Identifier;
   name: ts.Identifier;
 };
-/** 装饰器可能是 Injectable或者xx.Injectable */
 export function isDecoratorIdentifier(
   exp: ts.Expression
 ): exp is DecoratorIdentifier {
@@ -536,7 +535,7 @@ export interface Import {
   /**
    * The module from which the symbol was imported.
    *
-   * This could either be an absolute module name (static-injector for example) or a relative path.
+   * This could either be an absolute module name (@angular/core for example) or a relative path.
    */
   from: string;
 }
@@ -722,7 +721,7 @@ export interface ReflectionHost {
    * Determine if an identifier was imported from another module and return `Import` metadata
    * describing its origin.
    *
-   * @param id a TypeScript `ts.Identifer` to reflect.
+   * @param id a TypeScript `ts.Identifier` to reflect.
    *
    * @returns metadata about the `Import` if the identifier was imported from another module, or
    * `null` if the identifier doesn't resolve to an import but instead is locally defined.

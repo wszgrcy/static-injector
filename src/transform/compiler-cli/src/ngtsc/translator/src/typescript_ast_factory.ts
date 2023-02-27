@@ -5,7 +5,12 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import * as ts from 'typescript';
+import ts from 'typescript';
+
+import {
+  createFunctionDeclaration,
+  createParameterDeclaration,
+} from '../../ts_compatibility';
 
 import {
   AstFactory,
@@ -150,19 +155,13 @@ export class TypeScriptAstFactory
         `Invalid syntax, expected a block, but got ${ts.SyntaxKind[body.kind]}.`
       );
     }
-    return ts.factory.createFunctionDeclaration(
-      undefined,
+    return createFunctionDeclaration(
       undefined,
       undefined,
       functionName,
       undefined,
       parameters.map((param) =>
-        ts.factory.createParameterDeclaration(
-          undefined,
-          undefined,
-          undefined,
-          param
-        )
+        createParameterDeclaration(undefined, undefined, param)
       ),
       undefined,
       body
@@ -185,12 +184,7 @@ export class TypeScriptAstFactory
       functionName ?? undefined,
       undefined,
       parameters.map((param) =>
-        ts.factory.createParameterDeclaration(
-          undefined,
-          undefined,
-          undefined,
-          param
-        )
+        createParameterDeclaration(undefined, undefined, param)
       ),
       undefined,
       body
@@ -377,7 +371,10 @@ export function createTemplateMiddle(
   cooked: string,
   raw: string
 ): ts.TemplateMiddle {
-  const node: ts.TemplateLiteralLikeNode = ts.createTemplateHead(cooked, raw);
+  const node: ts.TemplateLiteralLikeNode = ts.factory.createTemplateHead(
+    cooked,
+    raw
+  );
   (node.kind as ts.SyntaxKind) = ts.SyntaxKind.TemplateMiddle;
   return node as ts.TemplateMiddle;
 }

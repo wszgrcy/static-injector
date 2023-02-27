@@ -5,9 +5,10 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import * as ts from 'typescript';
+import ts from 'typescript';
 
 import { ImportManager } from '../../translator';
+import { createImportDeclaration } from '../../ts_compatibility';
 
 /**
  * Adds extra imports in the import manage for this source file, after the existing imports
@@ -27,8 +28,7 @@ export function addImports(
       /* name */ undefined,
       /* namedBindings */ ts.factory.createNamespaceImport(qualifier)
     );
-    const decl = ts.factory.createImportDeclaration(
-      /* decorators */ undefined,
+    const decl = createImportDeclaration(
       /* modifiers */ undefined,
       /* importClause */ importClause,
       /* moduleSpecifier */ ts.factory.createStringLiteral(i.specifier)
