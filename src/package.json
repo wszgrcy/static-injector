@@ -1,6 +1,6 @@
 {
   "name": "static-injector",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Angular的静态注入器独立使用版本",
   "keywords": [
     "angular",
