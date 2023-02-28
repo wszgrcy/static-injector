@@ -37,6 +37,7 @@ export interface TypeDecorator {
     parameterIndex?: number
   ): void;
 }
+export const PARAMETERS = '__parameters__';
 
 function makeMetadataCtor(props?: (...args: any[]) => any): any {
   return function ctor(this: any, ...args: any[]) {
@@ -51,7 +52,8 @@ function makeMetadataCtor(props?: (...args: any[]) => any): any {
 
 export function makeParamDecorator(
   name: string,
-  props?: (...args: any[]) => any
+  props?: (...args: any[]) => any,
+  parentClass?: any
 ): any {
   return noSideEffects(() => {
     const metaCtor = makeMetadataCtor(props);
@@ -63,8 +65,33 @@ export function makeParamDecorator(
         metaCtor.apply(this, args);
         return this;
       }
-    }
+      const annotationInstance = new (<any>ParamDecoratorFactory)(...args);
 
+      (<any>ParamDecorator).annotation = annotationInstance;
+      return ParamDecorator;
+
+      function ParamDecorator(cls: any, unusedKey: any, index: number): any {
+        // Use of Object.defineProperty is important since it creates non-enumerable property which
+        // prevents the property is copied during subclassing.
+        const parameters = cls.hasOwnProperty(PARAMETERS)
+          ? (cls as any)[PARAMETERS]
+          : Object.defineProperty(cls, PARAMETERS, { value: [] })[PARAMETERS];
+
+        // there might be gaps if some in between parameters do not have annotations.
+        // we pad with nulls.
+        while (parameters.length <= index) {
+          parameters.push(null);
+        }
+
+        (parameters[index] = parameters[index] || []).push(annotationInstance);
+        return cls;
+      }
+    }
+    if (parentClass) {
+      ParamDecoratorFactory.prototype = Object.create(parentClass.prototype);
+    }
+    ParamDecoratorFactory.prototype.ngMetadataName = name;
+    (<any>ParamDecoratorFactory).annotationCls = ParamDecoratorFactory;
     return ParamDecoratorFactory;
   });
 }

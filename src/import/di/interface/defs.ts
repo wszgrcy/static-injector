@@ -8,9 +8,11 @@
 
 import { Type } from '../../interface/type';
 import { getClosureSafeProperty } from '../../util/property';
+
 import {
   ClassProvider,
   ConstructorProvider,
+  EnvironmentProviders,
   ExistingProvider,
   FactoryProvider,
   StaticClassProvider,
@@ -41,7 +43,13 @@ export interface ɵɵInjectableDeclaration<T> {
    * - `null`, does not belong to any injector. Must be explicitly listed in the injector
    *   `providers`.
    */
-  providedIn: InjectorType<any> | 'root' | 'platform' | 'any' | null;
+  providedIn:
+    | InjectorType<any>
+    | 'root'
+    | 'platform'
+    | 'any'
+    | 'environment'
+    | null;
 
   /**
    * The token to which this definition belongs.
@@ -84,6 +92,7 @@ export interface ɵɵInjectorDef<T> {
     | ConstructorProvider
     | StaticClassProvider
     | ClassProvider
+    | EnvironmentProviders
     | any[]
   )[];
 
@@ -94,7 +103,7 @@ export interface ɵɵInjectorDef<T> {
  * A `Type` which has a `ɵprov: ɵɵInjectableDeclaration` static field.
  *
  * `InjectableType`s contain their own Dependency Injection metadata and are usable in an
- * `InjectorDef`-based `StaticInjector.
+ * `InjectorDef`-based `StaticInjector`.
  *
  * @publicApi
  */
@@ -137,6 +146,7 @@ export interface InjectorTypeWithProviders<T> {
     | ConstructorProvider
     | StaticClassProvider
     | ClassProvider
+    | EnvironmentProviders
     | any[]
   )[];
 }
@@ -160,7 +170,7 @@ export interface InjectorTypeWithProviders<T> {
  */
 export function ɵɵdefineInjectable<T>(opts: {
   token: unknown;
-  providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
+  providedIn?: Type<any> | 'root' | 'platform' | 'any' | 'environment' | null;
   factory: () => T;
 }): unknown {
   return {
@@ -204,7 +214,11 @@ export function ɵɵdefineInjector(options: {
 export function getInjectableDef<T>(
   type: any
 ): ɵɵInjectableDeclaration<T> | null {
-  return getOwnDefinition(type, NG_PROV_DEF);
+  return getOwnDefinition(type, NG_PROV_DEF) || null;
+}
+
+export function isInjectable(type: any): boolean {
+  return getInjectableDef(type) !== null;
 }
 
 /**
@@ -218,10 +232,6 @@ function getOwnDefinition<T>(
   return type.hasOwnProperty(field) ? type[field] : null;
 }
 
-export const NG_PROV_DEF = getClosureSafeProperty({
-  ɵprov: getClosureSafeProperty,
-});
-
 /**
  * Read the injectable def (`ɵprov`) for `type` or read the `ɵprov` from one of its ancestors.
  *
@@ -233,24 +243,16 @@ export const NG_PROV_DEF = getClosureSafeProperty({
 export function getInheritedInjectableDef<T>(
   type: any
 ): ɵɵInjectableDeclaration<T> | null {
-  const def = type && (type[NG_PROV_DEF] || type[NG_INJECTABLE_DEF]);
+  const def = type && (type[NG_PROV_DEF] || null);
 
   if (def) {
     const typeName = getTypeName(type);
-    // TODO(FW-1307): Re-add ngDevMode when closure can handle it
-    // ngDevMode &&
-    console.warn(
-      `DEPRECATED: DI is instantiating a token "${typeName}" that inherits its @Injectable decorator but does not provide one itself.\n` +
-        `This will become an error in a future version of Angular. Please add @Injectable() to the "${typeName}" class.`
-    );
+
     return def;
   } else {
     return null;
   }
 }
-export const NG_INJECTABLE_DEF = getClosureSafeProperty({
-  ngInjectableDef: getClosureSafeProperty,
-});
 
 /** Gets the name of a type, accounting for some cross-browser differences. */
 function getTypeName(type: any): string {
@@ -267,3 +269,21 @@ function getTypeName(type: any): string {
   const match = ('' + type).match(/^function\s*([^\s(]+)/);
   return match === null ? '' : match[1];
 }
+
+/**
+ * Read the injector def type in a way which is immune to accidentally reading inherited value.
+ *
+ * @param type type which may have an injector def (`ɵinj`)
+ */
+export function getInjectorDef<T>(type: any): ɵɵInjectorDef<T> | null {
+  return type && (type.hasOwnProperty(NG_INJ_DEF) || false)
+    ? (type as any)[NG_INJ_DEF]
+    : null;
+}
+
+export const NG_PROV_DEF = getClosureSafeProperty({
+  ɵprov: getClosureSafeProperty,
+});
+export const NG_INJ_DEF = getClosureSafeProperty({
+  ɵinj: getClosureSafeProperty,
+});

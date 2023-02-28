@@ -83,6 +83,27 @@ export abstract class Injector {
     notFoundValue?: T,
     options?: InjectOptions | InjectFlags
   ): T;
+  /**
+   * Retrieves an instance from the injector based on the provided token.
+   * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
+   * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
+   * @deprecated use object-based flags (`InjectOptions`) instead.
+   */
+  abstract get<T>(
+    token: ProviderToken<T>,
+    notFoundValue?: T,
+    flags?: InjectFlags
+  ): T;
+  /**
+   * @deprecated from v4.0.0 use ProviderToken<T>
+   * @suppress {duplicate}
+   */
+  abstract get(token: any, notFoundValue?: any): any;
+
+  /**
+   * @deprecated from v5 use the new signature Injector.create(options)
+   */
+  static create(providers: StaticProvider[], parent?: Injector): Injector;
 
   /**
    * Creates a new injector instance that provides one or more dependencies,

@@ -6,9 +6,9 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import { stringify } from "../util/stringify";
-import { Injector } from "./injector";
-import { THROW_IF_NOT_FOUND } from "./injector_compatibility";
+import { stringify } from '../util/stringify';
+import { Injector } from './injector';
+import { THROW_IF_NOT_FOUND } from './injector_compatibility';
 
 export class NullInjector implements Injector {
   get(token: any, notFoundValue: any = THROW_IF_NOT_FOUND): any {
@@ -16,7 +16,7 @@ export class NullInjector implements Injector {
       const error = new Error(
         `NullInjectorError: No provider for ${stringify(token)}!`
       );
-      error.name = "NullInjectorError";
+      error.name = 'NullInjectorError';
       throw error;
     }
     return notFoundValue;

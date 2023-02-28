@@ -6,9 +6,9 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import { Type } from "../interface/type";
-import { getClosureSafeProperty } from "../util/property";
-import { stringify } from "../util/stringify";
+import { Type } from '../interface/type';
+import { getClosureSafeProperty } from '../util/property';
+import { stringify } from '../util/stringify';
 
 /**
  * An interface that a function passed into {@link forwardRef} has to implement.
@@ -67,7 +67,7 @@ export function resolveForwardRef<T>(type: T): T {
 /** Checks whether a function is wrapped by a `forwardRef`. */
 export function isForwardRef(fn: any): fn is () => any {
   return (
-    typeof fn === "function" &&
+    typeof fn === 'function' &&
     fn.hasOwnProperty(__forward_ref__) &&
     fn.__forward_ref__ === forwardRef
   );

@@ -13,8 +13,8 @@
  * Check `core/test/render3/perf/render_stringify` for benchmarks and alternate implementations.
  */
 export function renderStringify(value: any): string {
-  if (typeof value === "string") return value;
-  if (value == null) return "";
+  if (typeof value === 'string') return value;
+  if (value == null) return '';
   // Use `String` so that it invokes the `toString` method of the value. Note that this
   // appears to be faster than calling `value.toString` (see `render_stringify` benchmark).
   return String(value);
@@ -26,11 +26,11 @@ export function renderStringify(value: any): string {
  * used for error messages.
  */
 export function stringifyForError(value: any): string {
-  if (typeof value === "function") return value.name || value.toString();
+  if (typeof value === 'function') return value.name || value.toString();
   if (
-    typeof value === "object" &&
+    typeof value === 'object' &&
     value != null &&
-    typeof value.type === "function"
+    typeof value.type === 'function'
   ) {
     return value.type.name || value.type.toString();
   }

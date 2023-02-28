@@ -7,6 +7,7 @@
  */
 
 import { InjectionToken } from './injection_token';
+
 export type InjectorScope = 'root' | 'platform' | 'environment';
 
 /**

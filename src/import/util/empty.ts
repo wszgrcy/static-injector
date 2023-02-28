@@ -13,4 +13,9 @@
  * code.
  */
 
+export const EMPTY_OBJ: {} = {};
 export const EMPTY_ARRAY: any[] = [];
+
+// freezing the values prevents any code from accidentally inserting new values in
+if (false) {
+}

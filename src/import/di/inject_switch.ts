@@ -7,11 +7,13 @@
  */
 
 import { throwProviderNotFoundError } from '../render3/errors_di';
+
 import { stringify } from '../util/stringify';
 
 import { getInjectableDef, ɵɵInjectableDeclaration } from './interface/defs';
 import { InjectFlags } from './interface/injector';
 import { ProviderToken } from './provider_token';
+
 /**
  * Current implementation of inject.
  *
@@ -40,6 +42,7 @@ export function setInjectImplementation(
   _injectImplementation = impl;
   return previous;
 }
+
 /**
  * Injects `root` tokens in limp mode.
  *

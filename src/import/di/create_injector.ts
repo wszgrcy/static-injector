@@ -11,6 +11,7 @@ import { stringify } from '../util/stringify';
 
 import { Injector } from './injector';
 import { StaticProvider } from './interface/provider';
+import { importProvidersFrom } from './provider_collection';
 import { getNullInjector, R3Injector } from './r3_injector';
 import { InjectorScope } from './scope';
 
@@ -47,7 +48,10 @@ export function createInjectorWithoutInjectorInstances(
   name?: string,
   scopes = new Set<InjectorScope>()
 ): R3Injector {
-  const providers = [additionalProviders || EMPTY_ARRAY];
+  const providers = [
+    additionalProviders || EMPTY_ARRAY,
+    importProvidersFrom(defType),
+  ];
   name = name || (typeof defType === 'object' ? undefined : stringify(defType));
 
   return new R3Injector(

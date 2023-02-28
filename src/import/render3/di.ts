@@ -7,9 +7,18 @@
  */
 
 import { isForwardRef, resolveForwardRef } from '../di/forward_ref';
+
+import { Injector } from '../di/injector';
+import { convertToBitFlags } from '../di/injector_compatibility';
+
+import { InjectFlags, InjectOptions } from '../di/interface/injector';
+
 import { Type } from '../interface/type';
+
 import { noSideEffects } from '../util/closure';
-import { getFactoryDef } from './definition_factory';
+
+import { FactoryFn, getFactoryDef } from './definition_factory';
+
 import { NG_FACTORY_DEF } from './fields';
 
 /**

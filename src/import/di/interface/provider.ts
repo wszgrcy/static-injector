@@ -341,3 +341,74 @@ export type Provider =
   | ExistingProvider
   | FactoryProvider
   | any[];
+
+/**
+ * Encapsulated `Provider`s that are only accepted during creation of an `EnvironmentInjector` (e.g.
+ * in an `NgModule`).
+ *
+ * Using this wrapper type prevents providers which are only designed to work in
+ * application/environment injectors from being accidentally included in
+ * `@Component.providers` and ending up in a component injector.
+ *
+ * This wrapper type prevents access to the `Provider`s inside.
+ *
+ * @see `makeEnvironmentProviders`
+ * @see `importProvidersFrom`
+ *
+ * @publicApi
+ */
+export type EnvironmentProviders = {
+  ɵbrand: 'EnvironmentProviders';
+};
+
+export interface InternalEnvironmentProviders extends EnvironmentProviders {
+  ɵproviders: (Provider | EnvironmentProviders)[];
+
+  /**
+   * If present, indicates that the `EnvironmentProviders` were derived from NgModule providers.
+   *
+   * This is used to produce clearer error messages.
+   */
+  ɵfromNgModule?: true;
+}
+
+export function isEnvironmentProviders(
+  value: Provider | EnvironmentProviders | InternalEnvironmentProviders
+): value is InternalEnvironmentProviders {
+  return value && !!(value as InternalEnvironmentProviders).ɵproviders;
+}
+
+/**
+ * Describes a function that is used to process provider lists (such as provider
+ * overrides).
+ */
+export type ProcessProvidersFunction = (providers: Provider[]) => Provider[];
+
+/**
+ * A wrapper around an NgModule that associates it with [providers](guide/glossary#provider
+ * "Definition"). Usage without a generic type is deprecated.
+ *
+ * @see [Deprecations](guide/deprecations#modulewithproviders-type-without-a-generic)
+ *
+ * @publicApi
+ */
+export interface ModuleWithProviders<T> {
+  ngModule: Type<T>;
+  providers?: Array<Provider | EnvironmentProviders>;
+}
+
+/**
+ * Providers that were imported from NgModules via the `importProvidersFrom` function.
+ *
+ * These providers are meant for use in an application injector (or other environment injectors) and
+ * should not be used in component injectors.
+ *
+ * This type cannot be directly implemented. It's returned from the `importProvidersFrom` function
+ * and serves to prevent the extracted NgModule providers from being used in the wrong contexts.
+ *
+ * @see `importProvidersFrom`
+ *
+ * @publicApi
+ * @deprecated replaced by `EnvironmentProviders`
+ */
+export type ImportedNgModuleProviders = EnvironmentProviders;

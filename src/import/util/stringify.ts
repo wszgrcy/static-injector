@@ -7,16 +7,16 @@
  */
 
 export function stringify(token: any): string {
-  if (typeof token === "string") {
+  if (typeof token === 'string') {
     return token;
   }
 
   if (Array.isArray(token)) {
-    return "[" + token.map(stringify).join(", ") + "]";
+    return '[' + token.map(stringify).join(', ') + ']';
   }
 
   if (token == null) {
-    return "" + token;
+    return '' + token;
   }
 
   if (token.overriddenName) {
@@ -30,9 +30,9 @@ export function stringify(token: any): string {
   const res = token.toString();
 
   if (res == null) {
-    return "" + res;
+    return '' + res;
   }
 
-  const newLineIndex = res.indexOf("\n");
+  const newLineIndex = res.indexOf('\n');
   return newLineIndex === -1 ? res : res.substring(0, newLineIndex);
 }

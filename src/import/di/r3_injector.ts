@@ -6,19 +6,19 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-// import '../util/ng_dev_mode';
-
+import { RuntimeError, RuntimeErrorCode } from '../errors';
 import { OnDestroy } from '../interface/lifecycle_hooks';
 import { Type } from '../interface/type';
-import { FactoryFn, getFactoryDef } from '../render3/definition_factory';
-import { RuntimeError, RuntimeErrorCode } from '../render3/error_code';
 
-import { deepForEach, newArray } from '../util/array_utils';
+import { FactoryFn, getFactoryDef } from '../render3/definition_factory';
+
+import { newArray } from '../util/array_utils';
 import { EMPTY_ARRAY } from '../util/empty';
 import { stringify } from '../util/stringify';
 
 import { resolveForwardRef } from './forward_ref';
 import { ENVIRONMENT_INITIALIZER } from './initializer_token';
+import { setInjectImplementation } from './inject_switch';
 import { InjectionToken } from './injection_token';
 import { Injector } from './injector';
 import {
@@ -28,11 +28,9 @@ import {
   NG_TEMP_TOKEN_PATH,
   setCurrentInjector,
   THROW_IF_NOT_FOUND,
-  USE_VALUE,
   ɵɵinject,
 } from './injector_compatibility';
 import { INJECTOR } from './injector_token';
-import { setInjectImplementation } from './inject_switch';
 import {
   getInheritedInjectableDef,
   getInjectableDef,
@@ -43,29 +41,23 @@ import { InjectFlags, InjectOptions } from './interface/injector';
 import {
   ClassProvider,
   ConstructorProvider,
-  ExistingProvider,
-  FactoryProvider,
+  EnvironmentProviders,
+  InternalEnvironmentProviders,
+  isEnvironmentProviders,
   Provider,
   StaticClassProvider,
-  TypeProvider,
-  ValueProvider,
 } from './interface/provider';
 import { INJECTOR_DEF_TYPES } from './internal_tokens';
 import { NullInjector } from './null_injector';
+import {
+  isExistingProvider,
+  isFactoryProvider,
+  isTypeProvider,
+  isValueProvider,
+  SingleProvider,
+} from './provider_collection';
 import { ProviderToken } from './provider_token';
-import { InjectorScope, INJECTOR_SCOPE } from './scope';
-
-/**
- * Internal type for a single provider in a deep provider array.
- */
-type SingleProvider =
-  | TypeProvider
-  | ValueProvider
-  | ClassProvider
-  | ConstructorProvider
-  | ExistingProvider
-  | FactoryProvider
-  | StaticClassProvider;
+import { INJECTOR_SCOPE, InjectorScope } from './scope';
 
 /**
  * Marker which indicates that a value has not yet been created from the factory function.
@@ -176,6 +168,7 @@ export abstract class EnvironmentInjector implements Injector {
    */
   abstract onDestroy(callback: () => void): void;
 }
+
 export class R3Injector extends EnvironmentInjector {
   /**
    * Map of tokens to records which contain the instances of those tokens.
@@ -202,15 +195,16 @@ export class R3Injector extends EnvironmentInjector {
   private injectorDefTypes: Set<Type<unknown>>;
 
   constructor(
-    providers: Array<Provider>,
+    providers: Array<Provider | EnvironmentProviders>,
     readonly parent: Injector,
     readonly source: string | null,
     readonly scopes: Set<InjectorScope>
   ) {
     super();
     // Start off by creating Records for every provider.
-    forEachSingleProvider(providers as Array<Provider>, (provider) =>
-      this.processProvider(provider)
+    forEachSingleProvider(
+      providers as Array<Provider | InternalEnvironmentProviders>,
+      (provider) => this.processProvider(provider)
     );
 
     // Make sure the INJECTOR token provides this injector.
@@ -362,7 +356,8 @@ export class R3Injector extends EnvironmentInjector {
         EMPTY_ARRAY,
         InjectFlags.Self
       );
-
+      if (false) {
+      }
       for (const initializer of initializers) {
         initializer();
       }
@@ -383,7 +378,7 @@ export class R3Injector extends EnvironmentInjector {
 
   private assertNotDestroyed(): void {
     if (this._destroyed) {
-      throw new Error('Injector has already been destroyed.');
+      throw new RuntimeError(RuntimeErrorCode.INJECTOR_ALREADY_DESTROYED, null);
     }
   }
 
@@ -407,6 +402,8 @@ export class R3Injector extends EnvironmentInjector {
       let multiRecord = this.records.get(token);
       if (multiRecord) {
         // It has. Throw a nice error if
+        if (false) {
+        }
       } else {
         multiRecord = makeRecord(undefined, NOT_YET, true);
         multiRecord.factory = () => injectArgs(multiRecord!.multi!);
@@ -416,12 +413,15 @@ export class R3Injector extends EnvironmentInjector {
       multiRecord.multi!.push(provider);
     } else {
       const existing = this.records.get(token);
+      if (false) {
+      }
     }
     this.records.set(token, record);
   }
 
   private hydrate<T>(token: ProviderToken<T>, record: Record<T>): T {
-    if (record.value === NOT_YET) {
+    if (false) {
+    } else if (record.value === NOT_YET) {
       record.value = CIRCULAR;
       record.value = record.factory!();
     }
@@ -463,7 +463,7 @@ function injectableDefOrInjectorDefFactory(
   // InjectionTokens should have an injectable def (ɵprov) and thus should be handled above.
   // If it's missing that, it's an error.
   if (token instanceof InjectionToken) {
-    throw new Error(`Token ${stringify(token)} is missing a ɵprov definition.`);
+    throw new RuntimeError(RuntimeErrorCode.INVALID_INJECTION_TOKEN, null);
   }
 
   // Undecorated types can sometimes be created if they have no constructor arguments.
@@ -472,7 +472,7 @@ function injectableDefOrInjectorDefFactory(
   }
 
   // There was no way to resolve a factory for this token.
-  throw new Error('unreachable');
+  throw new RuntimeError(RuntimeErrorCode.INVALID_INJECTION_TOKEN, null);
 }
 
 function getUndecoratedInjectableFactory(token: Function) {
@@ -480,11 +480,7 @@ function getUndecoratedInjectableFactory(token: Function) {
   const paramLength = token.length;
   if (paramLength > 0) {
     const args: string[] = newArray(paramLength, '?');
-    throw new Error(
-      `Can't resolve all parameters for ${stringify(token)}: (${args.join(
-        ', '
-      )}).`
-    );
+    throw new RuntimeError(RuntimeErrorCode.INVALID_INJECTION_TOKEN, null);
   }
 
   // The constructor function appears to have no parameters.
@@ -520,6 +516,9 @@ export function providerToFactory(
   providers?: any[]
 ): () => any {
   let factory: (() => any) | undefined = undefined;
+  if (false) {
+  }
+
   if (isTypeProvider(provider)) {
     const unwrappedProvider = resolveForwardRef(provider);
     return (
@@ -539,9 +538,8 @@ export function providerToFactory(
           ((provider as StaticClassProvider | ClassProvider).useClass ||
             provider.provide)
       );
-      // if (ngDevMode && !classRef) {
-      //   throwInvalidProviderError(ngModuleType, providers, provider);
-      // }
+      if (false) {
+      }
       if (hasDeps(provider)) {
         factory = () => new classRef(...injectArgs(provider.deps));
       } else {
@@ -566,22 +564,6 @@ function makeRecord<T>(
   };
 }
 
-function isValueProvider(value: SingleProvider): value is ValueProvider {
-  return value !== null && typeof value == 'object' && USE_VALUE in value;
-}
-
-function isExistingProvider(value: SingleProvider): value is ExistingProvider {
-  return !!(value && (value as ExistingProvider).useExisting);
-}
-
-function isFactoryProvider(value: SingleProvider): value is FactoryProvider {
-  return !!(value && (value as FactoryProvider).useFactory);
-}
-
-export function isTypeProvider(value: SingleProvider): value is TypeProvider {
-  return typeof value === 'function';
-}
-
 function hasDeps(
   value: ClassProvider | ConstructorProvider | StaticClassProvider
 ): value is ClassProvider & { deps: any[] } {
@@ -604,12 +586,14 @@ function couldBeInjectableType(value: any): value is ProviderToken<any> {
 }
 
 function forEachSingleProvider(
-  providers: Array<Provider>,
+  providers: Array<Provider | EnvironmentProviders>,
   fn: (provider: SingleProvider) => void
 ): void {
   for (const provider of providers) {
     if (Array.isArray(provider)) {
       forEachSingleProvider(provider, fn);
+    } else if (provider && isEnvironmentProviders(provider)) {
+      forEachSingleProvider(provider.ɵproviders, fn);
     } else {
       fn(provider as SingleProvider);
     }

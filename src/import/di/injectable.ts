@@ -6,16 +6,17 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import {
-  ValueSansProvider,
-  ExistingSansProvider,
-  StaticClassSansProvider,
-  ConstructorSansProvider,
-  FactorySansProvider,
-  ClassSansProvider,
-} from './interface/provider';
 import { Type } from '../interface/type';
 import { TypeDecorator } from '../util/decorators';
+
+import {
+  ClassSansProvider,
+  ConstructorSansProvider,
+  ExistingSansProvider,
+  FactorySansProvider,
+  StaticClassSansProvider,
+  ValueSansProvider,
+} from './interface/provider';
 
 /**
  * Injectable providers used in `@Injectable` decorator.
@@ -78,7 +79,8 @@ export interface Injectable {
   /**
    * Determines which injectors will provide the injectable.
    *
-   * - `Type<any>` - associates the injectable with an `@NgModule` or other `InjectorType`,
+   * - `Type<any>` - associates the injectable with an `@NgModule` or other `InjectorType`. This
+   * option is DEPRECATED.
    * - 'null' : Equivalent to `undefined`. The injectable is not provided in any scope automatically
    * and must be added to a `providers` array of an [@NgModule](api/core/NgModule#providers),
    * [@Component](api/core/Directive#providers) or [@Directive](api/core/Directive#providers).
@@ -89,7 +91,7 @@ export interface Injectable {
    * - 'platform' : A special singleton platform injector shared by all
    * applications on the page.
    * - 'any' : Provides a unique instance in each lazy loaded module while all eagerly loaded
-   * modules share one instance.
+   * modules share one instance. This option is DEPRECATED.
    *
    */
   providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;

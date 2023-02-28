@@ -37,6 +37,7 @@ export enum InjectFlags {
   /** Inject `defaultValue` instead if token not found. */
   Optional = 0b1000,
 }
+
 /**
  * This enum is an exact copy of the `InjectFlags` enum above, but the difference is that this is a
  * const enum, so actual enum values would be inlined in generated code. The `InjectFlags` enum can
