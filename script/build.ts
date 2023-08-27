@@ -3,21 +3,20 @@ interface BuildOptions {
   output: string;
   format: rollup.ModuleFormat;
 }
-async function bundleImport(options: BuildOptions) {
+async function bundleImport() {
   let bundle = await rollup.rollup({
-    input: './dist/import/es2015/index.js',
+    input: './dist/import/es2022/index.js',
     treeshake: false,
   });
-  bundle.write({
-    file: options.output,
-    format: options.format,
-  });
-}
-(
-  [
+  for (const item of [
     { output: './dist/import/commonjs/index.js', format: 'commonjs' },
-    { output: './dist/import/fesm2015/index.js', format: 'es' },
-  ] as BuildOptions[]
-).forEach((options) => {
-  bundleImport(options);
-});
+    { output: './dist/import/fesm2022/index.js', format: 'esm' },
+  ] as BuildOptions[]) {
+    await bundle.write({
+      file: item.output,
+      format: item.format,
+    });
+  }
+}
+
+bundleImport();

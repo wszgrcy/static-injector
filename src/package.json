@@ -1,12 +1,12 @@
 {
   "name": "static-injector",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "Angular的静态注入器独立使用版本",
   "keywords": [
     "angular",
     "injector",
     "typescript",
-    "typescript 4.9",
+    "typescript 5.1.6",
     "injectable",
     "static-inject"
   ],
@@ -19,17 +19,17 @@
   },
   "homepage": "https://github.com/wszgrcy/static-injector#readme",
   "main": "import/commonjs/index.js",
-  "es2015": "import/fesm2015/index.js",
-  "fesm2015": "import/fesm2015/index.js",
-  "esm2015": "import/esm2015/index.js",
-  "module": "import/fesm2015/index.js",
+  "es2022": "import/fesm2022/index.js",
+  "fesm2022": "import/fesm2022/index.js",
+  "esm2022": "import/esm2022/index.js",
+  "module": "import/fesm2022/index.js",
   "typings": "import/typings/index.d.ts",
   "private": false,
   "scripts": {},
   "author": "wszgrcy",
   "license": "MIT",
   "peerDependencies": {
-    "typescript": "^4.9.3"
+    "typescript": "~5.1.6"
   },
   "devDependencies": {},
   "sideEffects": false
