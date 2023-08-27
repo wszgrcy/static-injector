@@ -102,7 +102,7 @@ describe('default', () => {
       }
     );
   });
-  it('mainl', () => {
+  it('main1', () => {
     createTestTransformer(
       [path.resolve(__dirname, '../fixture/main1.ts')],
       undefined,
@@ -114,4 +114,16 @@ describe('default', () => {
       }
     );
   });
+  it('inject(xxx)',() => {
+    createTestTransformer(
+      [path.resolve(__dirname, '../fixture/inject-function.ts')],
+      undefined,
+      {
+        writeFile: (fileName, data) => {
+          // expect(data).toContain(`ɵfac`);
+          // expect(data).toContain(`ɵprov`);
+        },
+      }
+    );
+  })
 });
