@@ -66,6 +66,7 @@ export class InjectableDecoratorHandler
     private isCore: boolean,
     private strictCtorDeps: boolean,
 
+    private includeClassMetadata: boolean,
     /**
      * What to do if the injectable already contains a ɵprov property.
      *
@@ -173,6 +174,7 @@ export class InjectableDecoratorHandler
         initializer: res.expression,
         statements: res.statements,
         type: res.type,
+        deferrableImports: null,
       });
     }
 
@@ -193,14 +195,11 @@ function extractInjectableMetadata(
 ): R3InjectableMetadata {
   const name = clazz.name.text;
   const type = wrapTypeReference(reflector, clazz);
-  const internalType = new WrappedNodeExpr(
-    reflector.getInternalNameOfClass(clazz)
-  );
   const typeArgumentCount = reflector.getGenericArityOfClass(clazz) || 0;
   if (decorator.args === null) {
     throw new FatalDiagnosticError(
       ErrorCode.DECORATOR_NOT_CALLED,
-      Decorator.nodeForError(decorator),
+      decorator.node,
       '@Injectable must be called'
     );
   }
@@ -209,7 +208,6 @@ function extractInjectableMetadata(
       name,
       type,
       typeArgumentCount,
-      internalType,
       providedIn: createMayBeForwardRefExpression(
         new LiteralExpr(null),
         ForwardRefHandling.None
@@ -255,7 +253,6 @@ function extractInjectableMetadata(
       name,
       type,
       typeArgumentCount,
-      internalType,
       providedIn,
     };
     if (meta.has('useValue')) {
@@ -313,7 +310,7 @@ function extractInjectableCtorDeps(
   if (decorator.args === null) {
     throw new FatalDiagnosticError(
       ErrorCode.DECORATOR_NOT_CALLED,
-      Decorator.nodeForError(decorator),
+      decorator.node,
       '@Injectable must be called'
     );
   }

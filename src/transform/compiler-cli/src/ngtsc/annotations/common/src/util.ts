@@ -29,7 +29,6 @@ import {
   Decorator,
   Import,
   ImportedTypeValueReference,
-  isNamedClassDeclaration,
   LocalTypeValueReference,
   ReflectionHost,
   TypeValueReference,
@@ -216,18 +215,14 @@ export function wrapFunctionExpressionsInParens(
  * Create an R3Reference for a class.
  *
  * The `value` is the exported declaration of the class from its source file.
- * The `type` is an expression that would be used by ngcc in the typings (.d.ts) files.
+ * The `type` is an expression that would be used in the typings (.d.ts) files.
  */
 export function wrapTypeReference(
   reflector: ReflectionHost,
   clazz: ClassDeclaration
 ): R3Reference {
-  const dtsClass = reflector.getDtsDeclaration(clazz);
   const value = new WrappedNodeExpr(clazz.name);
-  const type =
-    dtsClass !== null && isNamedClassDeclaration(dtsClass)
-      ? new WrappedNodeExpr(dtsClass.name)
-      : value;
+  const type = value;
   return { value, type };
 }
 
@@ -238,7 +233,6 @@ export function toFactoryMetadata(
   return {
     name: meta.name,
     type: meta.type,
-    internalType: meta.internalType,
     typeArgumentCount: meta.typeArgumentCount,
     deps: meta.deps,
     target,
@@ -246,8 +240,7 @@ export function toFactoryMetadata(
 }
 
 export function isAbstractClassDeclaration(clazz: ClassDeclaration): boolean {
-  return (
-    clazz.modifiers !== undefined &&
-    clazz.modifiers.some((mod) => mod.kind === ts.SyntaxKind.AbstractKeyword)
-  );
+  return ts.canHaveModifiers(clazz) && clazz.modifiers !== undefined
+    ? clazz.modifiers.some((mod) => mod.kind === ts.SyntaxKind.AbstractKeyword)
+    : false;
 }

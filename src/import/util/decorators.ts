@@ -36,6 +36,9 @@ export interface TypeDecorator {
     propertyKey?: string | symbol,
     parameterIndex?: number
   ): void;
+  // Standard (non-experimental) Decorator signature that avoids direct usage of
+  // any TS 5.0+ specific types.
+  (target: unknown, context: unknown): void;
 }
 export const PARAMETERS = '__parameters__';
 

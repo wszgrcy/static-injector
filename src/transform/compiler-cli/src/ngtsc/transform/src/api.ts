@@ -13,28 +13,7 @@ import {
 } from 'static-injector/transform/compiler';
 import ts from 'typescript';
 
-import { ClassDeclaration, Decorator } from '../../reflection';
-
-/**
- * A set of options which can be passed to a `DecoratorHandler` by a consumer, to tailor the output
- * of compilation beyond the decorators themselves.
- */
-export enum HandlerFlags {
-  /**
-   * No flags set.
-   */
-  NONE = 0x0,
-
-  /**
-   * Indicates that this decorator is fully inherited from its parent at runtime. In addition to
-   * normally inherited aspects such as inputs and queries, full inheritance applies to every aspect
-   * of the component or directive, such as the template function itself.
-   *
-   * Its primary effect is to cause the `CopyDefinitionFeature` to be applied to the definition
-   * being compiled. See that class for more information.
-   */
-  FULL_INHERITANCE = 0x00000001,
-}
+import { ClassDeclaration, Decorator, ReflectionHost } from '../../reflection';
 
 /**
  * Provides the interface between a decorator compiler from @angular/compiler and the Typescript
@@ -81,18 +60,14 @@ export interface DecoratorHandler<D, A, R> {
    * builds. Any side effects required for compilation (e.g. registration of metadata) should happen
    * in the `register` phase, which is guaranteed to run even for incremental builds.
    */
-  analyze(
-    node: ClassDeclaration,
-    metadata: Readonly<D>,
-    handlerFlags?: HandlerFlags
-  ): AnalysisOutput<A>;
+  analyze(node: ClassDeclaration, metadata: Readonly<D>): AnalysisOutput<A>;
 
   /**
    * Generate a description of the field which should be added to the class, including any
    * initialization code to be generated.
    *
-   * If the compilation mode is configured as partial, and an implementation of `compilePartial` is
-   * provided, then this method is not called.
+   * If the compilation mode is configured as other than full but an implementation of the
+   * corresponding method is not provided, then this method is called as a fallback.
    */
   compileFull(
     node: ClassDeclaration,
@@ -139,7 +114,8 @@ export interface AnalysisOutput<A> {
  */
 export interface CompileResult {
   name: string;
-  initializer: Expression;
+  initializer: Expression | null;
   statements: Statement[];
   type: Type;
+  deferrableImports: Set<ts.ImportDeclaration> | null;
 }

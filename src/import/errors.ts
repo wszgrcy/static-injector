@@ -17,11 +17,20 @@ import { ERROR_DETAILS_PAGE_BASE_URL } from './error_details_base_url';
  * error codes which have guides, which might leak into runtime code.
  *
  * Full list of available error guides can be found at https://angular.io/errors.
+ *
+ * Error code ranges per package:
+ *  - core (this package): 100-999
+ *  - forms: 1000-1999
+ *  - common: 2000-2999
+ *  - animations: 3000-3999
+ *  - router: 4000-4999
+ *  - platform-browser: 5000-5500
  */
 export const enum RuntimeErrorCode {
   // Change Detection Errors
   EXPRESSION_CHANGED_AFTER_CHECKED = -100,
   RECURSIVE_APPLICATION_REF_TICK = 101,
+  RECURSIVE_APPLICATION_RENDER = 102,
 
   // Dependency Injection Errors
   CYCLIC_DI_DEPENDENCY = -200,
@@ -33,6 +42,7 @@ export const enum RuntimeErrorCode {
   PROVIDER_IN_WRONG_CONTEXT = 207,
   MISSING_INJECTION_TOKEN = 208,
   INVALID_MULTI_PROVIDER = -209,
+  MISSING_DOCUMENT = 210,
 
   // Template Errors
   MULTIPLE_COMPONENTS_MATCH = -300,
@@ -48,16 +58,31 @@ export const enum RuntimeErrorCode {
   HOST_DIRECTIVE_COMPONENT = 310,
   HOST_DIRECTIVE_UNDEFINED_BINDING = 311,
   HOST_DIRECTIVE_CONFLICTING_ALIAS = 312,
+  MULTIPLE_MATCHING_PIPES = 313,
 
   // Bootstrap Errors
   MULTIPLE_PLATFORMS = 400,
   PLATFORM_NOT_FOUND = 401,
-  ERROR_HANDLER_NOT_FOUND = 402,
+  MISSING_REQUIRED_INJECTABLE_IN_BOOTSTRAP = 402,
   BOOTSTRAP_COMPONENTS_NOT_FOUND = -403,
   PLATFORM_ALREADY_DESTROYED = 404,
   ASYNC_INITIALIZERS_STILL_RUNNING = 405,
   APPLICATION_REF_ALREADY_DESTROYED = 406,
   RENDERER_NOT_FOUND = 407,
+
+  // Hydration Errors
+  HYDRATION_NODE_MISMATCH = -500,
+  HYDRATION_MISSING_SIBLINGS = -501,
+  HYDRATION_MISSING_NODE = -502,
+  UNSUPPORTED_PROJECTION_DOM_NODES = -503,
+  INVALID_SKIP_HYDRATION_HOST = -504,
+  MISSING_HYDRATION_ANNOTATIONS = -505,
+  HYDRATION_STABLE_TIMEDOUT = -506,
+  MISSING_SSR_CONTENT_INTEGRITY_MARKER = -507,
+
+  // Signal Errors
+  SIGNAL_WRITE_FROM_ILLEGAL_CONTEXT = 600,
+  REQUIRE_SYNC_WITHOUT_SYNC_EMIT = 601,
 
   // Styling Errors
 
@@ -83,6 +108,11 @@ export const enum RuntimeErrorCode {
   MISSING_ZONEJS = 908,
   UNEXPECTED_ZONE_STATE = 909,
   UNSAFE_IFRAME_ATTRS = -910,
+  VIEW_ALREADY_DESTROYED = 911,
+  COMPONENT_ID_COLLISION = -912,
+
+  // Runtime dependency tracker errors
+  RUNTIME_DEPS_INVALID_IMPORTED_TYPE = 1000,
 }
 
 /**
@@ -98,7 +128,8 @@ export const enum RuntimeErrorCode {
  *
  * Note: the `message` argument contains a descriptive error message as a string in development
  * mode (when the `ngDevMode` is defined). In production mode (after tree-shaking pass), the
- * `message` argument becomes `false`, thus we account for it in the typings and the runtime logic.
+ * `message` argument becomes `false`, thus we account for it in the typings and the runtime
+ * logic.
  */
 export class RuntimeError<T extends number = RuntimeErrorCode> extends Error {
   constructor(public code: T, message: null | false | string) {
@@ -119,7 +150,7 @@ export function formatRuntimeError<T extends number = RuntimeErrorCode>(
   // We also prepend `0` to non-compile-time errors.
   const fullCode = `NG0${Math.abs(code)}`;
 
-  let errorMessage = `${fullCode}${message ? ': ' + message.trim() : ''}`;
+  let errorMessage = `${fullCode}${message ? ': ' + message : ''}`;
 
   if (false) {
   }

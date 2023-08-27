@@ -12,7 +12,7 @@ import { InjectorMarkers } from './injector_marker';
 import { INJECTOR } from './injector_token';
 import { ɵɵdefineInjectable } from './interface/defs';
 import { InjectFlags, InjectOptions } from './interface/injector';
-import { StaticProvider } from './interface/provider';
+import { Provider, StaticProvider } from './interface/provider';
 import { NullInjector } from './null_injector';
 import { ProviderToken } from './provider_token';
 
@@ -22,7 +22,7 @@ import { ProviderToken } from './provider_token';
  * dependencies of various types with [injection tokens](guide/glossary#di-token).
  *
  * @see ["DI Providers"](guide/dependency-injection-providers).
- * @see `StaticProvider`
+ * @see {@link StaticProvider}
  *
  * @usageNotes
  *
@@ -118,7 +118,7 @@ export abstract class Injector {
    *
    */
   static create(options: {
-    providers: StaticProvider[];
+    providers: Array<Provider | StaticProvider>;
     parent?: Injector;
     name?: string;
   }): Injector;
@@ -126,7 +126,11 @@ export abstract class Injector {
   static create(
     options:
       | StaticProvider[]
-      | { providers: StaticProvider[]; parent?: Injector; name?: string },
+      | {
+          providers: Array<Provider | StaticProvider>;
+          parent?: Injector;
+          name?: string;
+        },
     parent?: Injector
   ): Injector {
     if (Array.isArray(options)) {

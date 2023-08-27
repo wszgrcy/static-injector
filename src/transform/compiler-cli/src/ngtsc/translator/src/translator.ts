@@ -279,6 +279,10 @@ export class ExpressionTranslatorVisitor<TStatement, TExpression>
     );
   }
 
+  visitDynamicImportExpr(ast: o.DynamicImportExpr, context: any) {
+    return this.factory.createDynamicImport(ast.url);
+  }
+
   visitNotExpr(ast: o.NotExpr, context: Context): TExpression {
     return this.factory.createUnaryExpression(
       '!',

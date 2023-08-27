@@ -133,8 +133,8 @@ export interface SelfDecorator {
    * <code-example path="core/di/ts/metadata_spec.ts" region="Self">
    * </code-example>
    *
-   * @see `SkipSelf`
-   * @see `Optional`
+   * @see {@link SkipSelf}
+   * @see {@link Optional}
    *
    */
   (): any;
@@ -180,8 +180,8 @@ export interface SkipSelfDecorator {
    * </code-example>
    *
    * @see [Dependency Injection guide](guide/dependency-injection-in-action#skip).
-   * @see `Self`
-   * @see `Optional`
+   * @see {@link Self}
+   * @see {@link Optional}
    *
    */
   (): any;

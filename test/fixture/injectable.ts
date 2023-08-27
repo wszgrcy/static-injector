@@ -9,14 +9,14 @@ import {
 let token = new InjectionToken('token');
 @Injectable({
   providedIn: 'root',
-  useFactory: (token) => new MyClass(token),
+  useFactory: (token: string) => new MyClass(token),
   deps: [
     [new Optional(), token],
     [new Optional(), 'aaa'],
   ],
 })
 export class MyClass {
-  constructor(private token) {}
+  constructor(private token: string) {}
   out() {
     return { token: this.token };
   }

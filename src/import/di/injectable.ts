@@ -103,4 +103,4 @@ export interface Injectable {
  * @Annotation
  * @publicApi
  */
-export const Injectable: InjectableDecorator = undefined;
+export const Injectable: InjectableDecorator = undefined as any;

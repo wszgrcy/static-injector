@@ -24,5 +24,6 @@ export function compileNgFactoryDefField(
     initializer: res.expression,
     statements: res.statements,
     type: res.type,
+    deferrableImports: null,
   };
 }

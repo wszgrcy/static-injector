@@ -163,7 +163,8 @@ export interface InjectorTypeWithProviders<T> {
  *   with an `@NgModule` or other `InjectorType`, or by specifying that this injectable should be
  *   provided in the `'root'` injector, which will be the application-level injector in most apps.
  * * `factory` gives the zero argument function which will create an instance of the injectable.
- *   The factory can call `inject` to access the `Injector` and request injection of dependencies.
+ *   The factory can call [`inject`](api/core/inject) to access the `Injector` and request injection
+ * of dependencies.
  *
  * @codeGenApi
  * @publicApi This instruction has been emitted by ViewEngine for some time and is deployed to npm.
@@ -246,28 +247,10 @@ export function getInheritedInjectableDef<T>(
   const def = type && (type[NG_PROV_DEF] || null);
 
   if (def) {
-    const typeName = getTypeName(type);
-
     return def;
   } else {
     return null;
   }
-}
-
-/** Gets the name of a type, accounting for some cross-browser differences. */
-function getTypeName(type: any): string {
-  // `Function.prototype.name` behaves differently between IE and other browsers. In most browsers
-  // it'll always return the name of the function itself, no matter how many other functions it
-  // inherits from. On IE the function doesn't have its own `name` property, but it takes it from
-  // the lowest level in the prototype chain. E.g. if we have `class Foo extends Parent` most
-  // browsers will evaluate `Foo.name` to `Foo` while IE will return `Parent`. We work around
-  // the issue by converting the function to a string and parsing its name out that way via a regex.
-  if (type.hasOwnProperty('name')) {
-    return type.name;
-  }
-
-  const match = ('' + type).match(/^function\s*([^\s(]+)/);
-  return match === null ? '' : match[1];
 }
 
 /**

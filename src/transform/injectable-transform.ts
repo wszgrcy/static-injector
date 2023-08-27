@@ -1,4 +1,4 @@
-import ts, { ClassDeclaration, factory, SourceFile } from 'typescript';
+import ts, { ClassDeclaration, SourceFile } from 'typescript';
 import { InjectableDecoratorHandler } from './compiler-cli/src/ngtsc/annotations/src/injectable';
 import { NoopImportRewriter } from './compiler-cli/src/ngtsc/imports';
 import {
@@ -18,7 +18,7 @@ interface ClassMetadata {
   /** 要添加的静态方法 */
   members: ts.PropertyDeclaration[];
   /** 声明,未用到 */
-  statements;
+  statements: any;
   /** 要被移除的装饰器 */
   decorator: ts.Decorator;
 }
@@ -46,26 +46,29 @@ export class InjectableTransformerFactory {
     this.handler = new InjectableDecoratorHandler(
       this.reflectionHost,
       false,
-      this.options.strictCtorDeps
+      !!this.options.strictCtorDeps,
+      false
     );
   }
   getTransform() {
     return (context: ts.TransformationContext) => this.transform(context);
   }
-  private visit(
-    node: ts.Node,
+  private visit<T extends ts.Node>(
+    node: T,
     context: ts.TransformationContext,
     map: Map<ts.ClassDeclaration, ClassMetadata>
-  ) {
+  ): T {
     return ts.visitEachChild(
       node,
-      (node: ClassDeclaration) => {
-        let result = map.get(node);
+      (node) => {
+        let result = map.get(node as ClassDeclaration);
         if (result) {
           const filteredDecorators =
             // Remove the decorator which triggered this compilation, leaving the others alone.
-            maybeFilterDecorator(ts.getDecorators(node), [result.decorator]);
-          const nodeModifiers = ts.getModifiers(node);
+            maybeFilterDecorator(ts.getDecorators(node as ClassDeclaration), [
+              result.decorator,
+            ]);
+          const nodeModifiers = ts.getModifiers(node as ClassDeclaration);
 
           let updatedModifiers: ts.ModifierLike[] | undefined;
 
@@ -76,13 +79,15 @@ export class InjectableTransformerFactory {
             ];
           }
           return ts.factory.updateClassDeclaration(
-            node,
+            node as ClassDeclaration,
             updatedModifiers,
-            node.name,
-            node.typeParameters,
-            node.heritageClauses,
+            (node as ClassDeclaration).name,
+            (node as ClassDeclaration).typeParameters,
+            (node as ClassDeclaration).heritageClauses || [],
             [
-              ...node.members.map((node) => this._stripAngularDecorators(node)),
+              ...(node as ClassDeclaration).members.map((node) =>
+                this._stripAngularDecorators(node)
+              ),
               ...result.members,
             ]
           );
@@ -111,16 +116,18 @@ export class InjectableTransformerFactory {
         ts.getDecorators(node) &&
         this.reflectionHost.isClass(node)
       ) {
-        const decorators = this.reflectionHost.getDecoratorsOfDeclaration(node);
+        const decorators =
+          this.reflectionHost.getDecoratorsOfDeclaration(node) || [];
 
         let result = this.handler.detect(node, decorators);
         if (!result) {
           return;
         }
         let analysisOutput = this.handler.analyze(node, result.metadata);
+
         let compileResult = this.handler.compileFull(
           node,
-          analysisOutput.analysis
+          analysisOutput.analysis!
         );
         let resultNode = this.translate(compileResult, importManager);
         classMetadataMap.set(node, {
@@ -146,7 +153,7 @@ export class InjectableTransformerFactory {
 
     for (const field of compileResult) {
       // Translate the initializer for the field into TS nodes.
-      const exprNode = translateExpression(field.initializer, importManager);
+      const exprNode = translateExpression(field.initializer!, importManager);
 
       // Create a static property declaration for the new field.
       const property = ts.factory.createPropertyDeclaration(
@@ -207,6 +214,48 @@ export class InjectableTransformerFactory {
         node.type,
         node.initializer
       ) as T & ts.ParameterDeclaration;
+    } else if (ts.isMethodDeclaration(node)) {
+      // Strip decorators of methods.
+      node = ts.factory.updateMethodDeclaration(
+        node,
+        combinedModifiers,
+        node.asteriskToken,
+        node.name,
+        node.questionToken,
+        node.typeParameters,
+        node.parameters,
+        node.type,
+        node.body
+      ) as T & ts.MethodDeclaration;
+    } else if (ts.isPropertyDeclaration(node)) {
+      // Strip decorators of properties.
+      node = ts.factory.updatePropertyDeclaration(
+        node,
+        combinedModifiers,
+        node.name,
+        node.questionToken,
+        node.type,
+        node.initializer
+      ) as T & ts.PropertyDeclaration;
+    } else if (ts.isGetAccessor(node)) {
+      // Strip decorators of getters.
+      node = ts.factory.updateGetAccessorDeclaration(
+        node,
+        combinedModifiers,
+        node.name,
+        node.parameters,
+        node.type,
+        node.body
+      ) as T & ts.GetAccessorDeclaration;
+    } else if (ts.isSetAccessor(node)) {
+      // Strip decorators of setters.
+      node = ts.factory.updateSetAccessorDeclaration(
+        node,
+        combinedModifiers,
+        node.name,
+        node.parameters,
+        node.body
+      ) as T & ts.SetAccessorDeclaration;
     } else if (ts.isConstructorDeclaration(node)) {
       // For constructors, strip decorators of the parameters.
       const parameters = node.parameters.map((param) =>

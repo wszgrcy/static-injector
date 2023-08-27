@@ -1,7 +1,7 @@
 import { Inject, Injectable, Injector } from 'static-injector';
 @Injectable()
 export class TemplateLiteralClass {
-  constructor(@Inject(`valu` + 'e') private noValue) {}
+  constructor(@Inject(`valu` + 'e') private noValue: boolean) {}
   out() {
     return {
       noValue: this.noValue,

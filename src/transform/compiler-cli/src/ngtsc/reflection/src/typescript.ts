@@ -166,18 +166,6 @@ export class TypeScriptReflectionHost implements ReflectionHost {
     return clazz.typeParameters !== undefined ? clazz.typeParameters.length : 0;
   }
 
-  getDtsDeclaration(_: ClassDeclaration): ts.Declaration | null {
-    return null;
-  }
-
-  getInternalNameOfClass(clazz: ClassDeclaration): ts.Identifier {
-    return clazz.name;
-  }
-
-  getAdjacentNameOfClass(clazz: ClassDeclaration): ts.Identifier {
-    return clazz.name;
-  }
-
   protected getDirectImportOfIdentifier(id: ts.Identifier): Import | null {
     const symbol = this.checker.getSymbolAtLocation(id);
 
@@ -206,6 +194,7 @@ export class TypeScriptReflectionHost implements ReflectionHost {
     return {
       from: importDecl.moduleSpecifier.text,
       name: getExportedName(decl, id),
+      node: importDecl,
     };
   }
 
@@ -262,6 +251,7 @@ export class TypeScriptReflectionHost implements ReflectionHost {
     return {
       from: importDeclaration.moduleSpecifier.text,
       name: id.text,
+      node: namespaceDeclaration.parent.parent,
     };
   }
 
@@ -440,7 +430,7 @@ function getFarLeftIdentifier(
  * Return the ImportDeclaration for the given `node` if it is either an `ImportSpecifier` or a
  * `NamespaceImport`. If not return `null`.
  */
-function getContainingImportDeclaration(
+export function getContainingImportDeclaration(
   node: ts.Node
 ): ts.ImportDeclaration | null {
   return ts.isImportSpecifier(node)

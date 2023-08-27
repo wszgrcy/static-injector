@@ -1,7 +1,7 @@
 import { Injectable, Injector } from 'static-injector';
 
 function OtherDecorator() {
-  return function (target) {};
+  return function (target: any) {};
 }
 
 @OtherDecorator()

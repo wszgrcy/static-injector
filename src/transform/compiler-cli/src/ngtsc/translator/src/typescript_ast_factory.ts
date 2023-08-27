@@ -8,11 +8,6 @@
 import ts from 'typescript';
 
 import {
-  createFunctionDeclaration,
-  createParameterDeclaration,
-} from '../../ts_compatibility';
-
-import {
   AstFactory,
   BinaryOperator,
   LeadingComment,
@@ -145,6 +140,14 @@ export class TypeScriptAstFactory
 
   createExpressionStatement = ts.factory.createExpressionStatement;
 
+  createDynamicImport(url: string) {
+    return ts.factory.createCallExpression(
+      ts.factory.createToken(ts.SyntaxKind.ImportKeyword) as ts.Expression,
+      /* type */ undefined,
+      [ts.factory.createStringLiteral(url)]
+    );
+  }
+
   createFunctionDeclaration(
     functionName: string,
     parameters: string[],
@@ -155,13 +158,13 @@ export class TypeScriptAstFactory
         `Invalid syntax, expected a block, but got ${ts.SyntaxKind[body.kind]}.`
       );
     }
-    return createFunctionDeclaration(
+    return ts.factory.createFunctionDeclaration(
       undefined,
       undefined,
       functionName,
       undefined,
       parameters.map((param) =>
-        createParameterDeclaration(undefined, undefined, param)
+        ts.factory.createParameterDeclaration(undefined, undefined, param)
       ),
       undefined,
       body
@@ -184,7 +187,7 @@ export class TypeScriptAstFactory
       functionName ?? undefined,
       undefined,
       parameters.map((param) =>
-        createParameterDeclaration(undefined, undefined, param)
+        ts.factory.createParameterDeclaration(undefined, undefined, param)
       ),
       undefined,
       body

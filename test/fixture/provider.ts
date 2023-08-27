@@ -25,7 +25,7 @@ export class UseFactoryClass {
   name = '';
   constructor(
     private input: string,
-    public noValue,
+    public noValue: string,
     public injectValue: string
   ) {
     this.name = input;
@@ -34,7 +34,7 @@ export class UseFactoryClass {
 @Injectable()
 export class UseExistingClass {
   name = 'noToBeUsed';
-  constructor(private input) {}
+  constructor(private input: string) {}
 }
 @Injectable()
 export class ClassWithDeps {
@@ -52,7 +52,7 @@ let injector = Injector.create({
     { provide: 'inputValueToken', useValue: 'inputValue' },
     {
       provide: UseFactoryClass,
-      useFactory: (value, noValue, injectValue) => {
+      useFactory: (value: string, noValue: string, injectValue: string) => {
         return new UseFactoryClass(value, noValue, injectValue);
       },
       deps: [

@@ -17,7 +17,7 @@ import { Type } from '../interface/type';
 
 import { noSideEffects } from '../util/closure';
 
-import { FactoryFn, getFactoryDef } from './definition_factory';
+import { getFactoryDef } from './definition_factory';
 
 import { NG_FACTORY_DEF } from './fields';
 
@@ -54,7 +54,7 @@ export function ɵɵgetInheritedFactory<T>(
     // (no Angular decorator on the superclass) or there is no constructor at all
     // in the inheritance chain. Since the two cases cannot be distinguished, the
     // latter has to be assumed.
-    return (t) => new t();
+    return (t: Type<T>) => new t();
   });
 }
 

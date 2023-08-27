@@ -22,7 +22,6 @@ import {
 import {
   ClassDeclaration,
   CtorParameter,
-  Decorator,
   ReflectionHost,
   TypeValueReferenceKind,
   UnavailableValue,
@@ -78,7 +77,7 @@ export function getConstructorDependencies(
           if (dec.args === null || dec.args.length !== 1) {
             throw new FatalDiagnosticError(
               ErrorCode.DECORATOR_ARITY_WRONG,
-              Decorator.nodeForError(dec),
+              dec.node,
               `Unexpected number of arguments to @Inject().`
             );
           }
@@ -94,7 +93,7 @@ export function getConstructorDependencies(
         } else {
           throw new FatalDiagnosticError(
             ErrorCode.DECORATOR_UNEXPECTED,
-            Decorator.nodeForError(dec),
+            dec.node,
             `Unexpected decorator ${name} on parameter.`
           );
         }
@@ -171,9 +170,8 @@ export function validateConstructorDependencies(
   } else if (deps.deps !== null) {
     return deps.deps;
   } else {
-    // TODO(alxhub): this cast is necessary because the g3 typescript version doesn't narrow here.
     // There is at least one error.
-    const error = (deps as { errors: ConstructorDepError[] }).errors[0];
+    const error = deps.errors[0];
     throw createUnsuitableInjectionTokenError(clazz, error);
   }
 }

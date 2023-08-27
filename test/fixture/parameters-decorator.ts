@@ -10,10 +10,10 @@ import {
 @Injectable()
 export class MyClass {
   constructor(
-    @Inject(token1) private token1,
-    @Inject('noValue') @Optional() private noValue,
-    @Inject(token1) @SkipSelf() private token1WithInjectorL2,
-    @Inject(token1) @Self() private token1WithSelf
+    @Inject(token1) private token1: number,
+    @Inject('noValue') @Optional() private noValue: unknown,
+    @Inject(token1) @SkipSelf() private token1WithInjectorL2: number,
+    @Inject(token1) @Self() private token1WithSelf: number
   ) {}
   out() {
     return {
