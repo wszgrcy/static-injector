@@ -6,9 +6,9 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import * as ts from "typescript";
+import * as ts from 'typescript';
 
-import { ErrorCode, ngErrorCode } from "./error_code";
+import { ErrorCode, ngErrorCode } from './error_code';
 
 export class FatalDiagnosticError {
   constructor(

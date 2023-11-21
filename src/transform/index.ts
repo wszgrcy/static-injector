@@ -1,1 +1,1 @@
-export * from "./injectable-transform";
+export * from './injectable-transform';

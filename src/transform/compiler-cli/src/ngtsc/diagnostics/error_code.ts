@@ -213,7 +213,7 @@ export enum ErrorCode {
  * Keep this value in sync with a similar const in
  * `packages/core/src/render3/error_code.ts`.
  */
-export const ERROR_DETAILS_PAGE_BASE_URL = "https://angular.io/errors";
+export const ERROR_DETAILS_PAGE_BASE_URL = 'https://angular.io/errors';
 
 /**
  * @internal
@@ -234,5 +234,5 @@ export const COMPILER_ERRORS_WITH_GUIDES = new Set([
  * @internal
  */
 export function ngErrorCode(code: ErrorCode): number {
-  return parseInt("-99" + code);
+  return parseInt('-99' + code);
 }
