@@ -16,6 +16,27 @@ import ts from 'typescript';
 import { ClassDeclaration, Decorator, ReflectionHost } from '../../reflection';
 
 /**
+ * Specifies the compilation mode that is used for the compilation.
+ */
+export enum CompilationMode {
+  /**
+   * Generates fully AOT compiled code using Ivy instructions.
+   */
+  FULL,
+
+  /**
+   * Generates code using a stable, but intermediate format suitable to be published to NPM.
+   */
+  PARTIAL,
+
+  /**
+   * Generates code based on each individual source file without using its
+   * dependencies (suitable for local dev edit/refresh workflow).
+   */
+  LOCAL,
+}
+
+/**
  * Provides the interface between a decorator compiler from @angular/compiler and the Typescript
  * compiler/transform.
  *

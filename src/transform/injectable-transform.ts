@@ -5,7 +5,11 @@ import {
   Decorator,
   TypeScriptReflectionHost,
 } from './compiler-cli/src/ngtsc/reflection';
-import { addImports, CompileResult } from './compiler-cli/src/ngtsc/transform';
+import {
+  addImports,
+  CompilationMode,
+  CompileResult,
+} from './compiler-cli/src/ngtsc/transform';
 import {
   ImportManager,
   translateExpression,
@@ -47,7 +51,8 @@ export class InjectableTransformerFactory {
       this.reflectionHost,
       false,
       !!this.options.strictCtorDeps,
-      false
+      false,
+      CompilationMode.FULL
     );
   }
   getTransform() {

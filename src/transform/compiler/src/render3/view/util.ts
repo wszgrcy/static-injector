@@ -8,6 +8,9 @@
 
 import * as o from '../../output/output_ast';
 
+/** Special value representing a direct access to a template's context. */
+export const DIRECT_CONTEXT_REFERENCE = '#context';
+
 /**
  * A representation for an object literal used during codegen of definition objects. The generic
  * type `T` allows to reference a documented type of the generated structure, such that the
@@ -18,7 +21,13 @@ export class DefinitionMap<T = any> {
 
   set(key: keyof T, value: o.Expression | null): void {
     if (value) {
-      this.values.push({ key: key as string, value, quoted: false });
+      const existing = this.values.find((value) => value.key === key);
+
+      if (existing) {
+        existing.value = value;
+      } else {
+        this.values.push({ key: key as string, value, quoted: false });
+      }
     }
   }
 

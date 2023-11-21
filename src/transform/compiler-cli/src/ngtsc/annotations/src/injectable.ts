@@ -31,6 +31,7 @@ import {
 } from '../../reflection';
 import {
   AnalysisOutput,
+  CompilationMode,
   CompileResult,
   DecoratorHandler,
   DetectResult,
@@ -67,6 +68,7 @@ export class InjectableDecoratorHandler
     private strictCtorDeps: boolean,
 
     private includeClassMetadata: boolean,
+    private readonly compilationMode: CompilationMode,
     /**
      * What to do if the injectable already contains a ɵprov property.
      *
@@ -114,7 +116,8 @@ export class InjectableDecoratorHandler
           decorator,
           this.reflector,
           this.isCore,
-          this.strictCtorDeps
+          this.strictCtorDeps,
+          this.compilationMode
         ),
 
         // Avoid generating multiple factories if a class has
@@ -305,7 +308,8 @@ function extractInjectableCtorDeps(
   decorator: Decorator,
   reflector: ReflectionHost,
   isCore: boolean,
-  strictCtorDeps: boolean
+  strictCtorDeps: boolean,
+  compilationMode: CompilationMode
 ) {
   if (decorator.args === null) {
     throw new FatalDiagnosticError(
@@ -327,16 +331,26 @@ function extractInjectableCtorDeps(
     // constructor signature does not work for DI then a factory definition (ɵfac) that throws is
     // generated.
     if (strictCtorDeps && !isAbstractClassDeclaration(clazz)) {
-      ctorDeps = getValidConstructorDependencies(clazz, reflector, isCore);
+      ctorDeps = getValidConstructorDependencies(
+        clazz,
+        reflector,
+        isCore,
+        compilationMode
+      );
     } else {
       ctorDeps = unwrapConstructorDependencies(
-        getConstructorDependencies(clazz, reflector, isCore)
+        getConstructorDependencies(clazz, reflector, isCore, compilationMode)
       );
     }
 
     return ctorDeps;
   } else if (decorator.args.length === 1) {
-    const rawCtorDeps = getConstructorDependencies(clazz, reflector, isCore);
+    const rawCtorDeps = getConstructorDependencies(
+      clazz,
+      reflector,
+      isCore,
+      compilationMode
+    );
 
     if (
       strictCtorDeps &&

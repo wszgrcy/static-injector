@@ -100,10 +100,7 @@ export function compileInjectable(
     } else {
       result = {
         statements: [],
-        expression: o.fn(
-          [],
-          [new o.ReturnStatement(meta.useFactory.callFn([]))]
-        ),
+        expression: o.arrowFn([], meta.useFactory.callFn([])),
       };
     }
   } else if (meta.useValue !== undefined) {
@@ -202,9 +199,9 @@ function delegateToFactory(
   return createFactoryFunction(unwrappedType);
 }
 
-function createFactoryFunction(type: o.Expression): o.FunctionExpr {
-  return o.fn(
+function createFactoryFunction(type: o.Expression): o.ArrowFunctionExpr {
+  return o.arrowFn(
     [new o.FnParam('t', o.DYNAMIC_TYPE)],
-    [new o.ReturnStatement(type.prop('ɵfac').callFn([o.variable('t')]))]
+    type.prop('ɵfac').callFn([o.variable('t')])
   );
 }

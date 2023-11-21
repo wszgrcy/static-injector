@@ -112,9 +112,7 @@ export function convertFromMaybeForwardRefExpression({
  * ```
  */
 export function generateForwardRef(expr: o.Expression): o.Expression {
-  return o
-    .importExpr(Identifiers.forwardRef)
-    .callFn([o.fn([], [new o.ReturnStatement(expr)])]);
+  return o.importExpr(Identifiers.forwardRef).callFn([o.arrowFn([], expr)]);
 }
 
 /**

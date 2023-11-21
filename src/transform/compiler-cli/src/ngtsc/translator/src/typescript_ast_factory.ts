@@ -194,6 +194,28 @@ export class TypeScriptAstFactory
     );
   }
 
+  createArrowFunctionExpression(
+    parameters: string[],
+    body: ts.Statement | ts.Expression
+  ): ts.Expression {
+    if (ts.isStatement(body) && !ts.isBlock(body)) {
+      throw new Error(
+        `Invalid syntax, expected a block, but got ${ts.SyntaxKind[body.kind]}.`
+      );
+    }
+
+    return ts.factory.createArrowFunction(
+      undefined,
+      undefined,
+      parameters.map((param) =>
+        ts.factory.createParameterDeclaration(undefined, undefined, param)
+      ),
+      undefined,
+      undefined,
+      body
+    );
+  }
+
   createIdentifier = ts.factory.createIdentifier;
 
   createIfStatement(

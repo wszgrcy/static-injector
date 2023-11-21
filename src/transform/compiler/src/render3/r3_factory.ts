@@ -201,7 +201,7 @@ export function compileFactoryFunction(
     // There is a base factory variable so wrap its declaration along with the factory function into
     // an IIFE.
     factoryFn = o
-      .fn(
+      .arrowFn(
         [],
         [
           new o.DeclareVarStmt(baseFactoryVar.name!),

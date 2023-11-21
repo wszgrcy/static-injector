@@ -1,12 +1,13 @@
 {
   "name": "static-injector",
-  "version": "2.2.1",
+  "version": "3.0.0",
   "description": "Angular的静态注入器独立使用版本",
   "keywords": [
     "angular",
+    "angular 17.0.4",
     "injector",
     "typescript",
-    "typescript 5.1.6",
+    "typescript 5.2.2",
     "injectable",
     "static-inject"
   ],

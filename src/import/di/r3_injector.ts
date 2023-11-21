@@ -47,6 +47,7 @@ import {
   isEnvironmentProviders,
   Provider,
   StaticClassProvider,
+  TypeProvider,
 } from './interface/provider';
 import { INJECTOR_DEF_TYPES } from './internal_tokens';
 import { NullInjector } from './null_injector';
@@ -227,7 +228,7 @@ export class R3Injector extends EnvironmentInjector {
     }
 
     this.injectorDefTypes = new Set(
-      this.get(INJECTOR_DEF_TYPES.multi, EMPTY_ARRAY, InjectFlags.Self)
+      this.get(INJECTOR_DEF_TYPES, EMPTY_ARRAY, InjectFlags.Self)
     );
   }
 
@@ -315,6 +316,10 @@ export class R3Injector extends EnvironmentInjector {
           if (def && this.injectableDefInScope(def)) {
             // Found an injectable def and it's scoped to this injector. Pretend as if it was here
             // all along.
+
+            if (false) {
+            }
+
             record = makeRecord(
               injectableDefOrInjectorDefFactory(token),
               NOT_YET
@@ -373,7 +378,7 @@ export class R3Injector extends EnvironmentInjector {
 
     try {
       const initializers = this.get(
-        ENVIRONMENT_INITIALIZER.multi,
+        ENVIRONMENT_INITIALIZER,
         EMPTY_ARRAY,
         InjectFlags.Self
       );
