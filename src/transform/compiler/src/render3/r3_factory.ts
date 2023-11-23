@@ -295,9 +295,11 @@ function createCtorDepsType(deps: R3DependencyMetadata[]): o.Type {
 
 function createCtorDepType(dep: R3DependencyMetadata): o.LiteralMapExpr | null {
   const entries: { key: string; quoted: boolean; value: o.Expression }[] = [];
+
   if (dep.optional) {
     entries.push({ key: 'optional', value: o.literal(true), quoted: false });
   }
+
   if (dep.self) {
     entries.push({ key: 'self', value: o.literal(true), quoted: false });
   }

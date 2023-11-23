@@ -259,10 +259,9 @@
             },
             {
                 "type": "custom",
-                "change": "change",
+                "change": "remove",
                 "values": {
                     "selector": "FunctionDeclaration:has(>::name[value=createCtorDepType]) IfStatement:has(>::expression[value=\"dep.attributeNameType !== null\"]),FunctionDeclaration:has(>::name[value=createCtorDepType]) IfStatement:has(>::expression[value=\"dep.host\"])",
-                    "content": "",
                     "replaceComment": true
                 }
             }
