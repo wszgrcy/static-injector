@@ -15,6 +15,4 @@ export type InjectorScope = 'root' | 'platform' | 'environment';
  * as a root scoped injector when processing requests for unknown tokens which may indicate
  * they are provided in the root scope.
  */
-export const INJECTOR_SCOPE = new InjectionToken<InjectorScope | null>(
-  'Set Injector scope.'
-);
+export const INJECTOR_SCOPE = new InjectionToken<InjectorScope | null>('');

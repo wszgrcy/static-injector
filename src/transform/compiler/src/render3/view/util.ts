@@ -6,6 +6,8 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
+import { InputFlags } from '../../core';
+
 import * as o from '../../output/output_ast';
 
 /** Special value representing a direct access to a template's context. */

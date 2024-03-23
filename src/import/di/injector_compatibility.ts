@@ -13,7 +13,7 @@ import { stringify } from '../util/stringify';
 
 import { resolveForwardRef } from './forward_ref';
 import { getInjectImplementation, injectRootLimpMode } from './inject_switch';
-import { Injector } from './injector';
+import type { Injector } from './injector';
 import {
   DecoratorFlags,
   InjectFlags,
@@ -97,12 +97,17 @@ export function ɵɵinject<T>(
   token: ProviderToken<T>,
   flags?: InjectFlags
 ): T | null;
+
+export function ɵɵinject<T>(
+  token: ProviderToken<T>,
+  flags?: InjectFlags
+): string | null;
 export function ɵɵinject<T>(
   token: ProviderToken<T>,
   flags = InjectFlags.Default
 ): T | null {
   return (getInjectImplementation() || injectInjectorOnly)(
-    resolveForwardRef(token),
+    resolveForwardRef(token as Type<T>),
     flags
   );
 }
@@ -173,6 +178,30 @@ export function inject<T>(
   options: InjectOptions
 ): T | null;
 /**
+ * @param token A token that represents a static attribute on the host node that should be injected.
+ * @returns Value of the attribute if it exists.
+ * @throws If called outside of a supported context or the attribute does not exist.
+ *
+ * @publicApi
+ */
+
+/**
+ * @param token A token that represents a static attribute on the host node that should be injected.
+ * @returns Value of the attribute if it exists, otherwise `null`.
+ * @throws If called outside of a supported context.
+ *
+ * @publicApi
+ */
+
+/**
+ * @param token A token that represents a static attribute on the host node that should be injected.
+ * @returns Value of the attribute if it exists.
+ * @throws If called outside of a supported context or the attribute does not exist.
+ *
+ * @publicApi
+ */
+
+/**
  * Injects a token from the currently active injector.
  * `inject` is only supported in an [injection context](/guide/dependency-injection-context). It can
  * be used during:
@@ -240,8 +269,10 @@ export function inject<T>(
 export function inject<T>(
   token: ProviderToken<T>,
   flags: InjectFlags | InjectOptions = InjectFlags.Default
-): T | null {
-  return ɵɵinject(token, convertToBitFlags(flags));
+) {
+  // The `as any` here _shouldn't_ be necessary, but without it JSCompiler
+  // throws a disambiguation  error due to the multiple signatures.
+  return ɵɵinject(token as any, convertToBitFlags(flags));
 }
 
 // Converts object-based DI flags (`InjectOptions`) to bit flags (`InjectFlags`).

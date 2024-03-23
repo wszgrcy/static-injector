@@ -21,7 +21,7 @@ import { resolveForwardRef } from './forward_ref';
 import { ENVIRONMENT_INITIALIZER } from './initializer_token';
 import { setInjectImplementation } from './inject_switch';
 import { InjectionToken } from './injection_token';
-import { Injector } from './injector';
+import type { Injector } from './injector';
 import {
   catchInjectorError,
   convertToBitFlags,
@@ -243,6 +243,7 @@ export class R3Injector extends EnvironmentInjector {
 
     // Set destroyed = true first, in case lifecycle hooks re-enter destroy().
     this._destroyed = true;
+
     try {
       // Call all the lifecycle hooks.
       for (const service of this._ngOnDestroyHooks) {
@@ -440,7 +441,6 @@ export class R3Injector extends EnvironmentInjector {
       token = provider;
       multiRecord.multi!.push(provider);
     } else {
-      const existing = this.records.get(token);
       if (false) {
       }
     }
@@ -448,23 +448,26 @@ export class R3Injector extends EnvironmentInjector {
   }
 
   private hydrate<T>(token: ProviderToken<T>, record: Record<T>): T {
-    if (false) {
-    } else if (record.value === NOT_YET) {
-      record.value = CIRCULAR;
-
+    try {
       if (false) {
-      } else {
-        record.value = record.factory!();
+      } else if (record.value === NOT_YET) {
+        record.value = CIRCULAR;
+
+        if (false) {
+        } else {
+          record.value = record.factory!();
+        }
       }
+      if (
+        typeof record.value === 'object' &&
+        record.value &&
+        hasOnDestroy(record.value)
+      ) {
+        this._ngOnDestroyHooks.add(record.value);
+      }
+      return record.value as T;
+    } finally {
     }
-    if (
-      typeof record.value === 'object' &&
-      record.value &&
-      hasOnDestroy(record.value)
-    ) {
-      this._ngOnDestroyHooks.add(record.value);
-    }
-    return record.value as T;
   }
 
   private injectableDefInScope(def: ɵɵInjectableDeclaration<any>): boolean {
@@ -518,7 +521,6 @@ function getUndecoratedInjectableFactory(token: Function) {
   // If the token has parameters then it has dependencies that we cannot resolve implicitly.
   const paramLength = token.length;
   if (paramLength > 0) {
-    const args: string[] = newArray(paramLength, '?');
     throw new RuntimeError(RuntimeErrorCode.INVALID_INJECTION_TOKEN, null);
   }
 

@@ -35,6 +35,9 @@ import {
   TypeValueReferenceKind,
 } from '../../../reflection';
 
+/** Module name of the framework core. */
+export const CORE_MODULE = 'static-injector';
+
 /**
  * Convert a `TypeValueReference` to an `Expression` which refers to the type as a value.
  *
@@ -74,9 +77,7 @@ export function valueReferenceToExpression(
 export function isAngularCore(
   decorator: Decorator
 ): decorator is Decorator & { import: Import } {
-  return (
-    decorator.import !== null && decorator.import.from === 'static-injector'
-  );
+  return decorator.import !== null && decorator.import.from === CORE_MODULE;
 }
 
 export function findAngularDecorator(
@@ -100,6 +101,20 @@ export function isAngularDecorator(
     return decorator.import.name === name;
   }
   return false;
+}
+
+export function getAngularDecorators(
+  decorators: Decorator[],
+  names: readonly string[],
+  isCore: boolean
+) {
+  return decorators.filter((decorator) => {
+    const name = isCore ? decorator.name : decorator.import?.name;
+    if (name === undefined || !names.includes(name)) {
+      return false;
+    }
+    return isCore || isAngularCore(decorator);
+  });
 }
 
 /**

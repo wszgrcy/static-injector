@@ -16,4 +16,4 @@ import { InjectionToken } from './injection_token';
  */
 export const ENVIRONMENT_INITIALIZER = new InjectionToken<
   ReadonlyArray<() => void>
->('ENVIRONMENT_INITIALIZER');
+>('');

@@ -31,7 +31,7 @@ export interface InjectDecorator {
    * <code-example path="core/di/ts/metadata_spec.ts" region="InjectWithoutDecorator">
    * </code-example>
    *
-   * @see ["Dependency Injection Guide"](guide/dependency-injection)
+   * @see [Dependency Injection Guide](guide/dependency-injection)
    *
    */
   (token: any): any;
@@ -84,7 +84,7 @@ export interface OptionalDecorator {
    * <code-example path="core/di/ts/metadata_spec.ts" region="Optional">
    * </code-example>
    *
-   * @see ["Dependency Injection Guide"](guide/dependency-injection).
+   * @see [Dependency Injection Guide](guide/dependency-injection).
    */
   (): any;
   new (): Optional;

@@ -54,10 +54,16 @@ export class Identifiers {
     moduleName: CORE,
   };
 
+  // Signal queries
+
+  // Two-way bindings
+
   static getInheritedFactory: o.ExternalReference = {
     name: 'ɵɵgetInheritedFactory',
     moduleName: CORE,
   };
 
   // sanitization-related functions
+
+  // type-checking
 }

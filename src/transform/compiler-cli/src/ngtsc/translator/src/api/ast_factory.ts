@@ -312,6 +312,7 @@ export type BinaryOperator =
   | '>'
   | '>='
   | '&'
+  | '|'
   | '/'
   | '=='
   | '==='

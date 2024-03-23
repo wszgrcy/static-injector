@@ -116,8 +116,7 @@ export class InjectableDecoratorHandler
           decorator,
           this.reflector,
           this.isCore,
-          this.strictCtorDeps,
-          this.compilationMode
+          this.strictCtorDeps
         ),
 
         // Avoid generating multiple factories if a class has
@@ -308,8 +307,7 @@ function extractInjectableCtorDeps(
   decorator: Decorator,
   reflector: ReflectionHost,
   isCore: boolean,
-  strictCtorDeps: boolean,
-  compilationMode: CompilationMode
+  strictCtorDeps: boolean
 ) {
   if (decorator.args === null) {
     throw new FatalDiagnosticError(
@@ -331,26 +329,16 @@ function extractInjectableCtorDeps(
     // constructor signature does not work for DI then a factory definition (ɵfac) that throws is
     // generated.
     if (strictCtorDeps && !isAbstractClassDeclaration(clazz)) {
-      ctorDeps = getValidConstructorDependencies(
-        clazz,
-        reflector,
-        isCore,
-        compilationMode
-      );
+      ctorDeps = getValidConstructorDependencies(clazz, reflector, isCore);
     } else {
       ctorDeps = unwrapConstructorDependencies(
-        getConstructorDependencies(clazz, reflector, isCore, compilationMode)
+        getConstructorDependencies(clazz, reflector, isCore)
       );
     }
 
     return ctorDeps;
   } else if (decorator.args.length === 1) {
-    const rawCtorDeps = getConstructorDependencies(
-      clazz,
-      reflector,
-      isCore,
-      compilationMode
-    );
+    const rawCtorDeps = getConstructorDependencies(clazz, reflector, isCore);
 
     if (
       strictCtorDeps &&

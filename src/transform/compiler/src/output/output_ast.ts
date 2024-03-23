@@ -121,6 +121,7 @@ export enum BinaryOperator {
   Modulo,
   And,
   Or,
+  BitwiseOr,
   BitwiseAnd,
   Lower,
   LowerEquals,
@@ -211,6 +212,20 @@ export abstract class Expression {
     pure?: boolean
   ): InvokeFunctionExpr {
     return new InvokeFunctionExpr(this, params, null, sourceSpan, pure);
+  }
+  bitwiseOr(
+    rhs: Expression,
+    sourceSpan?: ParseSourceSpan | null,
+    parens: boolean = true
+  ): BinaryOperatorExpr {
+    return new BinaryOperatorExpr(
+      BinaryOperator.BitwiseOr,
+      this,
+      rhs,
+      null,
+      sourceSpan,
+      parens
+    );
   }
 
   toStmt(): Statement {

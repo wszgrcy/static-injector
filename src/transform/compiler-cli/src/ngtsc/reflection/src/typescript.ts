@@ -9,6 +9,7 @@
 import ts from 'typescript';
 
 import {
+  AmbientImport,
   ClassDeclaration,
   ClassMember,
   ClassMemberKind,
@@ -27,7 +28,10 @@ import { isNamedClassDeclaration } from './util';
  */
 
 export class TypeScriptReflectionHost implements ReflectionHost {
-  constructor(protected checker: ts.TypeChecker) {}
+  constructor(
+    protected checker: ts.TypeChecker,
+    private readonly isLocalCompilation = false
+  ) {}
 
   getDecoratorsOfDeclaration(declaration: DeclarationNode): Decorator[] | null {
     const decorators = ts.canHaveDecorators(declaration)
@@ -95,7 +99,11 @@ export class TypeScriptReflectionHost implements ReflectionHost {
         }
       }
 
-      const typeValueReference = typeToValue(typeNode, this.checker);
+      const typeValueReference = typeToValue(
+        typeNode,
+        this.checker,
+        this.isLocalCompilation
+      );
 
       return {
         name,
@@ -339,6 +347,26 @@ export class TypeScriptReflectionHost implements ReflectionHost {
       isStatic,
     };
   }
+
+  private _viaModule(
+    declaration: ts.Declaration,
+    originalId: ts.Identifier | null,
+    importInfo: Import | null
+  ): string | AmbientImport | null {
+    if (
+      importInfo === null &&
+      originalId !== null &&
+      declaration.getSourceFile() !== originalId.getSourceFile()
+    ) {
+      return AmbientImport;
+    }
+
+    return importInfo !== null &&
+      importInfo.from !== null &&
+      !importInfo.from.startsWith('.')
+      ? importInfo.from
+      : null;
+  }
 }
 
 export function reflectObjectLiteral(
@@ -427,17 +455,21 @@ function getFarLeftIdentifier(
 }
 
 /**
- * Return the ImportDeclaration for the given `node` if it is either an `ImportSpecifier` or a
- * `NamespaceImport`. If not return `null`.
+ * Gets the closest ancestor `ImportDeclaration` to a node.
  */
 export function getContainingImportDeclaration(
   node: ts.Node
 ): ts.ImportDeclaration | null {
-  return ts.isImportSpecifier(node)
-    ? node.parent!.parent!.parent!
-    : ts.isNamespaceImport(node)
-    ? node.parent.parent
-    : null;
+  let parent = node.parent;
+
+  while (parent && !ts.isSourceFile(parent)) {
+    if (ts.isImportDeclaration(parent)) {
+      return parent;
+    }
+    parent = parent.parent;
+  }
+
+  return null;
 }
 
 /**

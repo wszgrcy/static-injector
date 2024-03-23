@@ -17,6 +17,7 @@ import {
   UnaryOperator,
   VariableDeclarationType,
 } from './api/ast_factory';
+import { tsNumericExpression } from './ts_util';
 
 /**
  * Different optimizers use different annotations on a function or method call to indicate its pure
@@ -44,6 +45,7 @@ const BINARY_OPERATORS: Record<BinaryOperator, ts.BinaryOperator> = {
   '>': ts.SyntaxKind.GreaterThanToken,
   '>=': ts.SyntaxKind.GreaterThanEqualsToken,
   '&': ts.SyntaxKind.AmpersandToken,
+  '|': ts.SyntaxKind.BarToken,
   '/': ts.SyntaxKind.SlashToken,
   '==': ts.SyntaxKind.EqualsEqualsToken,
   '===': ts.SyntaxKind.EqualsEqualsEqualsToken,
@@ -240,7 +242,7 @@ export class TypeScriptAstFactory
     } else if (typeof value === 'boolean') {
       return value ? ts.factory.createTrue() : ts.factory.createFalse();
     } else if (typeof value === 'number') {
-      return ts.factory.createNumericLiteral(value);
+      return tsNumericExpression(value);
     } else {
       return ts.factory.createStringLiteral(value);
     }

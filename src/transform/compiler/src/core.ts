@@ -12,6 +12,13 @@
 // This is important to prevent a build cycle, as @angular/core needs to
 // be compiled with the compiler.
 
+/** Flags describing an input for a directive. */
+export enum InputFlags {
+  None = 0,
+  SignalBased = 1 << 0,
+  HasDecoratorInputTransform = 1 << 1,
+}
+
 /**
  * Injection flags for DI.
  */
