@@ -648,7 +648,8 @@
                     "excludes": [
                         "DynamicValue",
                         "CompileResult",
-                        "assertSuccessfulReferenceEmit"
+                        "assertSuccessfulReferenceEmit",
+                        "ForeignFunctionResolver"
                     ]
                 }
             },
@@ -1597,7 +1598,8 @@
                         "emitInstanceCreatedByInjectorEvent",
                         "InjectorProfilerContext",
                         "runInInjectorProfilerContext",
-                        "setInjectorProfilerContext"
+                        "setInjectorProfilerContext",
+                        "TContainerNode"
                     ]
                 }
             },
