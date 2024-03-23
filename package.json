@@ -4,7 +4,7 @@
   "description": "Angular的静态注入器独立使用版本",
   "private": true,
   "scripts": {
-    "sync": "code-recycle ./script/sync/index.ts --cwd ./src ",
+    "sync": "code-recycle ./script/sync/index.ts --cwd ./src && prettier ./src --write",
     "test": "npm run test:transform && npm run test:import",
     "test:transform": "jest --config ./jest.transform.config.ts",
     "test:import": "cross-env TS_NODE_PROJECT=./tsconfig.spec.json jest --config ./jest.import.config.ts",

@@ -246,7 +246,8 @@
                         "getAttrsForDirectiveMatching",
                         "getInterpolationArgsLength",
                         "getInstructionStatements",
-                        "conditionallyCreateDirectiveBindingLiteral"
+                        "conditionallyCreateDirectiveBindingLiteral",
+                        "createCssSelectorFromNode"
                     ]
                 }
             },
@@ -262,7 +263,9 @@
                         "R3",
                         "ForwardRefHandling",
                         "R3QueryMetadata",
-                        "isI18nAttribute"
+                        "isI18nAttribute",
+                        "splitNsName",
+                        "CssSelector"
                     ]
                 }
             },
@@ -822,7 +825,6 @@
             }
         ]
     },
-
     {
         "fileName": "./transform/compiler-cli/src/ngtsc/reflection/src/host.ts",
         "rules": [
@@ -991,7 +993,6 @@
         "fileName": "./transform/compiler-cli/src/ngtsc/transform/src/utils.ts",
         "rules": []
     },
-
     {
         "fileName": "./transform/compiler-cli/src/ngtsc/translator/src/translator.ts",
         "rules": [
@@ -1813,6 +1814,32 @@
                     "excludes": [
                         "concatStringsWithSpace"
                     ]
+                }
+            }
+        ]
+    },
+    {
+        "fileName": "./import/render3/errors_di.ts",
+        "rules": [
+            {
+                "type": "custom",
+                "change": "change",
+                "values": {
+                    "selector": "BinaryExpression:has(>Identifier[value=ngDevMode])",
+                    "content": "null"
+                }
+            }
+        ]
+    },
+    {
+        "fileName": "./import/di/index.ts",
+        "rules": [
+            {
+                "type": "custom",
+                "change": "change",
+                "values": {
+                    "selector": "SourceFile",
+                    "content": "export {ProviderToken} from './provider_token';"
                 }
             }
         ]
