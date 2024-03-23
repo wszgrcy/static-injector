@@ -1,3 +1,5 @@
+| [中文](./readme-zh-Hans.md) | [English](./readme.md) |
+|-|-|
 # 简介
 
 - Angualr 依赖注入的独立版本

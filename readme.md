@@ -1,4 +1,4 @@
-|中文(./readme-zh-Hans.md)|English(./readme.md)|
+| [中文](./readme-zh-Hans.md) | [English](./readme.md) |
 |-|-|
 
 # Introduction
