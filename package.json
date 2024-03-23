@@ -1,7 +1,7 @@
 {
   "name": "static-injector",
   "version": "0.0.0",
-  "description": "Angular的静态注入器独立使用版本",
+  "description": "Angular 依赖注入独立版本;Angular dependency injection standalone version",
   "private": true,
   "scripts": {
     "sync": "code-recycle ./script/sync/index.ts --cwd ./src && prettier ./src --write",

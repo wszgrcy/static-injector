@@ -1,15 +1,16 @@
 {
   "name": "static-injector",
-  "version": "3.0.0",
-  "description": "Angular的静态注入器独立使用版本",
+  "version": "4.0.0",
+  "description": "Angular 依赖注入独立版本;Angular dependency injection standalone version",
   "keywords": [
     "angular",
-    "angular 17.0.4",
+    "angular 17.3.1",
     "injector",
     "typescript",
-    "typescript 5.2.2",
+    "typescript 5.4.2",
     "injectable",
-    "static-inject"
+    "static-inject",
+    "dependency injection"
   ],
   "repository": {
     "type": "git",
