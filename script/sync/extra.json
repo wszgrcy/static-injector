@@ -959,6 +959,7 @@
                         "xi18n",
                         "typeCheck",
                         "extendedTemplateCheck",
+                        "templateSemanticsCheck",
                         "compilePartial",
                         "compileLocal"
                     ]
@@ -988,7 +989,8 @@
                         "Xi18nContext",
                         "SemanticSymbol",
                         "ImportManager",
-                        "Reexport"
+                        "Reexport",
+                        "TemplateSemanticsChecker"
                     ]
                 }
             },
@@ -1339,11 +1341,26 @@
                 }
             },
             {
+                "type": "custom",
+                "values": {
+                    "selector": "FunctionDeclaration:like(HostAttributeToken):not(:like(ProviderToken))"
+                }
+            },
+            {
+                "type": "custom",
+                "change": "change",
+                "values": {
+                    "selector": "FunctionDeclaration UnionType:like(ProviderToken<T>|HostAttributeToken)",
+                    "content": "ProviderToken<T>"
+                }
+            },
+            {
                 "type": "import",
                 "change": "remove",
                 "values": {
                     "excludes": [
-                        "emitInjectEvent"
+                        "emitInjectEvent",
+                        "HostAttributeToken"
                     ]
                 }
             }
