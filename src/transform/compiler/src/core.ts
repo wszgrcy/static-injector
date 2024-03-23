@@ -17,6 +17,7 @@
  */
 export const enum InjectFlags {
   Default = 0,
+
   /** Don't descend into ancestors of the node requesting injection. */
   Self = 1 << 1,
   /** Skip the node that is requesting injection. */

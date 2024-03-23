@@ -80,6 +80,8 @@ export class InjectionToken<T> {
   ) {
     this.ɵprov = undefined;
     if (typeof options == 'number') {
+      // This is a special hack to assign __NG_ELEMENT_ID__ to this instance.
+      // See `InjectorMarkers`
     } else if (options !== undefined) {
       this.ɵprov = ɵɵdefineInjectable({
         token: this,

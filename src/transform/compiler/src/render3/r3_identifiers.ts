@@ -11,6 +11,10 @@ import * as o from '../output/output_ast';
 const CORE = 'static-injector';
 
 export class Identifiers {
+  /* Methods */
+
+  /* Instructions */
+
   static inject: o.ExternalReference = { name: 'ɵɵinject', moduleName: CORE };
 
   static directiveInject: o.ExternalReference = {
@@ -39,6 +43,7 @@ export class Identifiers {
     name: 'ɵɵdefineInjectable',
     moduleName: CORE,
   };
+
   static InjectableDeclaration: o.ExternalReference = {
     name: 'ɵɵInjectableDeclaration',
     moduleName: CORE,
@@ -53,4 +58,6 @@ export class Identifiers {
     name: 'ɵɵgetInheritedFactory',
     moduleName: CORE,
   };
+
+  // sanitization-related functions
 }

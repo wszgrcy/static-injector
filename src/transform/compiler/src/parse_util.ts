@@ -13,6 +13,9 @@ export class ParseLocation {
     public line: number,
     public col: number
   ) {}
+
+  // Return the source around the location
+  // Up to `maxChars` or `maxLines` on each side of the location
 }
 
 export class ParseSourceFile {
