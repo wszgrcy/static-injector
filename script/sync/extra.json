@@ -5,6 +5,14 @@
         "rules": [
             {
                 "type": "custom",
+                "change": "change",
+                "values": {
+                    "selector": "ConditionalExpression:has(>Identifier[value=ngDevMode])",
+                    "replaceSelector": ">ColonToken+*"
+                }
+            },
+            {
+                "type": "custom",
                 "values": {
                     "selector": "ExpressionStatement:like(ngDevMode)"
                 }

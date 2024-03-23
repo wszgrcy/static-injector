@@ -53,7 +53,7 @@ let fn: ScriptFunction = async (util, rule, host, injector) => {
     ],
     'packages',
     'branch',
-    '17.1.0'
+    '17.1.2'
   );
   let copyData = require('./copy.json') as {
     source: string;
@@ -91,6 +91,7 @@ let fn: ScriptFunction = async (util, rule, host, injector) => {
       content?: string;
       includes?: string[];
       removeComment?: boolean;
+      replaceSelector?: string;
     };
   }): NodeQueryOption {
     const range = async (context) => {
@@ -184,6 +185,19 @@ let fn: ScriptFunction = async (util, rule, host, injector) => {
             replace: item.values.content,
             multi: true,
             range: range,
+          };
+        } else if (item.values.replaceSelector) {
+          return {
+            query: item.values.selector,
+            multi: true,
+            // range: range,
+            children: [{ query: item.values.replaceSelector }],
+            callback(context, index) {
+              return {
+                range: context.node!.node!.range,
+                value: context.getNode('0').node!.value,
+              };
+            },
           };
         }
       }
