@@ -1450,7 +1450,8 @@
                         "InjectorProfilerContext",
                         "runInInjectorProfilerContext",
                         "setInjectorProfilerContext",
-                        "emitInjectEvent"
+                        "emitInjectEvent",
+                        "setActiveConsumer"
                     ]
                 }
             },
@@ -1458,6 +1459,18 @@
                 "type": "custom",
                 "values": {
                     "selector": "VariableDeclaration:has(>::name[value=prevInjectContext])<SyntaxList<VariableDeclarationList"
+                }
+            },
+            {
+                "type": "custom",
+                "values": {
+                    "selector": "VariableStatement:like(setActiveConsumer)"
+                }
+            },
+            {
+                "type": "custom",
+                "values": {
+                    "selector": "ExpressionStatement:like(setActiveConsumer)"
                 }
             }
         ]
