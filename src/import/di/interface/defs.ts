@@ -213,7 +213,7 @@ export function ɵɵdefineInjector(options: {
  * @param type A type which may have its own (non-inherited) `ɵprov`.
  */
 export function getInjectableDef<T>(
-  type: any
+  type: any,
 ): ɵɵInjectableDeclaration<T> | null {
   return getOwnDefinition(type, NG_PROV_DEF) || null;
 }
@@ -228,7 +228,7 @@ export function isInjectable(type: any): boolean {
  */
 function getOwnDefinition<T>(
   type: any,
-  field: string
+  field: string,
 ): ɵɵInjectableDeclaration<T> | null {
   return type.hasOwnProperty(field) ? type[field] : null;
 }
@@ -242,7 +242,7 @@ function getOwnDefinition<T>(
  *     scenario if we find the `ɵprov` on an ancestor only.
  */
 export function getInheritedInjectableDef<T>(
-  type: any
+  type: any,
 ): ɵɵInjectableDeclaration<T> | null {
   const def = type && (type[NG_PROV_DEF] || null);
 

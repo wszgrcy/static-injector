@@ -15,7 +15,7 @@ export class FatalDiagnosticError {
     readonly code: ErrorCode,
     readonly node: ts.Node,
     readonly message: string | ts.DiagnosticMessageChain,
-    readonly relatedInformation?: ts.DiagnosticRelatedInformation[]
+    readonly relatedInformation?: ts.DiagnosticRelatedInformation[],
   ) {}
 
   /**
@@ -28,7 +28,7 @@ export class FatalDiagnosticError {
       this.code,
       this.node,
       this.message,
-      this.relatedInformation
+      this.relatedInformation,
     );
   }
 }
@@ -37,7 +37,7 @@ export function makeDiagnostic(
   code: ErrorCode,
   node: ts.Node,
   messageText: string | ts.DiagnosticMessageChain,
-  relatedInformation?: ts.DiagnosticRelatedInformation[]
+  relatedInformation?: ts.DiagnosticRelatedInformation[],
 ): ts.DiagnosticWithLocation {
   node = ts.getOriginalNode(node);
   return {
@@ -53,7 +53,7 @@ export function makeDiagnostic(
 
 export function makeRelatedInformation(
   node: ts.Node,
-  messageText: string
+  messageText: string,
 ): ts.DiagnosticRelatedInformation {
   node = ts.getOriginalNode(node);
   return {

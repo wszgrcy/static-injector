@@ -46,13 +46,13 @@ export const CORE_MODULE = 'static-injector';
  * file in which the `TypeValueReference` originated.
  */
 export function valueReferenceToExpression(
-  valueRef: LocalTypeValueReference | ImportedTypeValueReference
+  valueRef: LocalTypeValueReference | ImportedTypeValueReference,
 ): Expression;
 export function valueReferenceToExpression(
-  valueRef: TypeValueReference
+  valueRef: TypeValueReference,
 ): Expression | null;
 export function valueReferenceToExpression(
-  valueRef: TypeValueReference
+  valueRef: TypeValueReference,
 ): Expression | null {
   if (valueRef.kind === TypeValueReferenceKind.UNAVAILABLE) {
     return null;
@@ -75,7 +75,7 @@ export function valueReferenceToExpression(
 }
 
 export function isAngularCore(
-  decorator: Decorator
+  decorator: Decorator,
 ): decorator is Decorator & { import: Import } {
   return decorator.import !== null && decorator.import.from === CORE_MODULE;
 }
@@ -83,17 +83,17 @@ export function isAngularCore(
 export function findAngularDecorator(
   decorators: Decorator[],
   name: string,
-  isCore: boolean
+  isCore: boolean,
 ): Decorator | undefined {
   return decorators.find((decorator) =>
-    isAngularDecorator(decorator, name, isCore)
+    isAngularDecorator(decorator, name, isCore),
   );
 }
 
 export function isAngularDecorator(
   decorator: Decorator,
   name: string,
-  isCore: boolean
+  isCore: boolean,
 ): boolean {
   if (isCore) {
     return decorator.name === name;
@@ -106,7 +106,7 @@ export function isAngularDecorator(
 export function getAngularDecorators(
   decorators: Decorator[],
   names: readonly string[],
-  isCore: boolean
+  isCore: boolean,
 ) {
   return decorators.filter((decorator) => {
     const name = isCore ? decorator.name : decorator.import?.name;
@@ -165,7 +165,7 @@ function expandForwardRef(arg: ts.Expression): ts.Expression | null {
  */
 export function tryUnwrapForwardRef(
   node: ts.Expression,
-  reflector: ReflectionHost
+  reflector: ReflectionHost,
 ): ts.Expression | null {
   node = unwrapExpression(node);
   if (!ts.isCallExpression(node) || node.arguments.length !== 1) {
@@ -197,7 +197,7 @@ export function tryUnwrapForwardRef(
 }
 
 const parensWrapperTransformerFactory: ts.TransformerFactory<ts.Expression> = (
-  context: ts.TransformationContext
+  context: ts.TransformationContext,
 ) => {
   const visitor: ts.Visitor = (node: ts.Node): ts.Node => {
     const visited = ts.visitEachChild(node, visitor, context);
@@ -220,7 +220,7 @@ const parensWrapperTransformerFactory: ts.TransformerFactory<ts.Expression> = (
  * @param expression Expression where functions should be wrapped in parentheses
  */
 export function wrapFunctionExpressionsInParens(
-  expression: ts.Expression
+  expression: ts.Expression,
 ): ts.Expression {
   return ts.transform(expression, [parensWrapperTransformerFactory])
     .transformed[0];
@@ -234,7 +234,7 @@ export function wrapFunctionExpressionsInParens(
  */
 export function wrapTypeReference(
   reflector: ReflectionHost,
-  clazz: ClassDeclaration
+  clazz: ClassDeclaration,
 ): R3Reference {
   const value = new WrappedNodeExpr(clazz.name);
   const type = value;
@@ -243,7 +243,7 @@ export function wrapTypeReference(
 
 export function toFactoryMetadata(
   meta: Omit<R3FactoryMetadata, 'target'>,
-  target: FactoryTarget
+  target: FactoryTarget,
 ): R3FactoryMetadata {
   return {
     name: meta.name,

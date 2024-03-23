@@ -47,7 +47,7 @@ import { INJECTOR_DEF_TYPES } from './internal_tokens';
  * referenced in `@Component` in a component injector.
  */
 export function makeEnvironmentProviders(
-  providers: (Provider | EnvironmentProviders)[]
+  providers: (Provider | EnvironmentProviders)[],
 ): EnvironmentProviders {
   return {
     ɵproviders: providers,
@@ -66,7 +66,7 @@ export type ImportProvidersSource =
 
 type WalkProviderTreeVisitor = (
   provider: SingleProvider,
-  container: Type<unknown> | InjectorType<unknown>
+  container: Type<unknown> | InjectorType<unknown>,
 ) => void;
 
 /**
@@ -136,7 +136,7 @@ export function internalImportProvidersFrom(
   if (injectorTypesWithProviders !== undefined) {
     processInjectorTypesWithProviders(
       injectorTypesWithProviders,
-      collectProviders
+      collectProviders,
     );
   }
 
@@ -149,7 +149,7 @@ export function internalImportProvidersFrom(
  */
 function processInjectorTypesWithProviders(
   typesWithProviders: InjectorTypeWithProviders<unknown>[],
-  visitor: WalkProviderTreeVisitor
+  visitor: WalkProviderTreeVisitor,
 ): void {
   for (let i = 0; i < typesWithProviders.length; i++) {
     const { ngModule, providers } = typesWithProviders[i];
@@ -178,13 +178,13 @@ export function isValueProvider(value: SingleProvider): value is ValueProvider {
 }
 
 export function isExistingProvider(
-  value: SingleProvider
+  value: SingleProvider,
 ): value is ExistingProvider {
   return !!(value && (value as ExistingProvider).useExisting);
 }
 
 export function isFactoryProvider(
-  value: SingleProvider
+  value: SingleProvider,
 ): value is FactoryProvider {
   return !!(value && (value as FactoryProvider).useFactory);
 }

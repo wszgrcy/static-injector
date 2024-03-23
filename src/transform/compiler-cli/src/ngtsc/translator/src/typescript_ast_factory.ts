@@ -85,19 +85,19 @@ export class TypeScriptAstFactory
     return ts.factory.createBinaryExpression(
       target,
       ts.SyntaxKind.EqualsToken,
-      value
+      value,
     );
   }
 
   createBinaryExpression(
     leftOperand: ts.Expression,
     operator: BinaryOperator,
-    rightOperand: ts.Expression
+    rightOperand: ts.Expression,
   ): ts.Expression {
     return ts.factory.createBinaryExpression(
       leftOperand,
       BINARY_OPERATORS[operator],
-      rightOperand
+      rightOperand,
     );
   }
 
@@ -108,7 +108,7 @@ export class TypeScriptAstFactory
   createCallExpression(
     callee: ts.Expression,
     args: ts.Expression[],
-    pure: boolean
+    pure: boolean,
   ): ts.Expression {
     const call = ts.factory.createCallExpression(callee, undefined, args);
     if (pure) {
@@ -118,7 +118,7 @@ export class TypeScriptAstFactory
         this.annotateForClosureCompiler
           ? PureAnnotation.CLOSURE
           : PureAnnotation.TERSER,
-        /* trailing newline */ false
+        /* trailing newline */ false,
       );
     }
     return call;
@@ -127,14 +127,14 @@ export class TypeScriptAstFactory
   createConditional(
     condition: ts.Expression,
     whenTrue: ts.Expression,
-    whenFalse: ts.Expression
+    whenFalse: ts.Expression,
   ): ts.Expression {
     return ts.factory.createConditionalExpression(
       condition,
       undefined,
       whenTrue,
       undefined,
-      whenFalse
+      whenFalse,
     );
   }
 
@@ -146,18 +146,18 @@ export class TypeScriptAstFactory
     return ts.factory.createCallExpression(
       ts.factory.createToken(ts.SyntaxKind.ImportKeyword) as ts.Expression,
       /* type */ undefined,
-      [ts.factory.createStringLiteral(url)]
+      [ts.factory.createStringLiteral(url)],
     );
   }
 
   createFunctionDeclaration(
     functionName: string,
     parameters: string[],
-    body: ts.Statement
+    body: ts.Statement,
   ): ts.Statement {
     if (!ts.isBlock(body)) {
       throw new Error(
-        `Invalid syntax, expected a block, but got ${ts.SyntaxKind[body.kind]}.`
+        `Invalid syntax, expected a block, but got ${ts.SyntaxKind[body.kind]}.`,
       );
     }
     return ts.factory.createFunctionDeclaration(
@@ -166,21 +166,21 @@ export class TypeScriptAstFactory
       functionName,
       undefined,
       parameters.map((param) =>
-        ts.factory.createParameterDeclaration(undefined, undefined, param)
+        ts.factory.createParameterDeclaration(undefined, undefined, param),
       ),
       undefined,
-      body
+      body,
     );
   }
 
   createFunctionExpression(
     functionName: string | null,
     parameters: string[],
-    body: ts.Statement
+    body: ts.Statement,
   ): ts.Expression {
     if (!ts.isBlock(body)) {
       throw new Error(
-        `Invalid syntax, expected a block, but got ${ts.SyntaxKind[body.kind]}.`
+        `Invalid syntax, expected a block, but got ${ts.SyntaxKind[body.kind]}.`,
       );
     }
     return ts.factory.createFunctionExpression(
@@ -189,20 +189,20 @@ export class TypeScriptAstFactory
       functionName ?? undefined,
       undefined,
       parameters.map((param) =>
-        ts.factory.createParameterDeclaration(undefined, undefined, param)
+        ts.factory.createParameterDeclaration(undefined, undefined, param),
       ),
       undefined,
-      body
+      body,
     );
   }
 
   createArrowFunctionExpression(
     parameters: string[],
-    body: ts.Statement | ts.Expression
+    body: ts.Statement | ts.Expression,
   ): ts.Expression {
     if (ts.isStatement(body) && !ts.isBlock(body)) {
       throw new Error(
-        `Invalid syntax, expected a block, but got ${ts.SyntaxKind[body.kind]}.`
+        `Invalid syntax, expected a block, but got ${ts.SyntaxKind[body.kind]}.`,
       );
     }
 
@@ -210,11 +210,11 @@ export class TypeScriptAstFactory
       undefined,
       undefined,
       parameters.map((param) =>
-        ts.factory.createParameterDeclaration(undefined, undefined, param)
+        ts.factory.createParameterDeclaration(undefined, undefined, param),
       ),
       undefined,
       undefined,
-      body
+      body,
     );
   }
 
@@ -223,17 +223,17 @@ export class TypeScriptAstFactory
   createIfStatement(
     condition: ts.Expression,
     thenStatement: ts.Statement,
-    elseStatement: ts.Statement | null
+    elseStatement: ts.Statement | null,
   ): ts.Statement {
     return ts.factory.createIfStatement(
       condition,
       thenStatement,
-      elseStatement ?? undefined
+      elseStatement ?? undefined,
     );
   }
 
   createLiteral(
-    value: string | number | boolean | null | undefined
+    value: string | number | boolean | null | undefined,
   ): ts.Expression {
     if (value === undefined) {
       return ts.factory.createIdentifier('undefined');
@@ -250,13 +250,13 @@ export class TypeScriptAstFactory
 
   createNewExpression(
     expression: ts.Expression,
-    args: ts.Expression[]
+    args: ts.Expression[],
   ): ts.Expression {
     return ts.factory.createNewExpression(expression, undefined, args);
   }
 
   createObjectLiteral(
-    properties: ObjectLiteralProperty<ts.Expression>[]
+    properties: ObjectLiteralProperty<ts.Expression>[],
   ): ts.Expression {
     return ts.factory.createObjectLiteralExpression(
       properties.map((prop) =>
@@ -264,9 +264,9 @@ export class TypeScriptAstFactory
           prop.quoted
             ? ts.factory.createStringLiteral(prop.propertyName)
             : ts.factory.createIdentifier(prop.propertyName),
-          prop.value
-        )
-      )
+          prop.value,
+        ),
+      ),
     );
   }
 
@@ -280,7 +280,7 @@ export class TypeScriptAstFactory
 
   createTaggedTemplate(
     tag: ts.Expression,
-    template: TemplateLiteral<ts.Expression>
+    template: TemplateLiteral<ts.Expression>,
   ): ts.Expression {
     let templateLiteral: ts.TemplateLiteral;
     const length = template.elements.length;
@@ -288,7 +288,7 @@ export class TypeScriptAstFactory
     if (length === 1) {
       templateLiteral = ts.factory.createNoSubstitutionTemplateLiteral(
         head.cooked,
-        head.raw
+        head.raw,
       );
     } else {
       const spans: ts.TemplateSpan[] = [];
@@ -300,7 +300,7 @@ export class TypeScriptAstFactory
           this.setSourceMapRange(middle, range);
         }
         spans.push(
-          ts.factory.createTemplateSpan(template.expressions[i - 1], middle)
+          ts.factory.createTemplateSpan(template.expressions[i - 1], middle),
         );
       }
       // Create the tail part
@@ -308,18 +308,18 @@ export class TypeScriptAstFactory
       const templatePart = template.elements[length - 1];
       const templateTail = createTemplateTail(
         templatePart.cooked,
-        templatePart.raw
+        templatePart.raw,
       );
       if (templatePart.range !== null) {
         this.setSourceMapRange(templateTail, templatePart.range);
       }
       spans.push(
-        ts.factory.createTemplateSpan(resolvedExpression, templateTail)
+        ts.factory.createTemplateSpan(resolvedExpression, templateTail),
       );
       // Put it all together
       templateLiteral = ts.factory.createTemplateExpression(
         ts.factory.createTemplateHead(head.cooked, head.raw),
-        spans
+        spans,
       );
     }
     if (head.range !== null) {
@@ -328,7 +328,7 @@ export class TypeScriptAstFactory
     return ts.factory.createTaggedTemplateExpression(
       tag,
       undefined,
-      templateLiteral
+      templateLiteral,
     );
   }
 
@@ -338,18 +338,18 @@ export class TypeScriptAstFactory
 
   createUnaryExpression(
     operator: UnaryOperator,
-    operand: ts.Expression
+    operand: ts.Expression,
   ): ts.Expression {
     return ts.factory.createPrefixUnaryExpression(
       UNARY_OPERATORS[operator],
-      operand
+      operand,
     );
   }
 
   createVariableDeclaration(
     variableName: string,
     initializer: ts.Expression | null,
-    type: VariableDeclarationType
+    type: VariableDeclarationType,
   ): ts.Statement {
     return ts.factory.createVariableStatement(
       undefined,
@@ -359,17 +359,17 @@ export class TypeScriptAstFactory
             variableName,
             undefined,
             undefined,
-            initializer ?? undefined
+            initializer ?? undefined,
           ),
         ],
-        VAR_TYPES[type]
-      )
+        VAR_TYPES[type],
+      ),
     );
   }
 
   setSourceMapRange<T extends ts.Node>(
     node: T,
-    sourceMapRange: SourceMapRange | null
+    sourceMapRange: SourceMapRange | null,
   ): T {
     if (sourceMapRange === null) {
       return node;
@@ -379,7 +379,7 @@ export class TypeScriptAstFactory
     if (!this.externalSourceFiles.has(url)) {
       this.externalSourceFiles.set(
         url,
-        ts.createSourceMapSource(url, sourceMapRange.content, (pos) => pos)
+        ts.createSourceMapSource(url, sourceMapRange.content, (pos) => pos),
       );
     }
     const source = this.externalSourceFiles.get(url);
@@ -396,11 +396,11 @@ export class TypeScriptAstFactory
 // Revert once https://github.com/microsoft/TypeScript/issues/35374 is fixed.
 export function createTemplateMiddle(
   cooked: string,
-  raw: string
+  raw: string,
 ): ts.TemplateMiddle {
   const node: ts.TemplateLiteralLikeNode = ts.factory.createTemplateHead(
     cooked,
-    raw
+    raw,
   );
   (node.kind as ts.SyntaxKind) = ts.SyntaxKind.TemplateMiddle;
   return node as ts.TemplateMiddle;
@@ -410,11 +410,11 @@ export function createTemplateMiddle(
 // Revert once https://github.com/microsoft/TypeScript/issues/35374 is fixed.
 export function createTemplateTail(
   cooked: string,
-  raw: string
+  raw: string,
 ): ts.TemplateTail {
   const node: ts.TemplateLiteralLikeNode = ts.factory.createTemplateHead(
     cooked,
-    raw
+    raw,
   );
   (node.kind as ts.SyntaxKind) = ts.SyntaxKind.TemplateTail;
   return node as ts.TemplateTail;
@@ -428,7 +428,7 @@ export function createTemplateTail(
  */
 export function attachComments(
   statement: ts.Statement,
-  leadingComments: LeadingComment[]
+  leadingComments: LeadingComment[],
 ): void {
   for (const comment of leadingComments) {
     const commentKind = comment.multiline
@@ -439,7 +439,7 @@ export function attachComments(
         statement,
         commentKind,
         comment.toString(),
-        comment.trailingNewline
+        comment.trailingNewline,
       );
     } else {
       for (const line of comment.toString().split('\n')) {
@@ -447,7 +447,7 @@ export function attachComments(
           statement,
           commentKind,
           line,
-          comment.trailingNewline
+          comment.trailingNewline,
         );
       }
     }

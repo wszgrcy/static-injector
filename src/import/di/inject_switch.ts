@@ -36,7 +36,7 @@ export function getInjectImplementation() {
 export function setInjectImplementation(
   impl:
     | (<T>(token: ProviderToken<T>, flags?: InjectFlags) => T | null)
-    | undefined
+    | undefined,
 ): (<T>(token: ProviderToken<T>, flags?: InjectFlags) => T | null) | undefined {
   const previous = _injectImplementation;
   _injectImplementation = impl;
@@ -53,7 +53,7 @@ export function setInjectImplementation(
 export function injectRootLimpMode<T>(
   token: ProviderToken<T>,
   notFoundValue: T | undefined,
-  flags: InjectFlags
+  flags: InjectFlags,
 ): T | null {
   const injectableDef: ɵɵInjectableDeclaration<T> | null =
     getInjectableDef(token);

@@ -48,7 +48,7 @@ export class ImportManager implements ImportGenerator<ts.Identifier> {
   constructor(
     protected rewriter: ImportRewriter = new NoopImportRewriter(),
     private prefix = 'i',
-    private factory = ts.factory
+    private factory = ts.factory,
   ) {}
 
   generateNamespaceImport(moduleName: string): ts.Identifier {
@@ -60,7 +60,7 @@ export class ImportManager implements ImportGenerator<ts.Identifier> {
     ) {
       this.specifierToIdentifier.set(
         moduleName,
-        this.factory.createIdentifier(`${this.prefix}${this.nextIndex++}`)
+        this.factory.createIdentifier(`${this.prefix}${this.nextIndex++}`),
       );
     }
     return this.specifierToIdentifier.get(moduleName)!;
@@ -68,7 +68,7 @@ export class ImportManager implements ImportGenerator<ts.Identifier> {
 
   generateNamedImport(
     moduleName: string,
-    originalSymbol: string
+    originalSymbol: string,
   ): NamedImport<ts.Identifier> {
     // First, rewrite the symbol name.
     const symbol = this.rewriter.rewriteSymbol(originalSymbol, moduleName);
@@ -97,7 +97,7 @@ export class ImportManager implements ImportGenerator<ts.Identifier> {
     for (const [originalSpecifier, qualifier] of this.specifierToIdentifier) {
       const specifier = this.rewriter.rewriteSpecifier(
         originalSpecifier,
-        contextPath
+        contextPath,
       );
       imports.push({
         specifier,

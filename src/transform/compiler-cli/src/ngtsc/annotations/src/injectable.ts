@@ -75,12 +75,12 @@ export class InjectableDecoratorHandler
      * If true then an error diagnostic is reported.
      * If false then there is no error and a new ɵprov property is not added.
      */
-    private errorOnDuplicateProv = true
+    private errorOnDuplicateProv = true,
   ) {}
 
   detect(
     node: ClassDeclaration,
-    decorators: Decorator[] | null
+    decorators: Decorator[] | null,
   ): DetectResult<Decorator> | undefined {
     if (!decorators) {
       return undefined;
@@ -88,7 +88,7 @@ export class InjectableDecoratorHandler
     const decorator = findAngularDecorator(
       decorators,
       'Injectable',
-      this.isCore
+      this.isCore,
     );
     if (decorator !== undefined) {
       return {
@@ -103,7 +103,7 @@ export class InjectableDecoratorHandler
 
   analyze(
     node: ClassDeclaration,
-    decorator: Readonly<Decorator>
+    decorator: Readonly<Decorator>,
   ): AnalysisOutput<InjectableHandlerData> {
     const meta = extractInjectableMetadata(node, decorator, this.reflector);
 
@@ -116,7 +116,7 @@ export class InjectableDecoratorHandler
           decorator,
           this.reflector,
           this.isCore,
-          this.strictCtorDeps
+          this.strictCtorDeps,
         ),
 
         // Avoid generating multiple factories if a class has
@@ -127,13 +127,13 @@ export class InjectableDecoratorHandler
 
   compileFull(
     node: ClassDeclaration,
-    analysis: Readonly<InjectableHandlerData>
+    analysis: Readonly<InjectableHandlerData>,
   ): CompileResult[] {
     return this.compile(
       compileNgFactoryDefField,
       (meta) => compileInjectable(meta, false),
       node,
-      analysis
+      analysis,
     );
   }
 
@@ -141,7 +141,7 @@ export class InjectableDecoratorHandler
     compileFactoryFn: CompileFactoryFn,
     compileInjectableFn: (meta: R3InjectableMetadata) => R3CompiledExpression,
     node: ClassDeclaration,
-    analysis: Readonly<InjectableHandlerData>
+    analysis: Readonly<InjectableHandlerData>,
   ): CompileResult[] {
     const results: CompileResult[] = [];
 
@@ -150,8 +150,8 @@ export class InjectableDecoratorHandler
       const factoryRes = compileFactoryFn(
         toFactoryMetadata(
           { ...meta, deps: analysis.ctorDeps },
-          FactoryTarget.Injectable
-        )
+          FactoryTarget.Injectable,
+        ),
       );
 
       results.push(factoryRes);
@@ -164,7 +164,7 @@ export class InjectableDecoratorHandler
       throw new FatalDiagnosticError(
         ErrorCode.INJECTABLE_DUPLICATE_PROV,
         ɵprov.nameNode || ɵprov.node || node,
-        'Injectables cannot contain a static ɵprov property, because the compiler is going to generate one.'
+        'Injectables cannot contain a static ɵprov property, because the compiler is going to generate one.',
       );
     }
 
@@ -193,7 +193,7 @@ export class InjectableDecoratorHandler
 function extractInjectableMetadata(
   clazz: ClassDeclaration,
   decorator: Decorator,
-  reflector: ReflectionHost
+  reflector: ReflectionHost,
 ): R3InjectableMetadata {
   const name = clazz.name.text;
   const type = wrapTypeReference(reflector, clazz);
@@ -202,7 +202,7 @@ function extractInjectableMetadata(
     throw new FatalDiagnosticError(
       ErrorCode.DECORATOR_NOT_CALLED,
       decorator.node,
-      '@Injectable must be called'
+      '@Injectable must be called',
     );
   }
   if (decorator.args.length === 0) {
@@ -212,7 +212,7 @@ function extractInjectableMetadata(
       typeArgumentCount,
       providedIn: createMayBeForwardRefExpression(
         new LiteralExpr(null),
-        ForwardRefHandling.None
+        ForwardRefHandling.None,
       ),
     };
   } else if (decorator.args.length === 1) {
@@ -224,7 +224,7 @@ function extractInjectableMetadata(
       throw new FatalDiagnosticError(
         ErrorCode.DECORATOR_ARG_NOT_LITERAL,
         metaNode,
-        `@Injectable argument must be an object literal`
+        `@Injectable argument must be an object literal`,
       );
     }
 
@@ -235,7 +235,7 @@ function extractInjectableMetadata(
       ? getProviderExpression(meta.get('providedIn')!, reflector)
       : createMayBeForwardRefExpression(
           new LiteralExpr(null),
-          ForwardRefHandling.None
+          ForwardRefHandling.None,
         );
 
     let deps: R3DependencyMetadata[] | undefined = undefined;
@@ -245,7 +245,7 @@ function extractInjectableMetadata(
         throw new FatalDiagnosticError(
           ErrorCode.VALUE_NOT_LITERAL,
           depsExpr,
-          `@Injectable deps metadata must be an inline array`
+          `@Injectable deps metadata must be an inline array`,
         );
       }
       deps = depsExpr.elements.map((dep) => getDep(dep, reflector));
@@ -262,7 +262,7 @@ function extractInjectableMetadata(
     } else if (meta.has('useExisting')) {
       result.useExisting = getProviderExpression(
         meta.get('useExisting')!,
-        reflector
+        reflector,
       );
     } else if (meta.has('useClass')) {
       result.useClass = getProviderExpression(meta.get('useClass')!, reflector);
@@ -276,7 +276,7 @@ function extractInjectableMetadata(
     throw new FatalDiagnosticError(
       ErrorCode.DECORATOR_ARITY_WRONG,
       decorator.args[2],
-      'Too many arguments to @Injectable'
+      'Too many arguments to @Injectable',
     );
   }
 }
@@ -290,14 +290,14 @@ function extractInjectableMetadata(
  */
 function getProviderExpression(
   expression: ts.Expression,
-  reflector: ReflectionHost
+  reflector: ReflectionHost,
 ): MaybeForwardRefExpression {
   const forwardRefValue = tryUnwrapForwardRef(expression, reflector);
   return createMayBeForwardRefExpression(
     new WrappedNodeExpr(forwardRefValue ?? expression),
     forwardRefValue !== null
       ? ForwardRefHandling.Unwrapped
-      : ForwardRefHandling.None
+      : ForwardRefHandling.None,
   );
 }
 
@@ -307,13 +307,13 @@ function extractInjectableCtorDeps(
   decorator: Decorator,
   reflector: ReflectionHost,
   isCore: boolean,
-  strictCtorDeps: boolean
+  strictCtorDeps: boolean,
 ) {
   if (decorator.args === null) {
     throw new FatalDiagnosticError(
       ErrorCode.DECORATOR_NOT_CALLED,
       decorator.node,
-      '@Injectable must be called'
+      '@Injectable must be called',
     );
   }
 
@@ -332,7 +332,7 @@ function extractInjectableCtorDeps(
       ctorDeps = getValidConstructorDependencies(clazz, reflector, isCore);
     } else {
       ctorDeps = unwrapConstructorDependencies(
-        getConstructorDependencies(clazz, reflector, isCore)
+        getConstructorDependencies(clazz, reflector, isCore),
       );
     }
 
@@ -367,7 +367,7 @@ function requiresValidCtor(meta: R3InjectableMetadata): boolean {
 
 function getDep(
   dep: ts.Expression,
-  reflector: ReflectionHost
+  reflector: ReflectionHost,
 ): R3DependencyMetadata {
   const meta: R3DependencyMetadata = {
     token: new WrappedNodeExpr(dep),
@@ -381,7 +381,7 @@ function getDep(
   function maybeUpdateDecorator(
     dec: ts.Identifier,
     reflector: ReflectionHost,
-    token?: ts.Expression
+    token?: ts.Expression,
   ): boolean {
     const source = reflector.getImportOfIdentifier(dec);
     if (source === null || source.from !== 'static-injector') {

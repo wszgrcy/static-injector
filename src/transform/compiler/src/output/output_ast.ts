@@ -35,7 +35,10 @@ export enum BuiltinTypeName {
 }
 
 export class BuiltinType extends Type {
-  constructor(public name: BuiltinTypeName, modifiers?: TypeModifier) {
+  constructor(
+    public name: BuiltinTypeName,
+    modifiers?: TypeModifier,
+  ) {
     super(modifiers);
   }
   override visitType(visitor: TypeVisitor, context: any): any {
@@ -47,7 +50,7 @@ export class ExpressionType extends Type {
   constructor(
     public value: Expression,
     modifiers?: TypeModifier,
-    public typeParams: Type[] | null = null
+    public typeParams: Type[] | null = null,
   ) {
     super(modifiers);
   }
@@ -57,7 +60,10 @@ export class ExpressionType extends Type {
 }
 
 export class ArrayType extends Type {
-  constructor(public of: Type, modifiers?: TypeModifier) {
+  constructor(
+    public of: Type,
+    modifiers?: TypeModifier,
+  ) {
     super(modifiers);
   }
   override visitType(visitor: TypeVisitor, context: any): any {
@@ -77,7 +83,10 @@ export class MapType extends Type {
 }
 
 export class TransplantedType<T> extends Type {
-  constructor(readonly type: T, modifiers?: TypeModifier) {
+  constructor(
+    readonly type: T,
+    modifiers?: TypeModifier,
+  ) {
     super(modifiers);
   }
   override visitType(visitor: TypeVisitor, context: any): any {
@@ -131,7 +140,7 @@ export enum BinaryOperator {
 }
 
 export function nullSafeIsEquivalent<
-  T extends { isEquivalent(other: T): boolean }
+  T extends { isEquivalent(other: T): boolean },
 >(base: T | null, other: T | null) {
   if (base == null || other == null) {
     return base == other;
@@ -142,7 +151,7 @@ export function nullSafeIsEquivalent<
 function areAllEquivalentPredicate<T>(
   base: T[],
   other: T[],
-  equivalentPredicate: (baseElement: T, otherElement: T) => boolean
+  equivalentPredicate: (baseElement: T, otherElement: T) => boolean,
 ) {
   const len = base.length;
   if (len !== other.length) {
@@ -158,12 +167,12 @@ function areAllEquivalentPredicate<T>(
 
 export function areAllEquivalent<T extends { isEquivalent(other: T): boolean }>(
   base: T[],
-  other: T[]
+  other: T[],
 ) {
   return areAllEquivalentPredicate(
     base,
     other,
-    (baseElement: T, otherElement: T) => baseElement.isEquivalent(otherElement)
+    (baseElement: T, otherElement: T) => baseElement.isEquivalent(otherElement),
   );
 }
 
@@ -173,7 +182,7 @@ export abstract class Expression {
 
   constructor(
     type: Type | null | undefined,
-    sourceSpan?: ParseSourceSpan | null
+    sourceSpan?: ParseSourceSpan | null,
   ) {
     this.type = type || null;
     this.sourceSpan = sourceSpan || null;
@@ -201,7 +210,7 @@ export abstract class Expression {
   key(
     index: Expression,
     type?: Type | null,
-    sourceSpan?: ParseSourceSpan | null
+    sourceSpan?: ParseSourceSpan | null,
   ): ReadKeyExpr {
     return new ReadKeyExpr(this, index, type, sourceSpan);
   }
@@ -209,14 +218,14 @@ export abstract class Expression {
   callFn(
     params: Expression[],
     sourceSpan?: ParseSourceSpan | null,
-    pure?: boolean
+    pure?: boolean,
   ): InvokeFunctionExpr {
     return new InvokeFunctionExpr(this, params, null, sourceSpan, pure);
   }
   bitwiseOr(
     rhs: Expression,
     sourceSpan?: ParseSourceSpan | null,
-    parens: boolean = true
+    parens: boolean = true,
   ): BinaryOperatorExpr {
     return new BinaryOperatorExpr(
       BinaryOperator.BitwiseOr,
@@ -224,7 +233,7 @@ export abstract class Expression {
       rhs,
       null,
       sourceSpan,
-      parens
+      parens,
     );
   }
 
@@ -237,7 +246,7 @@ export class ReadVarExpr extends Expression {
   constructor(
     public name: string,
     type?: Type | null,
-    sourceSpan?: ParseSourceSpan | null
+    sourceSpan?: ParseSourceSpan | null,
   ) {
     super(type, sourceSpan);
   }
@@ -267,7 +276,7 @@ export class TypeofExpr extends Expression {
   constructor(
     public expr: Expression,
     type?: Type | null,
-    sourceSpan?: ParseSourceSpan | null
+    sourceSpan?: ParseSourceSpan | null,
   ) {
     super(type, sourceSpan);
   }
@@ -293,7 +302,7 @@ export class WrappedNodeExpr<T> extends Expression {
   constructor(
     public node: T,
     type?: Type | null,
-    sourceSpan?: ParseSourceSpan | null
+    sourceSpan?: ParseSourceSpan | null,
   ) {
     super(type, sourceSpan);
   }
@@ -321,7 +330,7 @@ export class WriteVarExpr extends Expression {
     public name: string,
     value: Expression,
     type?: Type | null,
-    sourceSpan?: ParseSourceSpan | null
+    sourceSpan?: ParseSourceSpan | null,
   ) {
     super(type || value.type, sourceSpan);
     this.value = value;
@@ -348,7 +357,7 @@ export class WriteVarExpr extends Expression {
       this.name,
       this.value.clone(),
       this.type,
-      this.sourceSpan
+      this.sourceSpan,
     );
   }
 
@@ -358,7 +367,7 @@ export class WriteVarExpr extends Expression {
       this.value,
       type,
       modifiers,
-      this.sourceSpan
+      this.sourceSpan,
     );
   }
 
@@ -374,7 +383,7 @@ export class WriteKeyExpr extends Expression {
     public index: Expression,
     value: Expression,
     type?: Type | null,
-    sourceSpan?: ParseSourceSpan | null
+    sourceSpan?: ParseSourceSpan | null,
   ) {
     super(type || value.type, sourceSpan);
     this.value = value;
@@ -403,7 +412,7 @@ export class WriteKeyExpr extends Expression {
       this.index.clone(),
       this.value.clone(),
       this.type,
-      this.sourceSpan
+      this.sourceSpan,
     );
   }
 }
@@ -415,7 +424,7 @@ export class WritePropExpr extends Expression {
     public name: string,
     value: Expression,
     type?: Type | null,
-    sourceSpan?: ParseSourceSpan | null
+    sourceSpan?: ParseSourceSpan | null,
   ) {
     super(type || value.type, sourceSpan);
     this.value = value;
@@ -444,7 +453,7 @@ export class WritePropExpr extends Expression {
       this.name,
       this.value.clone(),
       this.type,
-      this.sourceSpan
+      this.sourceSpan,
     );
   }
 }
@@ -455,7 +464,7 @@ export class InvokeFunctionExpr extends Expression {
     public args: Expression[],
     type?: Type | null,
     sourceSpan?: ParseSourceSpan | null,
-    public pure = false
+    public pure = false,
   ) {
     super(type, sourceSpan);
   }
@@ -488,7 +497,7 @@ export class InvokeFunctionExpr extends Expression {
       this.args.map((arg) => arg.clone()),
       this.type,
       this.sourceSpan,
-      this.pure
+      this.pure,
     );
   }
 }
@@ -498,7 +507,7 @@ export class InstantiateExpr extends Expression {
     public classExpr: Expression,
     public args: Expression[],
     type?: Type | null,
-    sourceSpan?: ParseSourceSpan | null
+    sourceSpan?: ParseSourceSpan | null,
   ) {
     super(type, sourceSpan);
   }
@@ -524,7 +533,7 @@ export class InstantiateExpr extends Expression {
       this.classExpr.clone(),
       this.args.map((arg) => arg.clone()),
       this.type,
-      this.sourceSpan
+      this.sourceSpan,
     );
   }
 }
@@ -533,7 +542,7 @@ export class LiteralExpr extends Expression {
   constructor(
     public value: number | string | boolean | null | undefined,
     type?: Type | null,
-    sourceSpan?: ParseSourceSpan | null
+    sourceSpan?: ParseSourceSpan | null,
   ) {
     super(type, sourceSpan);
   }
@@ -558,13 +567,13 @@ export class LiteralExpr extends Expression {
 export class TemplateLiteral {
   constructor(
     public elements: TemplateLiteralElement[],
-    public expressions: Expression[]
+    public expressions: Expression[],
   ) {}
 
   clone(): TemplateLiteral {
     return new TemplateLiteral(
       this.elements.map((el) => el.clone()),
-      this.expressions.map((expr) => expr.clone())
+      this.expressions.map((expr) => expr.clone()),
     );
   }
 }
@@ -573,7 +582,7 @@ export class TemplateLiteralElement {
   constructor(
     public text: string,
     public sourceSpan?: ParseSourceSpan,
-    rawText?: string
+    rawText?: string,
   ) {
     // If `rawText` is not provided, try to extract the raw string from its
     // associated `sourceSpan`. If that is also not available, "fake" the raw
@@ -593,7 +602,10 @@ export class TemplateLiteralElement {
 }
 
 export class LiteralPiece {
-  constructor(public text: string, public sourceSpan: ParseSourceSpan) {}
+  constructor(
+    public text: string,
+    public sourceSpan: ParseSourceSpan,
+  ) {}
 }
 
 /**
@@ -629,13 +641,13 @@ const escapeForTemplateLiteral = (str: string): string =>
 function createCookedRawString(
   metaBlock: string,
   messagePart: string,
-  range: ParseSourceSpan | null
+  range: ParseSourceSpan | null,
 ): CookedRawString {
   if (metaBlock === '') {
     return {
       cooked: messagePart,
       raw: escapeForTemplateLiteral(
-        escapeStartingColon(escapeSlashes(messagePart))
+        escapeStartingColon(escapeSlashes(messagePart)),
       ),
       range,
     };
@@ -644,8 +656,8 @@ function createCookedRawString(
       cooked: `:${metaBlock}:${messagePart}`,
       raw: escapeForTemplateLiteral(
         `:${escapeColons(escapeSlashes(metaBlock))}:${escapeSlashes(
-          messagePart
-        )}`
+          messagePart,
+        )}`,
       ),
       range,
     };
@@ -657,7 +669,7 @@ export class ExternalExpr extends Expression {
     public value: ExternalReference,
     type?: Type | null,
     public typeParams: Type[] | null = null,
-    sourceSpan?: ParseSourceSpan | null
+    sourceSpan?: ParseSourceSpan | null,
   ) {
     super(type, sourceSpan);
   }
@@ -684,7 +696,7 @@ export class ExternalExpr extends Expression {
       this.value,
       this.type,
       this.typeParams,
-      this.sourceSpan
+      this.sourceSpan,
     );
   }
 }
@@ -693,7 +705,7 @@ export class ExternalReference {
   constructor(
     public moduleName: string | null,
     public name: string | null,
-    public runtime?: any | null
+    public runtime?: any | null,
   ) {}
   // Note: no isEquivalent method here as we use this as an interface too.
 }
@@ -706,7 +718,7 @@ export class ConditionalExpr extends Expression {
     trueCase: Expression,
     public falseCase: Expression | null = null,
     type?: Type | null,
-    sourceSpan?: ParseSourceSpan | null
+    sourceSpan?: ParseSourceSpan | null,
   ) {
     super(type || trueCase.type, sourceSpan);
     this.trueCase = trueCase;
@@ -735,13 +747,16 @@ export class ConditionalExpr extends Expression {
       this.trueCase.clone(),
       this.falseCase?.clone(),
       this.type,
-      this.sourceSpan
+      this.sourceSpan,
     );
   }
 }
 
 export class DynamicImportExpr extends Expression {
-  constructor(public url: string, sourceSpan?: ParseSourceSpan | null) {
+  constructor(
+    public url: string,
+    sourceSpan?: ParseSourceSpan | null,
+  ) {
     super(null, sourceSpan);
   }
 
@@ -765,7 +780,7 @@ export class DynamicImportExpr extends Expression {
 export class NotExpr extends Expression {
   constructor(
     public condition: Expression,
-    sourceSpan?: ParseSourceSpan | null
+    sourceSpan?: ParseSourceSpan | null,
   ) {
     super(BOOL_TYPE, sourceSpan);
   }
@@ -788,7 +803,10 @@ export class NotExpr extends Expression {
 }
 
 export class FnParam {
-  constructor(public name: string, public type: Type | null = null) {}
+  constructor(
+    public name: string,
+    public type: Type | null = null,
+  ) {}
 
   isEquivalent(param: FnParam): boolean {
     return this.name === param.name;
@@ -805,7 +823,7 @@ export class FunctionExpr extends Expression {
     public statements: Statement[],
     type?: Type | null,
     sourceSpan?: ParseSourceSpan | null,
-    public name?: string | null
+    public name?: string | null,
   ) {
     super(type, sourceSpan);
   }
@@ -833,7 +851,7 @@ export class FunctionExpr extends Expression {
       this.statements,
       this.type,
       modifiers,
-      this.sourceSpan
+      this.sourceSpan,
     );
   }
 
@@ -844,7 +862,7 @@ export class FunctionExpr extends Expression {
       this.statements,
       this.type,
       this.sourceSpan,
-      this.name
+      this.name,
     );
   }
 }
@@ -857,7 +875,7 @@ export class ArrowFunctionExpr extends Expression {
     public params: FnParam[],
     public body: Expression | Statement[],
     type?: Type | null,
-    sourceSpan?: ParseSourceSpan | null
+    sourceSpan?: ParseSourceSpan | null,
   ) {
     super(type, sourceSpan);
   }
@@ -895,7 +913,7 @@ export class ArrowFunctionExpr extends Expression {
       this.params.map((p) => p.clone()),
       Array.isArray(this.body) ? this.body : this.body.clone(),
       this.type,
-      this.sourceSpan
+      this.sourceSpan,
     );
   }
 
@@ -905,7 +923,7 @@ export class ArrowFunctionExpr extends Expression {
       this,
       INFERRED_TYPE,
       modifiers,
-      this.sourceSpan
+      this.sourceSpan,
     );
   }
 }
@@ -916,7 +934,7 @@ export class UnaryOperatorExpr extends Expression {
     public expr: Expression,
     type?: Type | null,
     sourceSpan?: ParseSourceSpan | null,
-    public parens: boolean = true
+    public parens: boolean = true,
   ) {
     super(type || NUMBER_TYPE, sourceSpan);
   }
@@ -943,7 +961,7 @@ export class UnaryOperatorExpr extends Expression {
       this.expr.clone(),
       this.type,
       this.sourceSpan,
-      this.parens
+      this.parens,
     );
   }
 }
@@ -956,7 +974,7 @@ export class BinaryOperatorExpr extends Expression {
     public rhs: Expression,
     type?: Type | null,
     sourceSpan?: ParseSourceSpan | null,
-    public parens: boolean = true
+    public parens: boolean = true,
   ) {
     super(type || lhs.type, sourceSpan);
     this.lhs = lhs;
@@ -986,7 +1004,7 @@ export class BinaryOperatorExpr extends Expression {
       this.rhs.clone(),
       this.type,
       this.sourceSpan,
-      this.parens
+      this.parens,
     );
   }
 }
@@ -996,7 +1014,7 @@ export class ReadPropExpr extends Expression {
     public receiver: Expression,
     public name: string,
     type?: Type | null,
-    sourceSpan?: ParseSourceSpan | null
+    sourceSpan?: ParseSourceSpan | null,
   ) {
     super(type, sourceSpan);
   }
@@ -1028,7 +1046,7 @@ export class ReadPropExpr extends Expression {
       this.name,
       value,
       null,
-      this.sourceSpan
+      this.sourceSpan,
     );
   }
 
@@ -1037,7 +1055,7 @@ export class ReadPropExpr extends Expression {
       this.receiver.clone(),
       this.name,
       this.type,
-      this.sourceSpan
+      this.sourceSpan,
     );
   }
 }
@@ -1047,7 +1065,7 @@ export class ReadKeyExpr extends Expression {
     public receiver: Expression,
     public index: Expression,
     type?: Type | null,
-    sourceSpan?: ParseSourceSpan | null
+    sourceSpan?: ParseSourceSpan | null,
   ) {
     super(type, sourceSpan);
   }
@@ -1074,7 +1092,7 @@ export class ReadKeyExpr extends Expression {
       this.index,
       value,
       null,
-      this.sourceSpan
+      this.sourceSpan,
     );
   }
 
@@ -1083,7 +1101,7 @@ export class ReadKeyExpr extends Expression {
       this.receiver.clone(),
       this.index.clone(),
       this.type,
-      this.sourceSpan
+      this.sourceSpan,
     );
   }
 }
@@ -1093,7 +1111,7 @@ export class LiteralArrayExpr extends Expression {
   constructor(
     entries: Expression[],
     type?: Type | null,
-    sourceSpan?: ParseSourceSpan | null
+    sourceSpan?: ParseSourceSpan | null,
   ) {
     super(type, sourceSpan);
     this.entries = entries;
@@ -1116,7 +1134,7 @@ export class LiteralArrayExpr extends Expression {
     return new LiteralArrayExpr(
       this.entries.map((e) => e.clone()),
       this.type,
-      this.sourceSpan
+      this.sourceSpan,
     );
   }
 }
@@ -1125,7 +1143,7 @@ export class LiteralMapEntry {
   constructor(
     public key: string,
     public value: Expression,
-    public quoted: boolean
+    public quoted: boolean,
   ) {}
   isEquivalent(e: LiteralMapEntry): boolean {
     return this.key === e.key && this.value.isEquivalent(e.value);
@@ -1141,7 +1159,7 @@ export class LiteralMapExpr extends Expression {
   constructor(
     public entries: LiteralMapEntry[],
     type?: MapType | null,
-    sourceSpan?: ParseSourceSpan | null
+    sourceSpan?: ParseSourceSpan | null,
   ) {
     super(type, sourceSpan);
     if (type) {
@@ -1168,13 +1186,16 @@ export class LiteralMapExpr extends Expression {
     return new LiteralMapExpr(
       entriesClone,
       this.type as MapType | null,
-      this.sourceSpan
+      this.sourceSpan,
     );
   }
 }
 
 export class CommaExpr extends Expression {
-  constructor(public parts: Expression[], sourceSpan?: ParseSourceSpan | null) {
+  constructor(
+    public parts: Expression[],
+    sourceSpan?: ParseSourceSpan | null,
+  ) {
     super(parts[parts.length - 1].type, sourceSpan);
   }
 
@@ -1236,7 +1257,7 @@ export class LeadingComment {
   constructor(
     public text: string,
     public multiline: boolean,
-    public trailingNewline: boolean
+    public trailingNewline: boolean,
   ) {}
   toString() {
     return this.multiline ? ` ${this.text} ` : this.text;
@@ -1255,7 +1276,7 @@ export abstract class Statement {
   constructor(
     public modifiers: StmtModifier = StmtModifier.None,
     public sourceSpan: ParseSourceSpan | null = null,
-    public leadingComments?: LeadingComment[]
+    public leadingComments?: LeadingComment[],
   ) {}
   /**
    * Calculates whether this statement produces the same value as the given statement.
@@ -1283,7 +1304,7 @@ export class DeclareVarStmt extends Statement {
     type?: Type | null,
     modifiers?: StmtModifier,
     sourceSpan?: ParseSourceSpan | null,
-    leadingComments?: LeadingComment[]
+    leadingComments?: LeadingComment[],
   ) {
     super(modifiers, sourceSpan, leadingComments);
     this.type = type || (value && value.type) || null;
@@ -1311,7 +1332,7 @@ export class DeclareFunctionStmt extends Statement {
     type?: Type | null,
     modifiers?: StmtModifier,
     sourceSpan?: ParseSourceSpan | null,
-    leadingComments?: LeadingComment[]
+    leadingComments?: LeadingComment[],
   ) {
     super(modifiers, sourceSpan, leadingComments);
     this.type = type || null;
@@ -1332,7 +1353,7 @@ export class ExpressionStatement extends Statement {
   constructor(
     public expr: Expression,
     sourceSpan?: ParseSourceSpan | null,
-    leadingComments?: LeadingComment[]
+    leadingComments?: LeadingComment[],
   ) {
     super(StmtModifier.None, sourceSpan, leadingComments);
   }
@@ -1350,7 +1371,7 @@ export class ReturnStatement extends Statement {
   constructor(
     public value: Expression,
     sourceSpan: ParseSourceSpan | null = null,
-    leadingComments?: LeadingComment[]
+    leadingComments?: LeadingComment[],
   ) {
     super(StmtModifier.None, sourceSpan, leadingComments);
   }
@@ -1370,7 +1391,7 @@ export class IfStmt extends Statement {
     public trueCase: Statement[],
     public falseCase: Statement[] = [],
     sourceSpan?: ParseSourceSpan | null,
-    leadingComments?: LeadingComment[]
+    leadingComments?: LeadingComment[],
   ) {
     super(StmtModifier.None, sourceSpan, leadingComments);
   }
@@ -1398,7 +1419,7 @@ export interface StatementVisitor {
 export function leadingComment(
   text: string,
   multiline: boolean = false,
-  trailingNewline: boolean = true
+  trailingNewline: boolean = true,
 ): LeadingComment {
   return new LeadingComment(text, multiline, trailingNewline);
 }
@@ -1410,7 +1431,7 @@ export function jsDocComment(tags: JSDocTag[] = []): JSDocComment {
 export function variable(
   name: string,
   type?: Type | null,
-  sourceSpan?: ParseSourceSpan | null
+  sourceSpan?: ParseSourceSpan | null,
 ): ReadVarExpr {
   return new ReadVarExpr(name, type, sourceSpan);
 }
@@ -1418,7 +1439,7 @@ export function variable(
 export function importExpr(
   id: ExternalReference,
   typeParams: Type[] | null = null,
-  sourceSpan?: ParseSourceSpan | null
+  sourceSpan?: ParseSourceSpan | null,
 ): ExternalExpr {
   return new ExternalExpr(id, null, typeParams, sourceSpan);
 }
@@ -1426,7 +1447,7 @@ export function importExpr(
 export function importType(
   id: ExternalReference,
   typeParams?: Type[] | null,
-  typeModifiers?: TypeModifier
+  typeModifiers?: TypeModifier,
 ): ExpressionType | null {
   return id != null
     ? expressionType(importExpr(id, typeParams, null), typeModifiers)
@@ -1436,14 +1457,14 @@ export function importType(
 export function expressionType(
   expr: Expression,
   typeModifiers?: TypeModifier,
-  typeParams?: Type[] | null
+  typeParams?: Type[] | null,
 ): ExpressionType {
   return new ExpressionType(expr, typeModifiers, typeParams);
 }
 
 export function transplantedType<T>(
   type: T,
-  typeModifiers?: TypeModifier
+  typeModifiers?: TypeModifier,
 ): TransplantedType<T> {
   return new TransplantedType(type, typeModifiers);
 }
@@ -1455,19 +1476,19 @@ export function typeofExpr(expr: Expression) {
 export function literalArr(
   values: Expression[],
   type?: Type | null,
-  sourceSpan?: ParseSourceSpan | null
+  sourceSpan?: ParseSourceSpan | null,
 ): LiteralArrayExpr {
   return new LiteralArrayExpr(values, type, sourceSpan);
 }
 
 export function literalMap(
   values: { key: string; quoted: boolean; value: Expression }[],
-  type: MapType | null = null
+  type: MapType | null = null,
 ): LiteralMapExpr {
   return new LiteralMapExpr(
     values.map((e) => new LiteralMapEntry(e.key, e.value, e.quoted)),
     type,
-    null
+    null,
   );
 }
 
@@ -1475,14 +1496,14 @@ export function unary(
   operator: UnaryOperator,
   expr: Expression,
   type?: Type,
-  sourceSpan?: ParseSourceSpan | null
+  sourceSpan?: ParseSourceSpan | null,
 ): UnaryOperatorExpr {
   return new UnaryOperatorExpr(operator, expr, type, sourceSpan);
 }
 
 export function not(
   expr: Expression,
-  sourceSpan?: ParseSourceSpan | null
+  sourceSpan?: ParseSourceSpan | null,
 ): NotExpr {
   return new NotExpr(expr, sourceSpan);
 }
@@ -1492,7 +1513,7 @@ export function fn(
   body: Statement[],
   type?: Type | null,
   sourceSpan?: ParseSourceSpan | null,
-  name?: string | null
+  name?: string | null,
 ): FunctionExpr {
   return new FunctionExpr(params, body, type, sourceSpan, name);
 }
@@ -1501,7 +1522,7 @@ export function arrowFn(
   params: FnParam[],
   body: Expression | Statement[],
   type?: Type | null,
-  sourceSpan?: ParseSourceSpan | null
+  sourceSpan?: ParseSourceSpan | null,
 ) {
   return new ArrowFunctionExpr(params, body, type, sourceSpan);
 }
@@ -1511,21 +1532,21 @@ export function ifStmt(
   thenClause: Statement[],
   elseClause?: Statement[],
   sourceSpan?: ParseSourceSpan,
-  leadingComments?: LeadingComment[]
+  leadingComments?: LeadingComment[],
 ) {
   return new IfStmt(
     condition,
     thenClause,
     elseClause,
     sourceSpan,
-    leadingComments
+    leadingComments,
   );
 }
 
 export function literal(
   value: any,
   type?: Type | null,
-  sourceSpan?: ParseSourceSpan | null
+  sourceSpan?: ParseSourceSpan | null,
 ): LiteralExpr {
   return new LiteralExpr(value, type, sourceSpan);
 }

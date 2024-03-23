@@ -22,7 +22,7 @@ export function addImports(
   factory = ts.factory,
   importManager: ImportManager,
   sf: ts.SourceFile,
-  extraStatements: ts.Statement[] = []
+  extraStatements: ts.Statement[] = [],
 ): ts.SourceFile {
   // Generate the import statements to prepend.
   const addedImports = importManager
@@ -30,13 +30,13 @@ export function addImports(
     .map((i) =>
       i.qualifier !== null
         ? createNamespaceImportDecl(i, factory)
-        : createSideEffectImportDecl(i, factory)
+        : createSideEffectImportDecl(i, factory),
     );
 
   // Filter out the existing imports and the source file body. All new statements
   // will be inserted between them.
   const existingImports = sf.statements.filter((stmt) =>
-    isImportStatement(stmt)
+    isImportStatement(stmt),
   );
   const body = sf.statements.filter((stmt) => !isImportStatement(stmt));
   // Prepend imports if needed.
@@ -53,7 +53,7 @@ export function addImports(
         ...addedImports,
         ...extraStatements,
         ...body,
-      ])
+      ]),
     );
   }
 
@@ -62,18 +62,18 @@ export function addImports(
 
 function createNamespaceImportDecl(
   i: NamespaceImport,
-  factory: ts.NodeFactory
+  factory: ts.NodeFactory,
 ): ts.ImportDeclaration {
   const qualifier = factory.createIdentifier(i.qualifier.text);
   const importClause = factory.createImportClause(
     /* isTypeOnly */ false,
     /* name */ undefined,
-    /* namedBindings */ factory.createNamespaceImport(qualifier)
+    /* namedBindings */ factory.createNamespaceImport(qualifier),
   );
   const decl = factory.createImportDeclaration(
     /* modifiers */ undefined,
     /* importClause */ importClause,
-    /* moduleSpecifier */ factory.createStringLiteral(i.specifier)
+    /* moduleSpecifier */ factory.createStringLiteral(i.specifier),
   );
 
   // Set the qualifier's original TS node to the `ts.ImportDeclaration`. This allows downstream
@@ -91,12 +91,12 @@ function createNamespaceImportDecl(
 
 function createSideEffectImportDecl(
   i: SideEffectImport,
-  factory: ts.NodeFactory
+  factory: ts.NodeFactory,
 ): ts.ImportDeclaration {
   return factory.createImportDeclaration(
     /* modifiers */ undefined,
     /* importClause */ undefined,
-    /* moduleSpecifier */ ts.factory.createStringLiteral(i.specifier)
+    /* moduleSpecifier */ ts.factory.createStringLiteral(i.specifier),
   );
 }
 

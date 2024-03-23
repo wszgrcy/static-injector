@@ -22,7 +22,7 @@ export interface AstFactory<TStatement, TExpression> {
    */
   attachComments(
     statement: TStatement,
-    leadingComments: LeadingComment[]
+    leadingComments: LeadingComment[],
   ): void;
 
   /**
@@ -50,7 +50,7 @@ export interface AstFactory<TStatement, TExpression> {
   createBinaryExpression(
     leftOperand: TExpression,
     operator: BinaryOperator,
-    rightOperand: TExpression
+    rightOperand: TExpression,
   ): TExpression;
 
   /**
@@ -70,7 +70,7 @@ export interface AstFactory<TStatement, TExpression> {
   createCallExpression(
     callee: TExpression,
     args: TExpression[],
-    pure: boolean
+    pure: boolean,
   ): TExpression;
 
   /**
@@ -83,7 +83,7 @@ export interface AstFactory<TStatement, TExpression> {
   createConditional(
     condition: TExpression,
     thenExpression: TExpression,
-    elseExpression: TExpression
+    elseExpression: TExpression,
   ): TExpression;
 
   /**
@@ -94,7 +94,7 @@ export interface AstFactory<TStatement, TExpression> {
    */
   createElementAccess(
     expression: TExpression,
-    element: TExpression
+    element: TExpression,
   ): TExpression;
 
   /**
@@ -114,7 +114,7 @@ export interface AstFactory<TStatement, TExpression> {
   createFunctionDeclaration(
     functionName: string,
     parameters: string[],
-    body: TStatement
+    body: TStatement,
   ): TStatement;
 
   /**
@@ -128,7 +128,7 @@ export interface AstFactory<TStatement, TExpression> {
   createFunctionExpression(
     functionName: string | null,
     parameters: string[],
-    body: TStatement
+    body: TStatement,
   ): TExpression;
 
   /**
@@ -140,7 +140,7 @@ export interface AstFactory<TStatement, TExpression> {
    */
   createArrowFunctionExpression(
     parameters: string[],
-    body: TExpression | TStatement
+    body: TExpression | TStatement,
   ): TExpression;
 
   /**
@@ -170,7 +170,7 @@ export interface AstFactory<TStatement, TExpression> {
   createIfStatement(
     condition: TExpression,
     thenStatement: TStatement,
-    elseStatement: TStatement | null
+    elseStatement: TStatement | null,
   ): TStatement;
 
   /**
@@ -179,7 +179,7 @@ export interface AstFactory<TStatement, TExpression> {
    * @param value the value of the literal.
    */
   createLiteral(
-    value: string | number | boolean | null | undefined
+    value: string | number | boolean | null | undefined,
   ): TExpression;
 
   /**
@@ -190,7 +190,7 @@ export interface AstFactory<TStatement, TExpression> {
    */
   createNewExpression(
     expression: TExpression,
-    args: TExpression[]
+    args: TExpression[],
   ): TExpression;
 
   /**
@@ -199,7 +199,7 @@ export interface AstFactory<TStatement, TExpression> {
    * @param properties the properties (key and value) to appear in the object.
    */
   createObjectLiteral(
-    properties: ObjectLiteralProperty<TExpression>[]
+    properties: ObjectLiteralProperty<TExpression>[],
   ): TExpression;
 
   /**
@@ -217,7 +217,7 @@ export interface AstFactory<TStatement, TExpression> {
    */
   createPropertyAccess(
     expression: TExpression,
-    propertyName: string
+    propertyName: string,
   ): TExpression;
 
   /**
@@ -240,7 +240,7 @@ export interface AstFactory<TStatement, TExpression> {
    */
   createTaggedTemplate(
     tag: TExpression,
-    template: TemplateLiteral<TExpression>
+    template: TemplateLiteral<TExpression>,
   ): TExpression;
 
   /**
@@ -265,7 +265,7 @@ export interface AstFactory<TStatement, TExpression> {
    */
   createUnaryExpression(
     operator: UnaryOperator,
-    operand: TExpression
+    operand: TExpression,
   ): TExpression;
 
   /**
@@ -278,7 +278,7 @@ export interface AstFactory<TStatement, TExpression> {
   createVariableDeclaration(
     variableName: string,
     initializer: TExpression | null,
-    type: VariableDeclarationType
+    type: VariableDeclarationType,
   ): TStatement;
 
   /**
@@ -290,7 +290,7 @@ export interface AstFactory<TStatement, TExpression> {
    */
   setSourceMapRange<T extends TStatement | TExpression>(
     node: T,
-    sourceMapRange: SourceMapRange | null
+    sourceMapRange: SourceMapRange | null,
   ): T;
 }
 

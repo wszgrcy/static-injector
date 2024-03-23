@@ -21,7 +21,7 @@ interface WithDefaultImportDeclaration {
  */
 export function attachDefaultImportDeclaration(
   expr: WrappedNodeExpr<unknown>,
-  importDecl: ts.ImportDeclaration
+  importDecl: ts.ImportDeclaration,
 ): void {
   (expr as WithDefaultImportDeclaration)[DefaultImportDeclaration] = importDecl;
 }
@@ -31,7 +31,7 @@ export function attachDefaultImportDeclaration(
  * dependency.
  */
 export function getDefaultImportDeclaration(
-  expr: WrappedNodeExpr<unknown>
+  expr: WrappedNodeExpr<unknown>,
 ): ts.ImportDeclaration | null {
   return (
     (expr as WithDefaultImportDeclaration)[DefaultImportDeclaration] ?? null

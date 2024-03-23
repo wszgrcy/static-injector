@@ -12,7 +12,7 @@ import { Identifiers } from './r3_identifiers';
 
 export function typeWithParameters(
   type: o.Expression,
-  numParams: number
+  numParams: number,
 ): o.ExpressionType {
   if (numParams === 0) {
     return o.expressionType(type);
@@ -45,7 +45,7 @@ export interface R3CompiledExpression {
  * that have not yet been defined.
  */
 export interface MaybeForwardRefExpression<
-  T extends o.Expression = o.Expression
+  T extends o.Expression = o.Expression,
 > {
   /**
    * The unwrapped expression.
@@ -75,7 +75,7 @@ export interface MaybeForwardRefExpression<
 
 export function createMayBeForwardRefExpression<T extends o.Expression>(
   expression: T,
-  forwardRef: ForwardRefHandling
+  forwardRef: ForwardRefHandling,
 ): MaybeForwardRefExpression<T> {
   return { expression, forwardRef };
 }

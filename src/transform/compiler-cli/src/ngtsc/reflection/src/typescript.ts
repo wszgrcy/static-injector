@@ -30,7 +30,7 @@ import { isNamedClassDeclaration } from './util';
 export class TypeScriptReflectionHost implements ReflectionHost {
   constructor(
     protected checker: ts.TypeChecker,
-    private readonly isLocalCompilation = false
+    private readonly isLocalCompilation = false,
   ) {}
 
   getDecoratorsOfDeclaration(declaration: DeclarationNode): Decorator[] | null {
@@ -63,7 +63,7 @@ export class TypeScriptReflectionHost implements ReflectionHost {
     const ctor = tsClazz.members.find(
       (member): member is ts.ConstructorDeclaration =>
         ts.isConstructorDeclaration(member) &&
-        (isDeclaration || member.body !== undefined)
+        (isDeclaration || member.body !== undefined),
     );
     if (ctor === undefined) {
       return null;
@@ -91,7 +91,7 @@ export class TypeScriptReflectionHost implements ReflectionHost {
             !(
               ts.isLiteralTypeNode(childTypeNode) &&
               childTypeNode.literal.kind === ts.SyntaxKind.NullKeyword
-            )
+            ),
         );
 
         if (childTypeNodes.length === 1) {
@@ -102,7 +102,7 @@ export class TypeScriptReflectionHost implements ReflectionHost {
       const typeValueReference = typeToValue(
         typeNode,
         this.checker,
-        this.isLocalCompilation
+        this.isLocalCompilation,
       );
 
       return {
@@ -122,7 +122,7 @@ export class TypeScriptReflectionHost implements ReflectionHost {
     } else if (ts.isQualifiedName(id.parent) && id.parent.right === id) {
       return this.getImportOfNamespacedIdentifier(
         id,
-        getQualifiedNameRoot(id.parent)
+        getQualifiedNameRoot(id.parent),
       );
     } else if (
       ts.isPropertyAccessExpression(id.parent) &&
@@ -130,7 +130,7 @@ export class TypeScriptReflectionHost implements ReflectionHost {
     ) {
       return this.getImportOfNamespacedIdentifier(
         id,
-        getFarLeftIdentifier(id.parent)
+        getFarLeftIdentifier(id.parent),
       );
     } else {
       return null;
@@ -155,7 +155,7 @@ export class TypeScriptReflectionHost implements ReflectionHost {
       return null;
     }
     const extendsClause = clazz.heritageClauses.find(
-      (clause) => clause.token === ts.SyntaxKind.ExtendsKeyword
+      (clause) => clause.token === ts.SyntaxKind.ExtendsKeyword,
     );
     if (extendsClause === undefined) {
       return null;
@@ -226,7 +226,7 @@ export class TypeScriptReflectionHost implements ReflectionHost {
    */
   protected getImportOfNamespacedIdentifier(
     id: ts.Identifier,
-    namespaceIdentifier: ts.Identifier | null
+    namespaceIdentifier: ts.Identifier | null,
   ): Import | null {
     if (namespaceIdentifier === null) {
       return null;
@@ -351,7 +351,7 @@ export class TypeScriptReflectionHost implements ReflectionHost {
   private _viaModule(
     declaration: ts.Declaration,
     originalId: ts.Identifier | null,
-    importInfo: Import | null
+    importInfo: Import | null,
   ): string | AmbientImport | null {
     if (
       importInfo === null &&
@@ -370,7 +370,7 @@ export class TypeScriptReflectionHost implements ReflectionHost {
 }
 
 export function reflectObjectLiteral(
-  node: ts.ObjectLiteralExpression
+  node: ts.ObjectLiteralExpression,
 ): Map<string, ts.Expression> {
   const map = new Map<string, ts.Expression>();
   node.properties.forEach((prop) => {
@@ -390,13 +390,13 @@ export function reflectObjectLiteral(
 }
 
 function castDeclarationToClassOrDie(
-  declaration: ClassDeclaration
+  declaration: ClassDeclaration,
 ): ClassDeclaration<ts.ClassDeclaration> {
   if (!ts.isClassDeclaration(declaration)) {
     throw new Error(
       `Reflecting on a ${
         ts.SyntaxKind[declaration.kind]
-      } instead of a ClassDeclaration.`
+      } instead of a ClassDeclaration.`,
     );
   }
   return declaration;
@@ -429,7 +429,7 @@ function propertyNameToString(node: ts.PropertyName): string | null {
  * @returns the left most identifier in the chain or `null` if it is not an identifier.
  */
 function getQualifiedNameRoot(
-  qualifiedName: ts.QualifiedName
+  qualifiedName: ts.QualifiedName,
 ): ts.Identifier | null {
   while (ts.isQualifiedName(qualifiedName.left)) {
     qualifiedName = qualifiedName.left;
@@ -444,7 +444,7 @@ function getQualifiedNameRoot(
  * @returns the left most identifier in the chain or `null` if it is not an identifier.
  */
 function getFarLeftIdentifier(
-  propertyAccess: ts.PropertyAccessExpression
+  propertyAccess: ts.PropertyAccessExpression,
 ): ts.Identifier | null {
   while (ts.isPropertyAccessExpression(propertyAccess.expression)) {
     propertyAccess = propertyAccess.expression;
@@ -458,7 +458,7 @@ function getFarLeftIdentifier(
  * Gets the closest ancestor `ImportDeclaration` to a node.
  */
 export function getContainingImportDeclaration(
-  node: ts.Node
+  node: ts.Node,
 ): ts.ImportDeclaration | null {
   let parent = node.parent;
 
@@ -479,7 +479,7 @@ export function getContainingImportDeclaration(
  */
 function getExportedName(
   decl: ts.Declaration,
-  originalId: ts.Identifier
+  originalId: ts.Identifier,
 ): string {
   return ts.isImportSpecifier(decl)
     ? (decl.propertyName !== undefined ? decl.propertyName : decl.name).text

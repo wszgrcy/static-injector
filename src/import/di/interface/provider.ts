@@ -373,7 +373,7 @@ export interface InternalEnvironmentProviders extends EnvironmentProviders {
 }
 
 export function isEnvironmentProviders(
-  value: Provider | EnvironmentProviders | InternalEnvironmentProviders
+  value: Provider | EnvironmentProviders | InternalEnvironmentProviders,
 ): value is InternalEnvironmentProviders {
   return value && !!(value as InternalEnvironmentProviders).ɵproviders;
 }

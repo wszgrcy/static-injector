@@ -25,7 +25,7 @@ import {
 export function typeToValue(
   typeNode: ts.TypeNode | null,
   checker: ts.TypeChecker,
-  isLocalCompilation: boolean
+  isLocalCompilation: boolean,
 ): TypeValueReference {
   // It's not possible to get a value expression if the parameter doesn't even have a type.
   if (typeNode === null) {
@@ -176,7 +176,7 @@ function unsupportedType(typeNode: ts.TypeNode): UnavailableTypeValueReference {
 
 function noValueDeclaration(
   typeNode: ts.TypeNode,
-  decl: ts.Declaration | null
+  decl: ts.Declaration | null,
 ): UnavailableTypeValueReference {
   return {
     kind: TypeValueReferenceKind.UNAVAILABLE,
@@ -186,7 +186,7 @@ function noValueDeclaration(
 
 function typeOnlyImport(
   typeNode: ts.TypeNode,
-  node: ts.ImportClause | ts.ImportSpecifier
+  node: ts.ImportClause | ts.ImportSpecifier,
 ): UnavailableTypeValueReference {
   return {
     kind: TypeValueReferenceKind.UNAVAILABLE,
@@ -195,7 +195,7 @@ function typeOnlyImport(
 }
 
 function unknownReference(
-  typeNode: ts.TypeNode
+  typeNode: ts.TypeNode,
 ): UnavailableTypeValueReference {
   return {
     kind: TypeValueReferenceKind.UNAVAILABLE,
@@ -205,7 +205,7 @@ function unknownReference(
 
 function namespaceImport(
   typeNode: ts.TypeNode,
-  importClause: ts.ImportClause
+  importClause: ts.ImportClause,
 ): UnavailableTypeValueReference {
   return {
     kind: TypeValueReferenceKind.UNAVAILABLE,
@@ -247,7 +247,7 @@ export function typeNodeToValueExpr(node: ts.TypeNode): ts.Expression | null {
  */
 function resolveTypeSymbols(
   typeRef: ts.TypeReferenceNode,
-  checker: ts.TypeChecker
+  checker: ts.TypeChecker,
 ): { local: ts.Symbol; decl: ts.Symbol; symbolNames: string[] } | null {
   const typeName = typeRef.typeName;
   // typeRefSymbol is the ts.Symbol of the entire type reference.
@@ -307,7 +307,7 @@ export function entityNameToValue(node: ts.EntityName): ts.Expression | null {
   } else if (ts.isIdentifier(node)) {
     const clone = ts.setOriginalNode(
       ts.factory.createIdentifier(node.text),
-      node
+      node,
     );
     (clone as any).parent = node.parent;
     return clone;

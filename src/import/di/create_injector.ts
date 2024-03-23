@@ -22,13 +22,13 @@ export function createInjector(
   defType: /* InjectorType<any> */ any,
   parent: Injector | null = null,
   additionalProviders: Array<Provider | StaticProvider> | null = null,
-  name?: string
+  name?: string,
 ): Injector {
   const injector = createInjectorWithoutInjectorInstances(
     defType,
     parent,
     additionalProviders,
-    name
+    name,
   );
   injector.resolveInjectorInitializers();
   return injector;
@@ -44,7 +44,7 @@ export function createInjectorWithoutInjectorInstances(
   parent: Injector | null = null,
   additionalProviders: Array<Provider | StaticProvider> | null = null,
   name?: string,
-  scopes = new Set<InjectorScope>()
+  scopes = new Set<InjectorScope>(),
 ): R3Injector {
   const providers = [
     additionalProviders || EMPTY_ARRAY,
@@ -56,6 +56,6 @@ export function createInjectorWithoutInjectorInstances(
     providers,
     parent || getNullInjector(),
     name || null,
-    scopes
+    scopes,
   );
 }

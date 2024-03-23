@@ -11,7 +11,7 @@ export class ParseLocation {
     public file: ParseSourceFile,
     public offset: number,
     public line: number,
-    public col: number
+    public col: number,
   ) {}
 
   // Return the source around the location
@@ -19,7 +19,10 @@ export class ParseLocation {
 }
 
 export class ParseSourceFile {
-  constructor(public content: string, public url: string) {}
+  constructor(
+    public content: string,
+    public url: string,
+  ) {}
 }
 
 export class ParseSourceSpan {
@@ -50,13 +53,13 @@ export class ParseSourceSpan {
     public start: ParseLocation,
     public end: ParseLocation,
     public fullStart: ParseLocation = start,
-    public details: string | null = null
+    public details: string | null = null,
   ) {}
 
   toString(): string {
     return this.start.file.content.substring(
       this.start.offset,
-      this.end.offset
+      this.end.offset,
     );
   }
 }

@@ -60,7 +60,7 @@ export const Inject: InjectDecorator = attachInjectFlag(
   // Disable tslint because `DecoratorFlags` is a const enum which gets inlined.
   // tslint:disable-next-line: no-toplevel-property-access
   makeParamDecorator('Inject', (token: any) => ({ token })),
-  DecoratorFlags.Inject
+  DecoratorFlags.Inject,
 );
 
 /**
@@ -108,7 +108,7 @@ export const Optional: OptionalDecorator =
   // tslint:disable-next-line: no-toplevel-property-access
   attachInjectFlag(
     makeParamDecorator('Optional'),
-    InternalInjectFlags.Optional
+    InternalInjectFlags.Optional,
   );
 
 /**
@@ -206,5 +206,5 @@ export const SkipSelf: SkipSelfDecorator =
   // tslint:disable-next-line: no-toplevel-property-access
   attachInjectFlag(
     makeParamDecorator('SkipSelf'),
-    InternalInjectFlags.SkipSelf
+    InternalInjectFlags.SkipSelf,
   );

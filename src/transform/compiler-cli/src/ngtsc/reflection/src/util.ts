@@ -10,19 +10,19 @@ import ts from 'typescript';
 import { ClassDeclaration } from './host';
 
 export function isNamedClassDeclaration(
-  node: ts.Node
+  node: ts.Node,
 ): node is ClassDeclaration<ts.ClassDeclaration> {
   return ts.isClassDeclaration(node) && isIdentifier(node.name);
 }
 
 export function isNamedFunctionDeclaration(
-  node: ts.Node
+  node: ts.Node,
 ): node is ClassDeclaration<ts.FunctionDeclaration> {
   return ts.isFunctionDeclaration(node) && isIdentifier(node.name);
 }
 
 export function isNamedVariableDeclaration(
-  node: ts.Node
+  node: ts.Node,
 ): node is ClassDeclaration<ts.VariableDeclaration> {
   return ts.isVariableDeclaration(node) && isIdentifier(node.name);
 }

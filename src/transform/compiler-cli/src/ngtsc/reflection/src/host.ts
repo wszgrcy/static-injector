@@ -56,7 +56,7 @@ export type NamespacedIdentifier = ts.PropertyAccessExpression & {
   name: ts.Identifier;
 };
 export function isDecoratorIdentifier(
-  exp: ts.Expression
+  exp: ts.Expression,
 ): exp is DecoratorIdentifier {
   return (
     ts.isIdentifier(exp) ||

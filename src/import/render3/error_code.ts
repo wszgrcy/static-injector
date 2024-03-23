@@ -38,7 +38,10 @@ export const enum RuntimeErrorCode {
 }
 
 export class RuntimeError extends Error {
-  constructor(public code: RuntimeErrorCode, message: string) {
+  constructor(
+    public code: RuntimeErrorCode,
+    message: string,
+  ) {
     super(formatRuntimeError(code, message));
   }
 }
@@ -48,7 +51,7 @@ export class RuntimeError extends Error {
 /** Called to format a runtime error */
 export function formatRuntimeError(
   code: RuntimeErrorCode,
-  message: string
+  message: string,
 ): string {
   const fullCode = code ? `NG0${code}: ` : '';
 

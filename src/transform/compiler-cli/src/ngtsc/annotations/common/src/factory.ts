@@ -16,7 +16,7 @@ import { CompileResult } from '../../../transform';
 export type CompileFactoryFn = (metadata: R3FactoryMetadata) => CompileResult;
 
 export function compileNgFactoryDefField(
-  metadata: R3FactoryMetadata
+  metadata: R3FactoryMetadata,
 ): CompileResult {
   const res = compileFactoryFunction(metadata);
   return {

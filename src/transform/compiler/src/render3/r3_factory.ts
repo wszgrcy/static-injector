@@ -108,7 +108,7 @@ export interface R3DependencyMetadata {
  * Construct a factory function expression for the given `R3FactoryMetadata`.
  */
 export function compileFactoryFunction(
-  meta: R3FactoryMetadata
+  meta: R3FactoryMetadata,
 ): R3CompiledExpression {
   const t = o.variable('t');
   let baseFactoryVar: o.ReadVarExpr | null = null;
@@ -128,7 +128,7 @@ export function compileFactoryFunction(
     if (meta.deps !== 'invalid') {
       ctorExpr = new o.InstantiateExpr(
         typeForCtor,
-        injectDependencies(meta.deps, meta.target)
+        injectDependencies(meta.deps, meta.target),
       );
     }
   } else {
@@ -181,7 +181,7 @@ export function compileFactoryFunction(
     const baseFactory = new o.BinaryOperatorExpr(
       o.BinaryOperator.Or,
       baseFactoryVar,
-      baseFactoryVar.set(getInheritedFactoryCall)
+      baseFactoryVar.set(getInheritedFactoryCall),
     );
     body.push(new o.ReturnStatement(baseFactory.callFn([typeForCtor])));
   } else {
@@ -194,7 +194,7 @@ export function compileFactoryFunction(
     body,
     o.INFERRED_TYPE,
     undefined,
-    `${meta.name}_Factory`
+    `${meta.name}_Factory`,
   );
 
   if (baseFactoryVar !== null) {
@@ -206,7 +206,7 @@ export function compileFactoryFunction(
         [
           new o.DeclareVarStmt(baseFactoryVar.name!),
           new o.ReturnStatement(factoryFn),
-        ]
+        ],
       )
       .callFn([], /* sourceSpan */ undefined, /* pure */ true);
   }
@@ -227,13 +227,13 @@ export function createFactoryType(meta: R3FactoryMetadata) {
     o.importExpr(R3.FactoryDeclaration, [
       typeWithParameters(meta.type.type, meta.typeArgumentCount),
       ctorDepsType,
-    ])
+    ]),
   );
 }
 
 function injectDependencies(
   deps: R3DependencyMetadata[],
-  target: FactoryTarget
+  target: FactoryTarget,
 ): o.Expression[] {
   return deps.map((dep, index) => compileInjectDependency(dep, target, index));
 }
@@ -241,7 +241,7 @@ function injectDependencies(
 function compileInjectDependency(
   dep: R3DependencyMetadata,
   target: FactoryTarget,
-  index: number
+  index: number,
 ): o.Expression {
   // Interpret the dependency according to its resolved type.
   if (dep.token === null) {
@@ -311,13 +311,13 @@ function createCtorDepType(dep: R3DependencyMetadata): o.LiteralMapExpr | null {
 }
 
 export function isDelegatedFactoryMetadata(
-  meta: R3FactoryMetadata
+  meta: R3FactoryMetadata,
 ): meta is R3DelegatedFnOrClassMetadata {
   return (meta as any).delegateType !== undefined;
 }
 
 export function isExpressionFactoryMetadata(
-  meta: R3FactoryMetadata
+  meta: R3FactoryMetadata,
 ): meta is R3ExpressionFactoryMetadata {
   return (meta as any).expression !== undefined;
 }

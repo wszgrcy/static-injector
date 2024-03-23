@@ -51,7 +51,7 @@ export function getCurrentInjector(): Injector | undefined | null {
 }
 
 export function setCurrentInjector(
-  injector: Injector | null | undefined
+  injector: Injector | null | undefined,
 ): Injector | undefined | null {
   const former = _currentInjector;
   _currentInjector = injector;
@@ -61,11 +61,11 @@ export function setCurrentInjector(
 export function injectInjectorOnly<T>(token: ProviderToken<T>): T;
 export function injectInjectorOnly<T>(
   token: ProviderToken<T>,
-  flags?: InjectFlags
+  flags?: InjectFlags,
 ): T | null;
 export function injectInjectorOnly<T>(
   token: ProviderToken<T>,
-  flags = InjectFlags.Default
+  flags = InjectFlags.Default,
 ): T | null {
   if (_currentInjector === undefined) {
     throw new RuntimeError(RuntimeErrorCode.MISSING_INJECTION_CONTEXT, null);
@@ -75,7 +75,7 @@ export function injectInjectorOnly<T>(
     const value = _currentInjector.get(
       token,
       flags & InjectFlags.Optional ? null : undefined,
-      flags
+      flags,
     );
 
     return value;
@@ -95,20 +95,20 @@ export function injectInjectorOnly<T>(
 export function ɵɵinject<T>(token: ProviderToken<T>): T;
 export function ɵɵinject<T>(
   token: ProviderToken<T>,
-  flags?: InjectFlags
+  flags?: InjectFlags,
 ): T | null;
 
 export function ɵɵinject<T>(
   token: ProviderToken<T>,
-  flags?: InjectFlags
+  flags?: InjectFlags,
 ): string | null;
 export function ɵɵinject<T>(
   token: ProviderToken<T>,
-  flags = InjectFlags.Default
+  flags = InjectFlags.Default,
 ): T | null {
   return (getInjectImplementation() || injectInjectorOnly)(
     resolveForwardRef(token as Type<T>),
-    flags
+    flags,
   );
 }
 
@@ -145,7 +145,7 @@ export function inject<T>(token: ProviderToken<T>): T;
  */
 export function inject<T>(
   token: ProviderToken<T>,
-  flags?: InjectFlags
+  flags?: InjectFlags,
 ): T | null;
 /**
  * @param token A token that represents a dependency that should be injected.
@@ -159,7 +159,7 @@ export function inject<T>(
  */
 export function inject<T>(
   token: ProviderToken<T>,
-  options: InjectOptions & { optional?: false }
+  options: InjectOptions & { optional?: false },
 ): T;
 /**
  * @param token A token that represents a dependency that should be injected.
@@ -175,7 +175,7 @@ export function inject<T>(
  */
 export function inject<T>(
   token: ProviderToken<T>,
-  options: InjectOptions
+  options: InjectOptions,
 ): T | null;
 /**
  * @param token A token that represents a static attribute on the host node that should be injected.
@@ -268,7 +268,7 @@ export function inject<T>(
  */
 export function inject<T>(
   token: ProviderToken<T>,
-  flags: InjectFlags | InjectOptions = InjectFlags.Default
+  flags: InjectFlags | InjectOptions = InjectFlags.Default,
 ) {
   // The `as any` here _shouldn't_ be necessary, but without it JSCompiler
   // throws a disambiguation  error due to the multiple signatures.
@@ -277,7 +277,7 @@ export function inject<T>(
 
 // Converts object-based DI flags (`InjectOptions`) to bit flags (`InjectFlags`).
 export function convertToBitFlags(
-  flags: InjectOptions | InjectFlags | undefined
+  flags: InjectOptions | InjectFlags | undefined,
 ): InjectFlags | undefined {
   if (typeof flags === 'undefined' || typeof flags === 'number') {
     return flags;
@@ -340,7 +340,7 @@ export function injectArgs(types: (ProviderToken<any> | any[])[]): any[] {
  */
 export function attachInjectFlag(
   decorator: any,
-  flag: InternalInjectFlags | DecoratorFlags
+  flag: InternalInjectFlags | DecoratorFlags,
 ): any {
   decorator[DI_DECORATOR_FLAG] = flag;
   decorator.prototype[DI_DECORATOR_FLAG] = flag;
@@ -360,7 +360,7 @@ export function catchInjectorError(
   e: any,
   token: any,
   injectorErrorName: string,
-  source: string | null
+  source: string | null,
 ): never {
   const tokenPath: any[] = e[NG_TEMP_TOKEN_PATH];
   if (token[SOURCE]) {
@@ -370,7 +370,7 @@ export function catchInjectorError(
     '\n' + e.message,
     tokenPath,
     injectorErrorName,
-    source
+    source,
   );
   e[NG_TOKEN_PATH] = tokenPath;
   e[NG_TEMP_TOKEN_PATH] = null;
@@ -381,7 +381,7 @@ export function formatError(
   text: string,
   obj: any,
   injectorErrorName: string,
-  source: string | null = null
+  source: string | null = null,
 ): string {
   text =
     text && text.charAt(0) === '\n' && text.charAt(1) == NO_NEW_LINE
@@ -400,7 +400,7 @@ export function formatError(
             ':' +
             (typeof value === 'string'
               ? JSON.stringify(value)
-              : stringify(value))
+              : stringify(value)),
         );
       }
     }

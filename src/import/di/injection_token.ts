@@ -76,7 +76,7 @@ export class InjectionToken<T> {
     options?: {
       providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
       factory: () => T;
-    }
+    },
   ) {
     this.ɵprov = undefined;
     if (typeof options == 'number') {

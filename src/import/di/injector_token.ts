@@ -22,5 +22,5 @@ export const INJECTOR = new InjectionToken<Injector>(
   '',
   // Disable tslint because this is const enum which gets inlined not top level prop access.
   // tslint:disable-next-line: no-toplevel-property-access
-  InjectorMarkers.Injector as any // Special value used by Ivy to identify `Injector`.
+  InjectorMarkers.Injector as any, // Special value used by Ivy to identify `Injector`.
 );

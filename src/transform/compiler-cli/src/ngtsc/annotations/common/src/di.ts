@@ -48,7 +48,7 @@ export interface ConstructorDepError {
 export function getConstructorDependencies(
   clazz: ClassDeclaration,
   reflector: ReflectionHost,
-  isCore: boolean
+  isCore: boolean,
 ): ConstructorDeps | null {
   const deps: R3DependencyMetadata[] = [];
   const errors: ConstructorDepError[] = [];
@@ -79,7 +79,7 @@ export function getConstructorDependencies(
             throw new FatalDiagnosticError(
               ErrorCode.DECORATOR_ARITY_WRONG,
               dec.node,
-              `Unexpected number of arguments to @Inject().`
+              `Unexpected number of arguments to @Inject().`,
             );
           }
           token = new WrappedNodeExpr(dec.args[0]);
@@ -95,7 +95,7 @@ export function getConstructorDependencies(
           throw new FatalDiagnosticError(
             ErrorCode.DECORATOR_UNEXPECTED,
             dec.node,
-            `Unexpected decorator ${name} on parameter.`
+            `Unexpected decorator ${name} on parameter.`,
           );
         }
       });
@@ -105,7 +105,7 @@ export function getConstructorDependencies(
         param.typeValueReference.kind !== TypeValueReferenceKind.UNAVAILABLE
       ) {
         throw new Error(
-          'Illegal state: expected value reference to be unavailable if no token is present'
+          'Illegal state: expected value reference to be unavailable if no token is present',
         );
       }
       errors.push({
@@ -132,7 +132,7 @@ export function getConstructorDependencies(
  * This is a companion function to `validateConstructorDependencies` which accepts invalid deps.
  */
 export function unwrapConstructorDependencies(
-  deps: ConstructorDeps | null
+  deps: ConstructorDeps | null,
 ): R3DependencyMetadata[] | 'invalid' | null {
   if (deps === null) {
     return null;
@@ -148,11 +148,11 @@ export function unwrapConstructorDependencies(
 export function getValidConstructorDependencies(
   clazz: ClassDeclaration,
   reflector: ReflectionHost,
-  isCore: boolean
+  isCore: boolean,
 ): R3DependencyMetadata[] | null {
   return validateConstructorDependencies(
     clazz,
-    getConstructorDependencies(clazz, reflector, isCore)
+    getConstructorDependencies(clazz, reflector, isCore),
   );
 }
 
@@ -165,7 +165,7 @@ export function getValidConstructorDependencies(
  */
 export function validateConstructorDependencies(
   clazz: ClassDeclaration,
-  deps: ConstructorDeps | null
+  deps: ConstructorDeps | null,
 ): R3DependencyMetadata[] | null {
   if (deps === null) {
     return null;
@@ -185,7 +185,7 @@ export function validateConstructorDependencies(
  */
 function createUnsuitableInjectionTokenError(
   clazz: ClassDeclaration,
-  error: ConstructorDepError
+  error: ConstructorDepError,
 ): FatalDiagnosticError {
   const { param, index, reason } = error;
   let chainMessage: string | undefined = undefined;
@@ -197,7 +197,7 @@ function createUnsuitableInjectionTokenError(
       hints = [
         makeRelatedInformation(
           reason.typeNode,
-          'This type is not supported as injection token.'
+          'This type is not supported as injection token.',
         ),
       ];
       break;
@@ -207,12 +207,12 @@ function createUnsuitableInjectionTokenError(
       hints = [
         makeRelatedInformation(
           reason.typeNode,
-          'This type does not have a value, so it cannot be used as injection token.'
+          'This type does not have a value, so it cannot be used as injection token.',
         ),
       ];
       if (reason.decl !== null) {
         hints.push(
-          makeRelatedInformation(reason.decl, 'The type is declared here.')
+          makeRelatedInformation(reason.decl, 'The type is declared here.'),
         );
       }
       break;
@@ -222,11 +222,11 @@ function createUnsuitableInjectionTokenError(
       hints = [
         makeRelatedInformation(
           reason.typeNode,
-          'This type is imported using a type-only import, which prevents it from being usable as an injection token.'
+          'This type is imported using a type-only import, which prevents it from being usable as an injection token.',
         ),
         makeRelatedInformation(
           reason.node,
-          'The type-only import occurs here.'
+          'The type-only import occurs here.',
         ),
       ];
       break;
@@ -236,11 +236,11 @@ function createUnsuitableInjectionTokenError(
       hints = [
         makeRelatedInformation(
           reason.typeNode,
-          'This type corresponds with a namespace, which cannot be used as injection token.'
+          'This type corresponds with a namespace, which cannot be used as injection token.',
         ),
         makeRelatedInformation(
           reason.importClause,
-          'The namespace import occurs here.'
+          'The namespace import occurs here.',
         ),
       ];
       break;
@@ -249,7 +249,7 @@ function createUnsuitableInjectionTokenError(
       hints = [
         makeRelatedInformation(
           reason.typeNode,
-          'This type could not be resolved.'
+          'This type could not be resolved.',
         ),
       ];
       break;
@@ -278,6 +278,6 @@ function createUnsuitableInjectionTokenError(
     ErrorCode.PARAM_MISSING_TOKEN,
     param.nameNode,
     chain,
-    hints
+    hints,
   );
 }

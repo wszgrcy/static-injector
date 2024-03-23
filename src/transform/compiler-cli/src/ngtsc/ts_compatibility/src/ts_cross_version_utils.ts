@@ -18,7 +18,7 @@ type Ts49CreateParameterDeclarationFn = (
   name: string | ts.BindingName,
   questionToken?: ts.QuestionToken | undefined,
   type?: ts.TypeNode | undefined,
-  initializer?: ts.Expression
+  initializer?: ts.Expression,
 ) => ts.ParameterDeclaration;
 
 /**
@@ -37,7 +37,7 @@ export const createParameterDeclaration: Ts49CreateParameterDeclarationFn =
           name,
           questionToken,
           type,
-          initializer
+          initializer,
         );
 
 /** Type of `ts.factory.createImportDeclaration` in TS 4.9+. */
@@ -45,7 +45,7 @@ type Ts49CreateImportDeclarationFn = (
   modifiers: readonly ts.Modifier[] | undefined,
   importClause: ts.ImportClause | undefined,
   moduleSpecifier: ts.Expression,
-  assertClause?: ts.AssertClause
+  assertClause?: ts.AssertClause,
 ) => ts.ImportDeclaration;
 
 /**
@@ -63,7 +63,7 @@ export const createImportDeclaration: Ts49CreateImportDeclarationFn =
           modifiers,
           importClause,
           moduleSpecifier,
-          assertClause
+          assertClause,
         );
 
 /** Type of `ts.factory.createFunctionDeclaration` in TS 4.9+. */
@@ -74,7 +74,7 @@ type Ts49CreateFunctionDeclarationFn = (
   typeParameters: readonly ts.TypeParameterDeclaration[] | undefined,
   parameters: readonly ts.ParameterDeclaration[],
   type: ts.TypeNode | undefined,
-  body: ts.Block | undefined
+  body: ts.Block | undefined,
 ) => ts.FunctionDeclaration;
 
 /**
@@ -93,7 +93,7 @@ export const createFunctionDeclaration: Ts49CreateFunctionDeclarationFn =
         typeParameters,
         parameters,
         type,
-        body
+        body,
       ) =>
         (ts.factory.createFunctionDeclaration as any)(
           ...splitModifiers(modifiers),
@@ -102,14 +102,14 @@ export const createFunctionDeclaration: Ts49CreateFunctionDeclarationFn =
           typeParameters,
           parameters,
           type,
-          body
+          body,
         );
 
 /** Type of `ts.factory.createIndexSignature` in TS 4.9+. */
 type Ts49CreateIndexSignatureFn = (
   modifiers: readonly ts.Modifier[] | undefined,
   parameters: readonly ts.ParameterDeclaration[],
-  type: ts.TypeNode
+  type: ts.TypeNode,
 ) => ts.IndexSignatureDeclaration;
 
 /**
@@ -129,7 +129,7 @@ export const createIndexSignature: Ts49CreateIndexSignatureFn = IS_AFTER_TS_49
  * and `modifiers` arrays.
  */
 function splitModifiers(
-  allModifiers: readonly ts.ModifierLike[] | undefined
+  allModifiers: readonly ts.ModifierLike[] | undefined,
 ): [ts.Decorator[] | undefined, ts.Modifier[] | undefined] {
   if (!allModifiers) {
     return [undefined, undefined];

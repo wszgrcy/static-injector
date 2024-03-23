@@ -25,7 +25,7 @@ import { NG_FACTORY_DEF } from './fields';
  * @codeGenApi
  */
 export function ɵɵgetInheritedFactory<T>(
-  type: Type<any>
+  type: Type<any>,
 ): (type: Type<T>) => T {
   return noSideEffects(() => {
     const ownConstructor = type.prototype.constructor;
@@ -59,7 +59,7 @@ export function ɵɵgetInheritedFactory<T>(
 }
 
 function getFactoryOf<T>(
-  type: Type<any>
+  type: Type<any>,
 ): ((type?: Type<T>) => T | null) | null {
   if (isForwardRef(type)) {
     return () => {

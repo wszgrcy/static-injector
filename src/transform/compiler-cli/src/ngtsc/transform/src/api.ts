@@ -55,7 +55,7 @@ export interface DecoratorHandler<D, A, R> {
    */
   detect(
     node: ClassDeclaration,
-    decorators: Decorator[] | null
+    decorators: Decorator[] | null,
   ): DetectResult<D> | undefined;
 
   /**
@@ -66,7 +66,7 @@ export interface DecoratorHandler<D, A, R> {
    */
   preanalyze?(
     node: ClassDeclaration,
-    metadata: Readonly<D>
+    metadata: Readonly<D>,
   ): Promise<void> | undefined;
 
   /**
@@ -92,7 +92,7 @@ export interface DecoratorHandler<D, A, R> {
    */
   compileFull(
     node: ClassDeclaration,
-    analysis: Readonly<A>
+    analysis: Readonly<A>,
   ): CompileResult | CompileResult[];
 }
 

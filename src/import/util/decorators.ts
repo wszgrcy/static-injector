@@ -34,7 +34,7 @@ export interface TypeDecorator {
   (
     target: Object,
     propertyKey?: string | symbol,
-    parameterIndex?: number
+    parameterIndex?: number,
   ): void;
   // Standard (non-experimental) Decorator signature that avoids direct usage of
   // any TS 5.0+ specific types.
@@ -56,7 +56,7 @@ function makeMetadataCtor(props?: (...args: any[]) => any): any {
 export function makeParamDecorator(
   name: string,
   props?: (...args: any[]) => any,
-  parentClass?: any
+  parentClass?: any,
 ): any {
   return noSideEffects(() => {
     const metaCtor = makeMetadataCtor(props);

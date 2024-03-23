@@ -40,7 +40,7 @@ export interface R3InjectableMetadata {
 
 export function compileInjectable(
   meta: R3InjectableMetadata,
-  resolveForwardRefs: boolean
+  resolveForwardRefs: boolean,
 ): R3CompiledExpression {
   let result: { expression: o.Expression; statements: o.Statement[] } | null =
     null;
@@ -62,7 +62,7 @@ export function compileInjectable(
     // deps are specified, in which case 'useClass' is effectively ignored.
 
     const useClassOnSelf = meta.useClass.expression.isEquivalent(
-      meta.type.value
+      meta.type.value,
     );
     let deps: R3DependencyMetadata[] | undefined = undefined;
     if (meta.deps !== undefined) {
@@ -85,7 +85,7 @@ export function compileInjectable(
         expression: delegateToFactory(
           meta.type.value as o.WrappedNodeExpr<any>,
           meta.useClass.expression as o.WrappedNodeExpr<any>,
-          resolveForwardRefs
+          resolveForwardRefs,
         ),
       };
     }
@@ -125,7 +125,7 @@ export function compileInjectable(
       expression: delegateToFactory(
         meta.type.value as o.WrappedNodeExpr<any>,
         meta.type.value as o.WrappedNodeExpr<any>,
-        resolveForwardRefs
+        resolveForwardRefs,
       ),
     };
   }
@@ -144,7 +144,7 @@ export function compileInjectable(
   if ((meta.providedIn.expression as o.LiteralExpr).value !== null) {
     injectableProps.set(
       'providedIn',
-      convertFromMaybeForwardRefExpression(meta.providedIn)
+      convertFromMaybeForwardRefExpression(meta.providedIn),
     );
   }
 
@@ -162,14 +162,14 @@ export function createInjectableType(meta: R3InjectableMetadata) {
   return new o.ExpressionType(
     o.importExpr(Identifiers.InjectableDeclaration, [
       typeWithParameters(meta.type.type, meta.typeArgumentCount),
-    ])
+    ]),
   );
 }
 
 function delegateToFactory(
   type: o.WrappedNodeExpr<any>,
   useType: o.WrappedNodeExpr<any>,
-  unwrapForwardRefs: boolean
+  unwrapForwardRefs: boolean,
 ): o.Expression {
   if (type.node === useType.node) {
     // The types are the same, so we can simply delegate directly to the type's factory.
@@ -202,6 +202,6 @@ function delegateToFactory(
 function createFactoryFunction(type: o.Expression): o.ArrowFunctionExpr {
   return o.arrowFn(
     [new o.FnParam('t', o.DYNAMIC_TYPE)],
-    type.prop('ɵfac').callFn([o.variable('t')])
+    type.prop('ɵfac').callFn([o.variable('t')]),
   );
 }

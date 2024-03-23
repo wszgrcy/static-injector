@@ -31,7 +31,7 @@ export interface InjectableTransformerFactoryOptions {
 }
 export function createTransformer(
   program: ts.Program,
-  options?: InjectableTransformerFactoryOptions
+  options?: InjectableTransformerFactoryOptions,
 ) {
   let factory = new InjectableTransformerFactory(program, options);
   return factory.getTransform();
@@ -43,7 +43,7 @@ export class InjectableTransformerFactory {
 
   constructor(
     private program: ts.Program,
-    private options: InjectableTransformerFactoryOptions = {}
+    private options: InjectableTransformerFactoryOptions = {},
   ) {
     this.typeChecker = this.program.getTypeChecker();
     this.reflectionHost = new TypeScriptReflectionHost(this.typeChecker);
@@ -52,7 +52,7 @@ export class InjectableTransformerFactory {
       false,
       !!this.options.strictCtorDeps,
       false,
-      CompilationMode.FULL
+      CompilationMode.FULL,
     );
   }
   getTransform() {
@@ -61,7 +61,7 @@ export class InjectableTransformerFactory {
   private visit<T extends ts.Node>(
     node: T,
     context: ts.TransformationContext,
-    map: Map<ts.ClassDeclaration, ClassMetadata>
+    map: Map<ts.ClassDeclaration, ClassMetadata>,
   ): T {
     return ts.visitEachChild(
       node,
@@ -91,15 +91,15 @@ export class InjectableTransformerFactory {
             (node as ClassDeclaration).heritageClauses || [],
             [
               ...(node as ClassDeclaration).members.map((node) =>
-                this._stripAngularDecorators(node)
+                this._stripAngularDecorators(node),
               ),
               ...result.members,
-            ]
+            ],
           );
         }
         return this.visit(node, context, map);
       },
-      context
+      context,
     );
   }
 
@@ -132,7 +132,7 @@ export class InjectableTransformerFactory {
 
         let compileResult = this.handler.compileFull(
           node,
-          analysisOutput.analysis!
+          analysisOutput.analysis!,
         );
         let resultNode = this.translate(compileResult, importManager);
         classMetadataMap.set(node, {
@@ -150,7 +150,7 @@ export class InjectableTransformerFactory {
   }
   private translate(
     compileResult: CompileResult[],
-    importManager: ImportManager
+    importManager: ImportManager,
   ) {
     // There is at least one field to add.
     const statements: ts.Statement[] = [];
@@ -166,7 +166,7 @@ export class InjectableTransformerFactory {
         field.name,
         undefined,
         undefined,
-        exprNode
+        exprNode,
       );
 
       if (false) {
@@ -178,7 +178,7 @@ export class InjectableTransformerFactory {
           property,
           ts.SyntaxKind.MultiLineCommentTrivia,
           '* @nocollapse ',
-          /* hasTrailingNewLine */ false
+          /* hasTrailingNewLine */ false,
         );
       }
 
@@ -217,7 +217,7 @@ export class InjectableTransformerFactory {
         node.name,
         node.questionToken,
         node.type,
-        node.initializer
+        node.initializer,
       ) as T & ts.ParameterDeclaration;
     } else if (ts.isMethodDeclaration(node)) {
       // Strip decorators of methods.
@@ -230,7 +230,7 @@ export class InjectableTransformerFactory {
         node.typeParameters,
         node.parameters,
         node.type,
-        node.body
+        node.body,
       ) as T & ts.MethodDeclaration;
     } else if (ts.isPropertyDeclaration(node)) {
       // Strip decorators of properties.
@@ -240,7 +240,7 @@ export class InjectableTransformerFactory {
         node.name,
         node.questionToken,
         node.type,
-        node.initializer
+        node.initializer,
       ) as T & ts.PropertyDeclaration;
     } else if (ts.isGetAccessor(node)) {
       // Strip decorators of getters.
@@ -250,7 +250,7 @@ export class InjectableTransformerFactory {
         node.name,
         node.parameters,
         node.type,
-        node.body
+        node.body,
       ) as T & ts.GetAccessorDeclaration;
     } else if (ts.isSetAccessor(node)) {
       // Strip decorators of setters.
@@ -259,18 +259,18 @@ export class InjectableTransformerFactory {
         combinedModifiers,
         node.name,
         node.parameters,
-        node.body
+        node.body,
       ) as T & ts.SetAccessorDeclaration;
     } else if (ts.isConstructorDeclaration(node)) {
       // For constructors, strip decorators of the parameters.
       const parameters = node.parameters.map((param) =>
-        this._stripAngularDecorators(param)
+        this._stripAngularDecorators(param),
       );
       node = ts.factory.updateConstructorDeclaration(
         node,
         modifiers,
         parameters,
-        node.body
+        node.body,
       ) as T & ts.ConstructorDeclaration;
     }
     return node;
@@ -302,7 +302,7 @@ export class InjectableTransformerFactory {
    * `undefined`.
    */
   private _nonCoreDecoratorsOnly(
-    node: ts.HasDecorators
+    node: ts.HasDecorators,
   ): ts.NodeArray<ts.Decorator> | undefined {
     const decorators = ts.getDecorators(node);
 
@@ -348,7 +348,7 @@ function isFromAngularCore(decorator: Decorator): boolean {
 
 /** Creates a `NodeArray` with the correct offsets from an array of decorators. */
 function nodeArrayFromDecoratorsArray(
-  decorators: readonly ts.Decorator[]
+  decorators: readonly ts.Decorator[],
 ): ts.NodeArray<ts.Decorator> {
   const array = ts.factory.createNodeArray(decorators);
 
@@ -361,7 +361,7 @@ function nodeArrayFromDecoratorsArray(
 }
 function maybeFilterDecorator(
   decorators: readonly ts.Decorator[] | undefined,
-  toRemove: ts.Decorator[]
+  toRemove: ts.Decorator[],
 ): ts.NodeArray<ts.Decorator> | undefined {
   if (decorators === undefined) {
     return undefined;
@@ -369,8 +369,8 @@ function maybeFilterDecorator(
   const filtered = decorators.filter(
     (dec) =>
       toRemove.find(
-        (decToRemove) => ts.getOriginalNode(dec) === decToRemove
-      ) === undefined
+        (decToRemove) => ts.getOriginalNode(dec) === decToRemove,
+      ) === undefined,
   );
   if (filtered.length === 0) {
     return undefined;

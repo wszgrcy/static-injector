@@ -27,6 +27,6 @@ export interface ImportGenerator<TExpression> {
   generateNamespaceImport(moduleName: string): TExpression;
   generateNamedImport(
     moduleName: string,
-    originalSymbol: string
+    originalSymbol: string,
   ): NamedImport<TExpression>;
 }

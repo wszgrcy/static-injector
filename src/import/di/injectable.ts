@@ -60,13 +60,13 @@ export interface InjectableDecorator {
   (
     options?: {
       providedIn: Type<any> | 'root' | 'platform' | 'any' | null;
-    } & InjectableProvider
+    } & InjectableProvider,
   ): TypeDecorator;
   new (): Injectable;
   new (
     options?: {
       providedIn: Type<any> | 'root' | 'platform' | 'any' | null;
-    } & InjectableProvider
+    } & InjectableProvider,
   ): Injectable;
 }
 

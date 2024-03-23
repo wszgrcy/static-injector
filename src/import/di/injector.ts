@@ -61,7 +61,7 @@ export abstract class Injector {
     notFoundValue: undefined,
     options: InjectOptions & {
       optional?: false;
-    }
+    },
   ): T;
   /**
    * Retrieves an instance from the injector based on the provided token.
@@ -71,7 +71,7 @@ export abstract class Injector {
   abstract get<T>(
     token: ProviderToken<T>,
     notFoundValue: null | undefined,
-    options: InjectOptions
+    options: InjectOptions,
   ): T | null;
   /**
    * Retrieves an instance from the injector based on the provided token.
@@ -81,7 +81,7 @@ export abstract class Injector {
   abstract get<T>(
     token: ProviderToken<T>,
     notFoundValue?: T,
-    options?: InjectOptions | InjectFlags
+    options?: InjectOptions | InjectFlags,
   ): T;
   /**
    * Retrieves an instance from the injector based on the provided token.
@@ -92,7 +92,7 @@ export abstract class Injector {
   abstract get<T>(
     token: ProviderToken<T>,
     notFoundValue?: T,
-    flags?: InjectFlags
+    flags?: InjectFlags,
   ): T;
   /**
    * @deprecated from v4.0.0 use ProviderToken<T>
@@ -131,7 +131,7 @@ export abstract class Injector {
           parent?: Injector;
           name?: string;
         },
-    parent?: Injector
+    parent?: Injector,
   ): Injector {
     if (Array.isArray(options)) {
       return createInjector({ name: '' }, parent, options, '');

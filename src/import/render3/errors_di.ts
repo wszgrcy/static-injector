@@ -17,7 +17,7 @@ import { stringifyForError } from './util/stringify_utils';
 /** Throws an error when a token is not found in DI. */
 export function throwProviderNotFoundError(
   token: ProviderToken<unknown>,
-  injectorName?: string
+  injectorName?: string,
 ): never {
   const errorMessage = null;
   throw new RuntimeError(RuntimeErrorCode.PROVIDER_NOT_FOUND, errorMessage);

@@ -112,7 +112,7 @@ export abstract class EnvironmentInjector implements Injector {
     notFoundValue: undefined,
     options: InjectOptions & {
       optional?: false;
-    }
+    },
   ): T;
   /**
    * Retrieves an instance from the injector based on the provided token.
@@ -122,7 +122,7 @@ export abstract class EnvironmentInjector implements Injector {
   abstract get<T>(
     token: ProviderToken<T>,
     notFoundValue: null | undefined,
-    options: InjectOptions
+    options: InjectOptions,
   ): T | null;
   /**
    * Retrieves an instance from the injector based on the provided token.
@@ -132,7 +132,7 @@ export abstract class EnvironmentInjector implements Injector {
   abstract get<T>(
     token: ProviderToken<T>,
     notFoundValue?: T,
-    options?: InjectOptions
+    options?: InjectOptions,
   ): T;
   /**
    * Retrieves an instance from the injector based on the provided token.
@@ -143,7 +143,7 @@ export abstract class EnvironmentInjector implements Injector {
   abstract get<T>(
     token: ProviderToken<T>,
     notFoundValue?: T,
-    flags?: InjectFlags
+    flags?: InjectFlags,
   ): T;
   /**
    * @deprecated from v4.0.0 use ProviderToken<T>
@@ -201,13 +201,13 @@ export class R3Injector extends EnvironmentInjector {
     providers: Array<Provider | EnvironmentProviders>,
     readonly parent: Injector,
     readonly source: string | null,
-    readonly scopes: Set<InjectorScope>
+    readonly scopes: Set<InjectorScope>,
   ) {
     super();
     // Start off by creating Records for every provider.
     forEachSingleProvider(
       providers as Array<Provider | InternalEnvironmentProviders>,
-      (provider) => this.processProvider(provider)
+      (provider) => this.processProvider(provider),
     );
 
     // Make sure the INJECTOR token provides this injector.
@@ -221,14 +221,14 @@ export class R3Injector extends EnvironmentInjector {
     // Detect whether this injector has the APP_ROOT_SCOPE token and thus should provide
     // any injectable scoped to APP_ROOT_SCOPE.
     const record = this.records.get(
-      INJECTOR_SCOPE
+      INJECTOR_SCOPE,
     ) as Record<InjectorScope | null>;
     if (record != null && typeof record.value === 'string') {
       this.scopes.add(record.value as InjectorScope);
     }
 
     this.injectorDefTypes = new Set(
-      this.get(INJECTOR_DEF_TYPES, EMPTY_ARRAY, InjectFlags.Self)
+      this.get(INJECTOR_DEF_TYPES, EMPTY_ARRAY, InjectFlags.Self),
     );
   }
 
@@ -290,7 +290,7 @@ export class R3Injector extends EnvironmentInjector {
   override get<T>(
     token: ProviderToken<T>,
     notFoundValue: any = THROW_IF_NOT_FOUND,
-    flags: InjectFlags | InjectOptions = InjectFlags.Default
+    flags: InjectFlags | InjectOptions = InjectFlags.Default,
   ): T {
     this.assertNotDestroyed();
 
@@ -323,7 +323,7 @@ export class R3Injector extends EnvironmentInjector {
 
             record = makeRecord(
               injectableDefOrInjectorDefFactory(token),
-              NOT_YET
+              NOT_YET,
             );
           } else {
             record = null;
@@ -381,7 +381,7 @@ export class R3Injector extends EnvironmentInjector {
       const initializers = this.get(
         ENVIRONMENT_INITIALIZER,
         EMPTY_ARRAY,
-        InjectFlags.Self
+        InjectFlags.Self,
       );
       if (false) {
       }
@@ -491,7 +491,7 @@ export class R3Injector extends EnvironmentInjector {
 }
 
 function injectableDefOrInjectorDefFactory(
-  token: ProviderToken<any>
+  token: ProviderToken<any>,
 ): FactoryFn<any> {
   // Most tokens will have an injectable def directly on them, which specifies a factory directly.
   const injectableDef = getInjectableDef(token);
@@ -554,7 +554,7 @@ function providerToRecord(provider: SingleProvider): Record<any> {
 export function providerToFactory(
   provider: SingleProvider,
   ngModuleType?: InjectorType<any>,
-  providers?: any[]
+  providers?: any[],
 ): () => any {
   let factory: (() => any) | undefined = undefined;
   if (false) {
@@ -577,7 +577,7 @@ export function providerToFactory(
       const classRef = resolveForwardRef(
         provider &&
           ((provider as StaticClassProvider | ClassProvider).useClass ||
-            provider.provide)
+            provider.provide),
       );
       if (false) {
       }
@@ -596,7 +596,7 @@ export function providerToFactory(
 function makeRecord<T>(
   factory: (() => T) | undefined,
   value: T | {},
-  multi: boolean = false
+  multi: boolean = false,
 ): Record<T> {
   return {
     factory: factory,
@@ -606,7 +606,7 @@ function makeRecord<T>(
 }
 
 function hasDeps(
-  value: ClassProvider | ConstructorProvider | StaticClassProvider
+  value: ClassProvider | ConstructorProvider | StaticClassProvider,
 ): value is ClassProvider & { deps: any[] } {
   return !!(value as any).deps;
 }
@@ -628,7 +628,7 @@ function couldBeInjectableType(value: any): value is ProviderToken<any> {
 
 function forEachSingleProvider(
   providers: Array<Provider | EnvironmentProviders>,
-  fn: (provider: SingleProvider) => void
+  fn: (provider: SingleProvider) => void,
 ): void {
   for (const provider of providers) {
     if (Array.isArray(provider)) {

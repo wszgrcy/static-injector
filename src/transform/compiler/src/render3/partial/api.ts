@@ -39,7 +39,7 @@ export type LegacyInputPartialMapping =
   | [
       bindingPropertyName: string,
       classPropertyName: string,
-      transformFunction?: o.Expression
+      transformFunction?: o.Expression,
     ];
 
 /**
