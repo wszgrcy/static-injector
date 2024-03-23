@@ -46,7 +46,8 @@
             "/src/ngtsc/annotations/common/index.ts",
             "/src/ngtsc/annotations/common/src/di.ts",
             "/src/ngtsc/annotations/common/src/factory.ts",
-            "/src/ngtsc/imports/src/default.ts"
+            "/src/ngtsc/imports/src/default.ts",
+            "/src/ngtsc/translator/src/ts_util.ts"
         ]
     },
     {

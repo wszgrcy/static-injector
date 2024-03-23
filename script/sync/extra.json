@@ -247,7 +247,9 @@
                         "getInterpolationArgsLength",
                         "getInstructionStatements",
                         "conditionallyCreateDirectiveBindingLiteral",
-                        "createCssSelectorFromNode"
+                        "createCssSelectorFromNode",
+                        "getInputFlagExpr",
+                        "bitwiseOrInputFlagsExpr"
                     ]
                 }
             },

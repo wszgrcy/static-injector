@@ -334,7 +334,7 @@ export class InjectableTransformerFactory {
     return nodeArrayFromDecoratorsArray(filtered);
   }
   private updateStatements(node: ts.SourceFile, importManager: ImportManager) {
-    return addImports(importManager, node);
+    return addImports(ts.factory, importManager, node);
   }
 }
 /**
