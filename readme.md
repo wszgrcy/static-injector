@@ -1,35 +1,41 @@
-# 简介
+|中文(./readme-zh-Hans.md)|English(./readme.md)|
+|-|-|
 
-- 这是 Angualr 依赖注入的独立版本
-- 使用方法与 Angular 的依赖注入完全一致
-# 来源
+# Introduction
+
+- Angular dependency injection standalone version
+- The usage method is completely consistent with Angular's dependency injection
+
+# Source
 - Angular 17.3.1
-# 兼容
+
+# dependency
 - ts 5.4.2
-# 使用方法
 
-- 以`Injector.create`创建第一级依赖注入器
-- 声明为依赖注入类即为`@Injectable`装饰器
+# Usage
 
-# 与`injection-js`的不同
+- Create a first level dependency injector with `Injector.create`
+- Declare as a dependency injection class using the `@Injectable` decorator
 
-- `injection-js`属于动态依赖注入,是 Angular5 之前使用的版本,Angular5 之后转为静态依赖注入
-- 理论上会比`injection-js`快一些(否则 Angular 也不会做替换...),但是没有做 Benchmark
-- 需要会使用`typescript`调用转换器进行转换,或者使用 webpack 的 ts-loader 传入转换器,或者其他转换工具支持 typescript 并且支持 typescript 的自定义转换器
-  > 未来会提供各个打包工具的使用方法
-- 两者基本上可以互换(细节部分需要调整)
+# Different from `injection js`
 
-- 支持构造时使用`inject`
-# 测试
+- `injection-js` belongs to dynamic dependency injection and is a version used before Angular5. After Angular5, it has been converted to static dependency injection
+- In theory, it would be faster than `injection-js` (otherwise Angular wouldn't do the replacement...), but there was no benchmark done
+- Need to use `typescript` to call the transformer for conversion/use webpack's ts loader to pass in the converter/roll up/ts node/other conversion tools support typescript and custom converters that support typescript
+- The two are basically interchangeable (the details need to be adjusted)
 
-- 做了一部分的单元测试.保证大部分功能正常使用
-- 因为大部分代码本身就是从 Angular 中提取的,所以稳定性肯定也是有保证
+- Support the use of `inject` during construction
 
-# 同步
-- 目前重构了同步逻辑,使用`@code-recycle/cli`进行修改,保证与`angular`官方版本一致
+# Test
 
-# 模板
+- Partially conducted unit testing to ensure that most functions are functioning properly
+- Because most of the code itself is extracted from Angular, stability is definitely guaranteed
 
-- [typescript 下使用(使用 Typescript Compiler API)](https://github.com/wszgrcy/static-injector-typescript-template)
-- [webpack 下使用](https://github.com/wszgrcy/static-injector-webpack-template)
-- [rollup 下使用](https://github.com/wszgrcy/static-injector-rollup-template)
+# Sync
+- Currently, the synchronization logic has been refactored and modified using `@code recycle/cli` to ensure consistency with the official version of `angular`
+
+# Template
+
+- [Used under typescript (using Typescript Compiler API)](https://github.com/wszgrcy/static-injector-typescript-template)
+- [Used under webpack](https://github.com/wszgrcy/static-injector-webpack-template)
+- [Using Rollup](https://github.com/wszgrcy/static-injector-rollup-template)
