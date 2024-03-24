@@ -1,4 +1,4 @@
-| [中文](https://github.com/wszgrcy/cyia-localize/blob/master/readme.zh-Hans.md) | [English](./readme.md) |
+| [中文](https://github.com/wszgrcy/static-injector/blob/main/readme.zh-Hans.md) | [English](./readme.md) |
 |-|-|
 
 # Introduction
