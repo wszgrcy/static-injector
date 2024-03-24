@@ -1,4 +1,4 @@
-| [中文](./readme-zh-Hans.md) | [English](./readme.md) |
+| [中文](https://github.com/wszgrcy/cyia-localize/blob/master/readme.zh-Hans.md) | [English](./readme.md) |
 |-|-|
 
 # Introduction
@@ -17,7 +17,7 @@
 - Create a first level dependency injector with `Injector.create`
 - Declare as a dependency injection class using the `@Injectable` decorator
 
-# Different from `injection js`
+# Different from `injection-js`
 
 - `injection-js` belongs to dynamic dependency injection and is a version used before Angular5. After Angular5, it has been converted to static dependency injection
 - In theory, it would be faster than `injection-js` (otherwise Angular wouldn't do the replacement...), but there was no benchmark done

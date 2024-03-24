@@ -1,6 +1,6 @@
 {
   "name": "static-injector",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "Angular 依赖注入独立版本;Angular dependency injection standalone version",
   "keywords": [
     "angular",
@@ -10,7 +10,8 @@
     "typescript 5.4.2",
     "injectable",
     "static-inject",
-    "dependency injection"
+    "dependency injection",
+    "injection-js"
   ],
   "repository": {
     "type": "git",
