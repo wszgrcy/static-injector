@@ -1,5 +1,4 @@
 import { inject, Injectable, Injector, INJECTOR_SCOPE } from 'static-injector';
-@Injectable()
 export class MyClass {
   private injectClass = inject(InjectClass);
   private rootInjectClass = inject(RootInjectClass);
@@ -12,12 +11,12 @@ export class MyClass {
     };
   }
 }
-@Injectable()
 export class InjectClass {
   name = 'InjectClass';
 }
-@Injectable({ providedIn: 'root' })
+
 export class RootInjectClass {
+  static injectOptions = { providedIn: 'root' };
   name = 'RootInjectClass';
 }
 

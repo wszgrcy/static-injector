@@ -5,12 +5,12 @@ interface BuildOptions {
 }
 async function bundleImport() {
   let bundle = await rollup.rollup({
-    input: './dist/import/es2022/index.js',
-    treeshake: false,
+    input: './dist/es2022/index.js',
+    treeshake: true,
   });
   for (const item of [
-    { output: './dist/import/commonjs/index.js', format: 'commonjs' },
-    { output: './dist/import/fesm2022/index.js', format: 'esm' },
+    { output: './dist/commonjs/index.js', format: 'commonjs' },
+    { output: './dist/fesm2022/index.js', format: 'esm' },
   ] as BuildOptions[]) {
     await bundle.write({
       file: item.output,

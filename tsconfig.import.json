@@ -1,8 +1,8 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "dist/import/es2022",
-    "declarationDir": "dist/import/typings",
+    "outDir": "dist/es2022",
+    "declarationDir": "dist/typings",
     "module": "ES2022",
     "target": "ES2022",
     "moduleResolution": "node",

@@ -1,6 +1,5 @@
 import { Injectable, Injector, R3Injector } from 'static-injector';
 let isDestroy = false;
-@Injectable()
 export class MyClass {
   ngOnDestroy(): void {
     isDestroy = true;
