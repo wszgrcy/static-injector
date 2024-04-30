@@ -59,3 +59,6 @@ console.log(instance.hello());
 # Sync
 
 - Currently, the synchronization logic has been refactored and modified using `@code recycle/cli` to ensure consistency with the official version of `angular`
+
+# Examples
+- [https://github.com/wszgrcy/static-injector/tree/alpha/test/import](https://github.com/wszgrcy/static-injector/tree/alpha/test/import)

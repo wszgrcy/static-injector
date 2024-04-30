@@ -57,3 +57,5 @@ console.log(instance.hello());
 # 同步
 - 目前重构了同步逻辑,使用`@code-recycle/cli`进行修改,保证与`angular`官方版本一致
 
+# 实例
+- [https://github.com/wszgrcy/static-injector/tree/alpha/test/import](https://github.com/wszgrcy/static-injector/tree/alpha/test/import)
