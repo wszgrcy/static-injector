@@ -1,4 +1,4 @@
-import { inject, Injectable, Injector, INJECTOR_SCOPE } from 'static-injector';
+import { inject,  Injector, INJECTOR_SCOPE } from 'static-injector';
 export class MyClass {
   private injectClass = inject(InjectClass);
   private rootInjectClass = inject(RootInjectClass);

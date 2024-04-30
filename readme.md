@@ -21,21 +21,19 @@
 
 - Create a first level dependency injector with `Injector.create`
 ```ts
-import { Injector } from 'static-injector';
+import { Injector, inject } from 'static-injector';
 
-export class FirstClass {
-  constructor() {}
-  hello() {
-    return 'hello';
+class Main {
+  child = inject(Child);
+}
+class Child {
+  output() {
+    return 'hello world';
   }
 }
-
-let injector = Injector.create({
-  providers: [{ provide: FirstClass }],
-});
-let instance = injector.get(FirstClass);
-console.log(instance.hello());
-
+let injector = Injector.create({ providers: [Main, Child] });
+const instance = injector.get(Main);
+console.log(instance.child.output());
 ```
 
 # Different from `injection-js`
