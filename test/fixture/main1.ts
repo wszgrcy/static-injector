@@ -1,8 +1,9 @@
-import { Injectable, Injector } from 'static-injector';
+import { Injectable, Injector, inject } from 'static-injector';
 import * as sub from './sub1';
-@Injectable()
+
 export class Main1Class {
-  constructor(private sub: sub.Sub1Class) {}
+  private sub = inject(sub.Sub1Class);
+  constructor() {}
   hello() {
     return this.sub.hello();
   }

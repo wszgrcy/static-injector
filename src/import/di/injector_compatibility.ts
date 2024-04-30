@@ -406,7 +406,8 @@ export function formatError(
     }
     context = `{${parts.join(', ')}}`;
   }
-  return `${injectorErrorName}${
-    source ? '(' + source + ')' : ''
-  }[${context}]: ${text.replace(NEW_LINE, '\n  ')}`;
+  return `${injectorErrorName}${source ? '(' + source + ')' : ''}[${context}]: ${text.replace(
+    NEW_LINE,
+    '\n  ',
+  )}`;
 }

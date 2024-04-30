@@ -1,22 +1,16 @@
 import {
+  inject,
   Injectable,
   InjectionToken,
   Injector,
-  INJECTOR_SCOPE,
-  Optional,
-  SkipSelf,
+  INJECTOR_SCOPE
 } from 'static-injector';
-let token = new InjectionToken('token');
-@Injectable({
-  providedIn: 'root',
-  useFactory: (token: string) => new MyClass(token),
-  deps: [
-    [new Optional(), token],
-    [new Optional(), 'aaa'],
-  ],
-})
+let token = new InjectionToken<string>('token');
+
 export class MyClass {
-  constructor(private token: string) {}
+  static injectOptions = { providedIn: 'root' };
+  private token = inject(token);
+  constructor() {}
   out() {
     return { token: this.token };
   }

@@ -1,56 +1,5 @@
 [
     {
-        "source": "compiler",
-        "target":"./transform/compiler",
-        "fileList": [
-            "/src/output/output_ast.ts",
-            "/src/render3/partial/api.ts",
-            "/src/render3/view/util.ts",
-            "/src/render3/r3_factory.ts",
-            "/src/render3/r3_identifiers.ts",
-            "/src/render3/util.ts",
-            "/src/core.ts",
-            "/src/injectable_compiler_2.ts",
-            "/src/parse_util.ts",
-            "/index.ts",
-            "/compiler.ts",
-            "/public_api.ts",
-            "/src/compiler.ts"
-        ]
-    },
-    {
-        "source": "compiler-cli",
-        "target":"./transform/compiler-cli",
-        "fileList": [
-            "/src/ngtsc/annotations/common/src/util.ts",
-            "/src/ngtsc/annotations/src/injectable.ts",
-            "/src/ngtsc/diagnostics/index.ts",
-            "/src/ngtsc/imports/index.ts",
-            "/src/ngtsc/imports/src/core.ts",
-            "/src/ngtsc/reflection/index.ts",
-            "/src/ngtsc/reflection/src/host.ts",
-            "/src/ngtsc/reflection/src/typescript.ts",
-            "/src/ngtsc/reflection/src/type_to_value.ts",
-            "/src/ngtsc/reflection/src/util.ts",
-            "/src/ngtsc/transform/index.ts",
-            "/src/ngtsc/transform/src/api.ts",
-            "/src/ngtsc/transform/src/utils.ts",
-            "/src/ngtsc/translator/index.ts",
-            "/src/ngtsc/translator/src/import_manager.ts",
-            "/src/ngtsc/translator/src/translator.ts",
-            "/src/ngtsc/translator/src/typescript_ast_factory.ts",
-            "/src/ngtsc/translator/src/typescript_translator.ts",
-            "/src/ngtsc/translator/src/api/ast_factory.ts",
-            "/src/ngtsc/translator/src/api/import_generator.ts",
-            "/src/ngtsc/util/src/typescript.ts",
-            "/src/ngtsc/annotations/common/index.ts",
-            "/src/ngtsc/annotations/common/src/di.ts",
-            "/src/ngtsc/annotations/common/src/factory.ts",
-            "/src/ngtsc/imports/src/default.ts",
-            "/src/ngtsc/translator/src/ts_util.ts"
-        ]
-    },
-    {
         "source": "core/src",
         "target":"./import",
         "fileList": [
@@ -79,19 +28,16 @@
             "/interface/lifecycle_hooks.ts",
             "/interface/type.ts",
             "/render3/definition_factory.ts",
-            "/render3/di.ts",
             "/render3/errors_di.ts",
             "/render3/fields.ts",
             "/render3/instructions/di.ts",
             "/render3/util/stringify_utils.ts",
-            "/util/array_utils.ts",
             "/util/closure.ts",
             "/util/decorators.ts",
             "/util/empty.ts",
             "/util/property.ts",
             "/util/stringify.ts",
-            "/errors.ts",
-            "/error_details_base_url.ts"
+            "/errors.ts"
         ]
     }
 ]

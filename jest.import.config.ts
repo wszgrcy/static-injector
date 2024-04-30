@@ -176,9 +176,7 @@ const config: JestConfigWithTsJest = {
       'ts-jest',
       {
         tsconfig: 'tsconfig.spec.json',
-        astTransformers: {
-          before: ['./test/util/jest-test-transformer-loader.js'],
-        },
+    
       },
     ],
   },

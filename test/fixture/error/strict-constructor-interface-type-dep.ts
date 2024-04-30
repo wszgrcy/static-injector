@@ -1,6 +1,6 @@
 import { Injectable, Injector } from 'static-injector';
 interface A {}
-@Injectable()
+
 export class MyClass {
   constructor(a: A) {}
 }

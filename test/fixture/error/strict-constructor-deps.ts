@@ -1,5 +1,5 @@
 import { Injectable, Injector } from 'static-injector';
-@Injectable()
+
 export class MyClass {
   constructor(a) {}
 }

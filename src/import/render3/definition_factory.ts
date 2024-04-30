@@ -32,8 +32,5 @@ export function getFactoryDef<T>(
   type: any,
   throwNotFound?: boolean,
 ): FactoryFn<T> | null {
-  const hasFactoryDef = type.hasOwnProperty(NG_FACTORY_DEF);
-  if (false) {
-  }
-  return hasFactoryDef ? type[NG_FACTORY_DEF] : null;
+  return () => new type();
 }

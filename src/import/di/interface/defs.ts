@@ -215,7 +215,13 @@ export function ɵɵdefineInjector(options: {
 export function getInjectableDef<T>(
   type: any,
 ): ɵɵInjectableDeclaration<T> | null {
-  return getOwnDefinition(type, NG_PROV_DEF) || null;
+  return (
+    getOwnDefinition(type, NG_PROV_DEF) || {
+      token: type,
+      factory: () => new type(),
+      ...type.injectOptions,
+    }
+  );
 }
 
 export function isInjectable(type: any): boolean {

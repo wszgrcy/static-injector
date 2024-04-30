@@ -1,10 +1,8 @@
-import { Injectable, Injector, INJECTOR_SCOPE } from 'static-injector';
-@Injectable()
+import { inject, Injectable, Injector, INJECTOR_SCOPE } from 'static-injector';
 export class MyClass {
-  constructor(
-    private injectClass: InjectClass,
-    private rootInjectClass: RootInjectClass
-  ) {}
+  private injectClass = inject(InjectClass);
+  private rootInjectClass = inject(RootInjectClass);
+  constructor() {}
   out() {
     return {
       injectClass: this.injectClass,
@@ -12,12 +10,11 @@ export class MyClass {
     };
   }
 }
-@Injectable()
 export class InjectClass {
   name = 'InjectClass';
 }
-@Injectable({ providedIn: 'root' })
 export class RootInjectClass {
+  static injectOptions = { providedIn: 'root' };
   name = 'RootInjectClass';
 }
 

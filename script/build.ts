@@ -1,22 +1,16 @@
 import * as rollup from 'rollup';
-interface BuildOptions {
-  output: string;
-  format: rollup.ModuleFormat;
-}
+
 async function bundleImport() {
   let bundle = await rollup.rollup({
-    input: './dist/import/es2022/index.js',
-    treeshake: false,
+    input: './dist/es2022/index.js',
+    treeshake: true,
   });
-  for (const item of [
-    { output: './dist/import/commonjs/index.js', format: 'commonjs' },
-    { output: './dist/import/fesm2022/index.js', format: 'esm' },
-  ] as BuildOptions[]) {
-    await bundle.write({
-      file: item.output,
-      format: item.format,
-    });
-  }
+
+  await bundle.write({ file: './dist/commonjs/index.js', format: 'commonjs' });
+  await bundle.write({
+    file: './dist/fesm2022/index.js',
+    format: 'module',
+  });
 }
 
 bundleImport();

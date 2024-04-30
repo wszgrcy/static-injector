@@ -13,7 +13,7 @@ export class OnlyOtherClass {
 
 export const result = new OnlyOtherClass().hello();
 @OtherDecorator()
-@Injectable()
+
 export class BothClass {
   hello() {
     return 'hello';
