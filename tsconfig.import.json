@@ -8,5 +8,7 @@
     "moduleResolution": "node",
     "strict": true
   },
-  "include": ["./src/import"]
+  "include": [
+    "./src/import"
+  ]
 }
