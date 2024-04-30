@@ -2,11 +2,17 @@
 |-|-|
 # 简介
 
-- Angualr 依赖注入的独立版本
+- Angular 依赖注入的独立版本
 - 使用方法与 Angular 的依赖注入完全一致
 - 不需要任何转换器,引入即可使用
+- 0依赖
+- 移除装饰器
+> `@Injectable()`=>`static injectOptions={}`
+> `@Inject() xx`=>`xx=inject()`
+> `@Optional()`=>`xx=inject(token,{optional:true})`
+- `JS`/`TS`支持
 # 来源
-- Angular 17.3.1
+- Angular 17.3.6
 
 # 使用方法
 

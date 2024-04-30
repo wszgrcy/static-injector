@@ -4,13 +4,19 @@
   "description": "Angular 依赖注入独立版本;Angular dependency injection standalone version",
   "keywords": [
     "angular",
-    "angular 17.3.1",
+    "angular 17.3.6",
     "injector",
     "typescript",
     "injectable",
     "static-inject",
     "dependency injection",
-    "injection-js"
+    "injection-js",
+    "dependency inversion",
+    "di",
+    "inversion of control container",
+    "ioc",
+    "javascript",
+    "node"
   ],
   "repository": {
     "type": "git",

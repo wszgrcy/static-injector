@@ -6,9 +6,16 @@
 - Angular dependency injection standalone version
 - The usage method is completely consistent with Angular's dependency injection
 - No transformer required
+- 0 dependencies
+- Remove Decorator
+> `@Injectable()`=>`static injectOptions={}`
+> `@Inject() xx`=>`xx=inject()`
+> `@Optional()`=>`xx=inject(token,{optional:true})`
+- `JS`/`TS` Support
+
 # Source
 
-- Angular 17.3.1
+- Angular 17.3.6
 
 # Usage
 
