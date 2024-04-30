@@ -12,7 +12,7 @@ import { Type } from '../interface/type';
 import { getFactoryDef } from '../render3/definition_factory';
 
 import { stringifyForError } from '../render3/util/stringify_utils';
-import { deepForEach } from '../util/array_utils';
+
 import { EMPTY_ARRAY } from '../util/empty';
 import { getClosureSafeProperty } from '../util/property';
 import { stringify } from '../util/stringify';

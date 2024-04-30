@@ -7,9 +7,6 @@
       "path": "./tsconfig.import.json"
     },
     {
-      "path": "./tsconfig.transform.json"
-    },
-    {
       "path": "./tsconfig.import-test.json"
     },
     {

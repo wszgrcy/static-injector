@@ -2,7 +2,7 @@ import { Injectable, Injector } from 'static-injector';
 
 export class FirstClass {
   init() {
-    @Injectable()
+    
     class SecondClass {
       name = 'second';
     }

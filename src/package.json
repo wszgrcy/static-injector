@@ -1,17 +1,22 @@
 {
   "name": "static-injector",
-  "version": "4.0.2",
+  "version": "5.0.0-alpha.0",
   "description": "Angular 依赖注入独立版本;Angular dependency injection standalone version",
   "keywords": [
     "angular",
-    "angular 17.3.1",
+    "angular 17.3.6",
     "injector",
     "typescript",
-    "typescript 5.4.2",
     "injectable",
     "static-inject",
     "dependency injection",
-    "injection-js"
+    "injection-js",
+    "dependency inversion",
+    "di",
+    "inversion of control container",
+    "ioc",
+    "javascript",
+    "node"
   ],
   "repository": {
     "type": "git",
@@ -21,19 +26,17 @@
     "url": "https://github.com/wszgrcy/static-injector/issues"
   },
   "homepage": "https://github.com/wszgrcy/static-injector#readme",
-  "main": "import/commonjs/index.js",
-  "es2022": "import/fesm2022/index.js",
-  "fesm2022": "import/fesm2022/index.js",
-  "esm2022": "import/esm2022/index.js",
-  "module": "import/fesm2022/index.js",
-  "typings": "import/typings/index.d.ts",
+  "main": "commonjs/index.js",
+  "es2022": "fesm2022/index.js",
+  "fesm2022": "fesm2022/index.js",
+  "esm2022": "esm2022/index.js",
+  "module": "fesm2022/index.js",
+  "typings": "typings/index.d.ts",
   "private": false,
   "scripts": {},
   "author": "wszgrcy",
   "license": "MIT",
-  "peerDependencies": {
-    "typescript": ">=5.0.0"
-  },
+  "peerDependencies": {},
   "devDependencies": {},
   "sideEffects": false
 }

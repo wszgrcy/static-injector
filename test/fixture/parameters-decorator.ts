@@ -6,19 +6,17 @@ import {
   Optional,
   Self,
   SkipSelf,
+  inject,
 } from 'static-injector';
-@Injectable()
+
 export class MyClass {
-  constructor(
-    @Inject(token1) private token1: number,
-    @Inject('noValue') @Optional() private noValue: unknown,
-    @Inject(token1) @SkipSelf() private token1WithInjectorL2: number,
-    @Inject(token1) @Self() private token1WithSelf: number
-  ) {}
+  private token1 = inject(token1);
+  private token1WithInjectorL2 = inject(token1, { skipSelf: true });
+  private token1WithSelf = inject(token1, { self: true });
+  constructor() {}
   out() {
     return {
       token1: this.token1,
-      noValue: this.noValue,
       token1WithInjectorL2: this.token1WithInjectorL2,
       token1WithSelf: this.token1WithSelf,
     };

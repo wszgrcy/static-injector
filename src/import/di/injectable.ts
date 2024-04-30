@@ -96,11 +96,3 @@ export interface Injectable {
    */
   providedIn?: Type<any> | 'root' | 'platform' | 'any' | null;
 }
-
-/**
- * Injectable decorator and metadata.
- *
- * @Annotation
- * @publicApi
- */
-export const Injectable: InjectableDecorator = undefined as any;
