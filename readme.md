@@ -40,8 +40,7 @@ console.log(instance.hello());
 
 # Different from `injection-js`
 
-- `injection-js` belongs to dynamic dependency injection and is a version used before Angular5. After Angular5, it has been converted to static dependency injection
-- In theory, it would be faster than `injection-js` (otherwise Angular wouldn't do the replacement...), but there was no benchmark done
+- `injection-js` belongs to dynamic dependency injection and is a version used before Angular5. Currently no longer updated
 - The two are basically interchangeable (the details need to be adjusted)
 
 - Support the use of `inject` during construction
@@ -58,7 +57,7 @@ console.log(instance.hello());
 
 # Sync
 
-- Currently, the synchronization logic has been refactored and modified using `@code recycle/cli` to ensure consistency with the official version of `angular`
+- Currently, the synchronization logic has been refactored and modified using `@code-recycle/cli` to ensure consistency with the official version of `angular`
 
 # Examples
 - [https://github.com/wszgrcy/static-injector/tree/alpha/test/import](https://github.com/wszgrcy/static-injector/tree/alpha/test/import)

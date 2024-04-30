@@ -38,8 +38,7 @@ console.log(instance.hello());
 
 # 与`injection-js`的不同
 
-- `injection-js`属于动态依赖注入,是 Angular5 之前使用的版本,Angular5 之后转为静态依赖注入
-- 理论上会比`injection-js`快一些(否则 Angular 也不会做替换...),但是没有做 Benchmark
+- `injection-js`属于动态依赖注入,是 Angular5 之前使用的版本,目前已经不再更新
 - 两者基本上可以互换(细节部分需要调整)
 
 - 支持构造时期使用`inject`
