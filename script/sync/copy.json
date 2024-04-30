@@ -28,19 +28,16 @@
             "/interface/lifecycle_hooks.ts",
             "/interface/type.ts",
             "/render3/definition_factory.ts",
-            "/render3/di.ts",
             "/render3/errors_di.ts",
             "/render3/fields.ts",
             "/render3/instructions/di.ts",
             "/render3/util/stringify_utils.ts",
-            "/util/array_utils.ts",
             "/util/closure.ts",
             "/util/decorators.ts",
             "/util/empty.ts",
             "/util/property.ts",
             "/util/stringify.ts",
-            "/errors.ts",
-            "/error_details_base_url.ts"
+            "/errors.ts"
         ]
     }
 ]

@@ -1,12 +1,11 @@
-import { Inject, Injectable, Injector, Optional, inject } from 'static-injector';
+import { Inject, Injector, Optional, inject } from 'static-injector';
 
 export class MyClass {
-  private useClassClass= inject(UseClassClass)
-  private useFactoryClass= inject(UseFactoryClass)
-  private useExistingClass= inject(UseExistingClass)
-  private classWithDeps= inject(ClassWithDeps)
-  constructor(
-  ) {}
+  private useClassClass = inject(UseClassClass);
+  private useFactoryClass = inject(UseFactoryClass);
+  private useExistingClass = inject(UseExistingClass);
+  private classWithDeps = inject(ClassWithDeps);
+  constructor() {}
   out() {
     return {
       useClassClass: this.useClassClass,
@@ -26,7 +25,7 @@ export class UseFactoryClass {
   constructor(
     private input: string,
     public noValue: string,
-    public injectValue: string
+    public injectValue: string,
   ) {
     this.name = input;
   }

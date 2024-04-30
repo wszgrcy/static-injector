@@ -13,7 +13,7 @@ import { Type } from '../interface/type';
 import { FactoryFn, getFactoryDef } from '../render3/definition_factory';
 
 import { NG_ENV_ID } from '../render3/fields';
-import { newArray } from '../util/array_utils';
+
 import { EMPTY_ARRAY } from '../util/empty';
 import { stringify } from '../util/stringify';
 

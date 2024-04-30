@@ -3,9 +3,7 @@ import {
   Injectable,
   InjectionToken,
   Injector,
-  INJECTOR_SCOPE,
-  Optional,
-  SkipSelf,
+  INJECTOR_SCOPE
 } from 'static-injector';
 let token = new InjectionToken<string>('token');
 

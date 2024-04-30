@@ -13,6 +13,7 @@ const typeMap = {
   'interface-property': 'PropertySignature',
   'class-method': 'MethodDeclaration',
   'enum-member': 'EnumMember',
+  'variable':'VariableDeclaration'
 };
 function importDeclarationByNamed(list: string[]) {
   let listStr = list.map((item) => `[value=${item}]`).join(',');
@@ -43,8 +44,6 @@ let fn: ScriptFunction = async (util, rule, host, injector) => {
   let data = await rule.os.gitClone(
     'https://github.com/angular/angular.git',
     [
-      '/packages/compiler',
-      '/packages/compiler-cli',
       '/packages/core/src',
       '!**/*.bazel',
       '!**/*spec.ts',

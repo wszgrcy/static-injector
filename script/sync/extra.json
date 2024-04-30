@@ -93,11 +93,11 @@
                 }
             },
             {
-                "type": "custom",
-                "change": "change",
+                "type": "variable",
                 "values": {
-                    "selector": "VariableDeclaration:has(>::name[value=Injectable])>CallExpression",
-                    "content": "undefined as any"
+                    "excludes": [
+                        "Injectable"
+                    ]
                 }
             }
         ]
@@ -238,7 +238,8 @@
                 "values": {
                     "excludes": [
                         "getComponentDef",
-                        "throwCyclicDependencyError"
+                        "throwCyclicDependencyError",
+                        "deepForEach"
                     ]
                 }
             },
@@ -265,6 +266,7 @@
                 "type": "import",
                 "values": {
                     "excludes": [
+                        "newArray",
                         "getComponentDef",
                         "throwCyclicDependencyError",
                         "emitInstanceCreatedByInjectorEvent",
@@ -416,100 +418,6 @@
         ]
     },
     {
-        "fileName": "./import/render3/di.ts",
-        "rules": [
-            {
-                "type": "import",
-                "values": {
-                    "excludes": [
-                        "InjectorMarkers",
-                        "assertDefined",
-                        "assertDirectiveDef",
-                        "registerPreOrderHooks",
-                        "DirectiveDef",
-                        "isFactory",
-                        "AttributeMarker",
-                        "isComponentDef",
-                        "DECLARATION_COMPONENT_VIEW",
-                        "assertTNodeType",
-                        "enterDI",
-                        "isNameOnlyAttributeMarker",
-                        "getParentInjectorIndex",
-                        "throwCyclicDependencyError",
-                        "stringifyForError",
-                        "ProviderToken",
-                        "injectRootLimpMode",
-                        "emitInstanceCreatedByInjectorEvent",
-                        "InjectorProfilerContext",
-                        "runInInjectorProfilerContext",
-                        "setInjectorProfilerContext",
-                        "TContainerNode"
-                    ]
-                }
-            },
-            {
-                "type": "import",
-                "values": {
-                    "namedImports": [
-                        "NG_ELEMENT_ID"
-                    ]
-                }
-            },
-            {
-                "type": "variable",
-                "values": {
-                    "excludes": [
-                        "includeViewProviders",
-                        "BLOOM_SIZE",
-                        "BLOOM_MASK",
-                        "BLOOM_BUCKET_BITS",
-                        "nextNgElementId",
-                        "NOT_FOUND"
-                    ]
-                }
-            },
-            {
-                "type": "function",
-                "values": {
-                    "excludes": [
-                        "setIncludeViewProviders",
-                        "bloomAdd",
-                        "getOrCreateNodeInjectorForNode",
-                        "getInjectorIndex",
-                        "getParentInjectorLocation",
-                        "diPublicInInjector",
-                        "injectAttributeImpl",
-                        "notFoundValueOrThrow",
-                        "lookupTokenUsingModuleInjector",
-                        "getOrCreateInjectable",
-                        "lookupTokenUsingNodeInjector",
-                        "searchTokensOnInjector",
-                        "locateDirectiveOrProvider",
-                        "getNodeInjectable",
-                        "bloomHashBitOrFactory",
-                        "bloomHasToken",
-                        "shouldSearchParent",
-                        "NodeInjector",
-                        "createNodeInjector",
-                        "lookupTokenUsingEmbeddedInjector",
-                        "getTNodeFromLView",
-                        "insertBloom",
-                        "getNodeInjectorLView",
-                        "getNodeInjectorTNode"
-                    ]
-                }
-            },
-            {
-                "type": "class",
-                "values": {
-                    "excludes": [
-                        "NodeInjector"
-                    ]
-                }
-            }
-        ]
-    },
-    {
         "fileName": "./import/render3/errors_di.ts",
         "rules": [
             {
@@ -517,6 +425,19 @@
                 "values": {
                     "includes": [
                         "throwProviderNotFoundError"
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "fileName": "./import/errors.ts",
+        "rules": [
+            {
+                "type": "import",
+                "values": {
+                    "excludes": [
+                        "ERROR_DETAILS_PAGE_BASE_URL"
                     ]
                 }
             }
@@ -589,28 +510,6 @@
         ]
     },
     {
-        "fileName": "./import/util/array_utils.ts",
-        "rules": [
-            {
-                "type": "import",
-                "values": {
-                    "excludes": [
-                        "assertEqual"
-                    ]
-                }
-            },
-            {
-                "type": "function",
-                "values": {
-                    "includes": [
-                        "newArray",
-                        "deepForEach"
-                    ]
-                }
-            }
-        ]
-    },
-    {
         "fileName": "./import/util/closure.ts",
         "rules": []
     },
@@ -633,6 +532,22 @@
                         "ANNOTATIONS",
                         "PROP_METADATA"
                     ]
+                }
+            },
+            {
+                "type": "custom",
+                "change": "change",
+                "values": {
+                    "comment":"装饰器已经去掉,所以这个函数如果调用,一定是通过new Self()这种方式",
+                    "selector": "FunctionDeclaration:has(>Identifier[value=ParamDecoratorFactory])>Block",
+                    "replaceSelector":"IfStatement Block"
+                }
+            },
+            {
+                "type": "custom",
+                "change": "remove",
+                "values": {
+                    "selector": "ExpressionStatement:like(ParamDecoratorFactory.prototype),ExpressionStatement:like(annotationCls)"
                 }
             }
         ]
