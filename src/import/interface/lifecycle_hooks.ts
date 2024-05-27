@@ -10,7 +10,7 @@
  * A lifecycle hook that is called when a directive, pipe, or service is destroyed.
  * Use for any custom cleanup that needs to occur when the
  * instance is destroyed.
- * @see [Lifecycle hooks guide](guide/lifecycle-hooks)
+ * @see [Lifecycle hooks guide](guide/components/lifecycle)
  *
  * @usageNotes
  * The following snippet shows how a component can implement this interface

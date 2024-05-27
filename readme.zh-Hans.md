@@ -12,7 +12,7 @@
 > `@Optional()`=>`xx=inject(token,{optional:true})`
 - `JS`/`TS`支持
 # 来源
-- Angular 17.3.6
+- Angular 18.0.0
 
 # 使用方法
 

@@ -3,14 +3,13 @@ import {
   Injectable,
   InjectionToken,
   Injector,
-  INJECTOR_SCOPE
+  INJECTOR_SCOPE,
+  RootStaticInjectOptions
 } from 'static-injector';
 let token = new InjectionToken<string>('token');
 
-export class MyClass {
-  static injectOptions = { providedIn: 'root' };
+export class MyClass extends RootStaticInjectOptions{
   private token = inject(token);
-  constructor() {}
   out() {
     return { token: this.token };
   }

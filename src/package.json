@@ -1,10 +1,10 @@
 {
   "name": "static-injector",
-  "version": "5.0.1",
+  "version": "5.0.2",
   "description": "Angular 依赖注入独立版本;Angular dependency injection standalone version",
   "keywords": [
     "angular",
-    "angular 17.3.6",
+    "angular 18.0.0",
     "injector",
     "typescript",
     "injectable",

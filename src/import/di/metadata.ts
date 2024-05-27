@@ -31,7 +31,7 @@ export interface InjectDecorator {
    * <code-example path="core/di/ts/metadata_spec.ts" region="InjectWithoutDecorator">
    * </code-example>
    *
-   * @see [Dependency Injection Guide](guide/dependency-injection)
+   * @see [Dependency Injection Guide](guide/di/dependency-injection
    *
    */
   (token: any): any;
@@ -45,7 +45,7 @@ export interface InjectDecorator {
  */
 export interface Inject {
   /**
-   * A [DI token](guide/glossary#di-token) that maps to the dependency to be injected.
+   * A DI token that maps to the dependency to be injected.
    */
   token: any;
 }
@@ -58,8 +58,8 @@ export interface Inject {
  */
 export const Inject: InjectDecorator = attachInjectFlag(
   // Disable tslint because `DecoratorFlags` is a const enum which gets inlined.
-  // tslint:disable-next-line: no-toplevel-property-access
   makeParamDecorator('Inject', (token: any) => ({ token })),
+  // tslint:disable-next-line: no-toplevel-property-access
   DecoratorFlags.Inject,
 );
 
@@ -84,7 +84,7 @@ export interface OptionalDecorator {
    * <code-example path="core/di/ts/metadata_spec.ts" region="Optional">
    * </code-example>
    *
-   * @see [Dependency Injection Guide](guide/dependency-injection).
+   * @see [Dependency Injection Guide](guide/di/dependency-injection.
    */
   (): any;
   new (): Optional;
@@ -179,7 +179,7 @@ export interface SkipSelfDecorator {
    * <code-example path="core/di/ts/metadata_spec.ts" region="SkipSelf">
    * </code-example>
    *
-   * @see [Dependency Injection guide](guide/dependency-injection-in-action#skip).
+   * @see [Dependency Injection guide](guide/di/di-in-action#skip).
    * @see {@link Self}
    * @see {@link Optional}
    *

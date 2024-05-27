@@ -67,6 +67,7 @@ export const enum RuntimeErrorCode {
   ASYNC_INITIALIZERS_STILL_RUNNING = 405,
   APPLICATION_REF_ALREADY_DESTROYED = 406,
   RENDERER_NOT_FOUND = 407,
+  PROVIDED_BOTH_ZONE_AND_ZONELESS = 408,
 
   // Hydration Errors
   HYDRATION_NODE_MISMATCH = -500,
@@ -113,6 +114,7 @@ export const enum RuntimeErrorCode {
   VIEW_ALREADY_DESTROYED = 911,
   COMPONENT_ID_COLLISION = -912,
   IMAGE_PERFORMANCE_WARNING = -913,
+  UNEXPECTED_ZONEJS_PRESENT_IN_ZONELESS_MODE = 914,
 
   // Signal integration errors
   REQUIRED_INPUT_NO_VALUE = -950,
@@ -121,6 +123,10 @@ export const enum RuntimeErrorCode {
 
   // Output()
   OUTPUT_REF_DESTROYED = 953,
+
+  // Repeater errors
+  LOOP_TRACK_DUPLICATE_KEYS = -955,
+  LOOP_TRACK_RECREATE = -956,
 
   // Runtime dependency tracker errors
   RUNTIME_DEPS_INVALID_IMPORTED_TYPE = 1000,

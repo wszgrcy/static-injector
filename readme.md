@@ -15,7 +15,7 @@
 
 # Source
 
-- Angular 17.3.6
+- Angular 18.0.0
 
 # Usage
 
