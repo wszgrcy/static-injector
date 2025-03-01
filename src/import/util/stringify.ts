@@ -3,7 +3,7 @@
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 
 export function stringify(token: any): string {
@@ -12,29 +12,26 @@ export function stringify(token: any): string {
   }
 
   if (Array.isArray(token)) {
-    return '[' + token.map(stringify).join(', ') + ']';
+    return `[${token.map(stringify).join(', ')}]`;
   }
 
   if (token == null) {
     return '' + token;
   }
 
-  if (token.overriddenName) {
-    return `${token.overriddenName}`;
+  const name = token.overriddenName || token.name;
+  if (name) {
+    return `${name}`;
   }
 
-  if (token.name) {
-    return `${token.name}`;
+  const result = token.toString();
+
+  if (result == null) {
+    return '' + result;
   }
 
-  const res = token.toString();
-
-  if (res == null) {
-    return '' + res;
-  }
-
-  const newLineIndex = res.indexOf('\n');
-  return newLineIndex === -1 ? res : res.substring(0, newLineIndex);
+  const newLineIndex = result.indexOf('\n');
+  return newLineIndex >= 0 ? result.slice(0, newLineIndex) : result;
 }
 
 /**

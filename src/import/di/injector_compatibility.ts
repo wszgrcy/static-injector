@@ -3,7 +3,7 @@
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 
 import { RuntimeError, RuntimeErrorCode } from '../errors';
@@ -223,7 +223,7 @@ export function inject<T>(
  * In practice the `inject()` calls are allowed in a constructor, a constructor parameter and a
  * field initializer:
  *
- * ```typescript
+ * ```ts
  * @Injectable({providedIn: 'root'})
  * export class Car {
  *   radio: Radio|undefined;
@@ -239,7 +239,7 @@ export function inject<T>(
  *
  * It is also legal to call `inject` from a provider's factory:
  *
- * ```typescript
+ * ```ts
  * providers: [
  *   {provide: Car, useFactory: () => {
  *     // OK: a class factory
@@ -253,7 +253,7 @@ export function inject<T>(
  * notably, calls to `inject()` are disallowed after a class instance was created, in methods
  * (including lifecycle hooks):
  *
- * ```typescript
+ * ```ts
  * @Component({ ... })
  * export class CarComponent {
  *   ngOnInit() {

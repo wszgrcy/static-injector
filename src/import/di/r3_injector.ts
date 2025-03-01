@@ -3,7 +3,7 @@
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 
 import { RuntimeError, RuntimeErrorCode } from '../errors';
@@ -239,7 +239,7 @@ export class R3Injector extends EnvironmentInjector {
    * hook was found.
    */
   override destroy(): void {
-    this.assertNotDestroyed();
+    assertNotDestroyed(this);
 
     // Set destroyed = true first, in case lifecycle hooks re-enter destroy().
     this._destroyed = true;
@@ -265,13 +265,13 @@ export class R3Injector extends EnvironmentInjector {
   }
 
   override onDestroy(callback: () => void): () => void {
-    this.assertNotDestroyed();
+    assertNotDestroyed(this);
     this._onDestroyHooks.push(callback);
     return () => this.removeOnDestroy(callback);
   }
 
   override runInContext<ReturnT>(fn: () => ReturnT): ReturnT {
-    this.assertNotDestroyed();
+    assertNotDestroyed(this);
 
     const previousInjector = setCurrentInjector(this);
     const previousInjectImplementation = setInjectImplementation(undefined);
@@ -292,7 +292,7 @@ export class R3Injector extends EnvironmentInjector {
     notFoundValue: any = THROW_IF_NOT_FOUND,
     flags: InjectFlags | InjectOptions = InjectFlags.Default,
   ): T {
-    this.assertNotDestroyed();
+    assertNotDestroyed(this);
 
     if (token.hasOwnProperty(NG_ENV_ID)) {
       return (token as any)[NG_ENV_ID](this);
@@ -401,12 +401,6 @@ export class R3Injector extends EnvironmentInjector {
       tokens.push(stringify(token));
     }
     return `R3Injector[${tokens.join(', ')}]`;
-  }
-
-  assertNotDestroyed(): void {
-    if (this._destroyed) {
-      throw new RuntimeError(RuntimeErrorCode.INJECTOR_ALREADY_DESTROYED, null);
-    }
   }
 
   /**
@@ -591,6 +585,12 @@ export function providerToFactory(
     }
   }
   return factory;
+}
+
+export function assertNotDestroyed(injector: R3Injector): void {
+  if (injector.destroyed) {
+    throw new RuntimeError(RuntimeErrorCode.INJECTOR_ALREADY_DESTROYED, null);
+  }
 }
 
 function makeRecord<T>(

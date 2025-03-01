@@ -3,7 +3,7 @@
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 
 /**
@@ -14,7 +14,7 @@
  * angular.io. This extra annotation is needed to avoid introducing a separate set to store
  * error codes which have guides, which might leak into runtime code.
  *
- * Full list of available error guides can be found at https://angular.io/errors.
+ * Full list of available error guides can be found at https://angular.dev/errors.
  *
  * Error code ranges per package:
  *  - core (this package): 100-999
@@ -57,6 +57,7 @@ export const enum RuntimeErrorCode {
   HOST_DIRECTIVE_UNDEFINED_BINDING = 311,
   HOST_DIRECTIVE_CONFLICTING_ALIAS = 312,
   MULTIPLE_MATCHING_PIPES = 313,
+  UNINITIALIZED_LET_ACCESS = 314,
 
   // Bootstrap Errors
   MULTIPLE_PLATFORMS = 400,
@@ -78,6 +79,7 @@ export const enum RuntimeErrorCode {
   MISSING_HYDRATION_ANNOTATIONS = -505,
   HYDRATION_STABLE_TIMEDOUT = -506,
   MISSING_SSR_CONTENT_INTEGRITY_MARKER = -507,
+  MISCONFIGURED_INCREMENTAL_HYDRATION = 508,
 
   // Signal Errors
   SIGNAL_WRITE_FROM_ILLEGAL_CONTEXT = 600,
@@ -93,7 +95,7 @@ export const enum RuntimeErrorCode {
   MISSING_LOCALE_DATA = 701,
 
   // Defer errors (750-799 range)
-  DEFER_LOADING_FAILED = 750,
+  DEFER_LOADING_FAILED = -750,
 
   // standalone errors
   IMPORT_PROVIDERS_FROM_STANDALONE = 800,
@@ -119,7 +121,7 @@ export const enum RuntimeErrorCode {
   // Signal integration errors
   REQUIRED_INPUT_NO_VALUE = -950,
   REQUIRED_QUERY_NO_VALUE = -951,
-  REQUIRED_MODEL_NO_VALUE = -952,
+  REQUIRED_MODEL_NO_VALUE = 952,
 
   // Output()
   OUTPUT_REF_DESTROYED = 953,
@@ -129,8 +131,10 @@ export const enum RuntimeErrorCode {
   LOOP_TRACK_RECREATE = -956,
 
   // Runtime dependency tracker errors
-  RUNTIME_DEPS_INVALID_IMPORTED_TYPE = 1000,
-  RUNTIME_DEPS_ORPHAN_COMPONENT = 1001,
+  RUNTIME_DEPS_INVALID_IMPORTED_TYPE = 980,
+  RUNTIME_DEPS_ORPHAN_COMPONENT = 981,
+
+  // Upper bounds for core runtime errors is 999
 }
 
 /**
@@ -138,7 +142,7 @@ export const enum RuntimeErrorCode {
  * Formats and outputs the error message in a consistent way.
  *
  * Example:
- * ```
+ * ```ts
  *  throw new RuntimeError(
  *    RuntimeErrorCode.INJECTOR_ALREADY_DESTROYED,
  *    ngDevMode && 'Injector has already been destroyed.');
