@@ -391,10 +391,10 @@ export function formatError(
   if (Array.isArray(obj)) {
     context = obj.map(stringify).join(' -> ');
   } else if (typeof obj === 'object') {
-    let parts = <string[]>[];
-    for (let key in obj) {
+    const parts = <string[]>[];
+    for (const key in obj) {
       if (obj.hasOwnProperty(key)) {
-        let value = obj[key];
+        const value = obj[key];
         parts.push(
           key +
             ':' +

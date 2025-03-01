@@ -538,9 +538,9 @@
                 "type": "custom",
                 "change": "change",
                 "values": {
-                    "comment":"装饰器已经去掉,所以这个函数如果调用,一定是通过new Self()这种方式",
+                    "comment": "装饰器已经去掉,所以这个函数如果调用,一定是通过new Self()这种方式",
                     "selector": "FunctionDeclaration:has(>Identifier[value=ParamDecoratorFactory])>Block",
-                    "replaceSelector":"IfStatement Block"
+                    "replaceSelector": "IfStatement Block"
                 }
             },
             {
@@ -610,7 +610,156 @@
                 "change": "change",
                 "values": {
                     "selector": "SourceFile",
-                    "content": "export {ProviderToken} from './provider_token';"
+                    "content": "export {ProviderToken} from './provider_token';export {assertInInjectionContext, runInInjectionContext} from './contextual';export { EnvironmentInjector } from './r3_injector';"
+                }
+            }
+        ]
+    },
+    {
+        "fileName": "./import/render3/reactivity/effect.ts",
+        "rules": [
+            {
+                "type": "interface",
+                "values": {
+                    "excludes": [
+                        "ViewEffectNode"
+                    ]
+                }
+            },
+            {
+                "type": "function",
+                "values": {
+                    "excludes": [
+                        "createViewEffect"
+                    ]
+                }
+            },
+            {
+                "type": "variable",
+                "values": {
+                    "excludes": [
+                        "VIEW_EFFECT_NODE"
+                    ]
+                }
+            },
+            {
+                "type": "custom",
+                "change": "remove",
+                "values": {
+                    "selector": "VariableStatement:like(const viewContext)"
+                }
+            },
+            {
+                "type": "custom",
+                "change": "change",
+                "values": {
+                    "selector": "FunctionDeclaration:has(>[value=effect]) IfStatement:has(BinaryExpression:has(>[value=viewContext]))",
+                    "content": "node = createRootEffect(effectFn, injector.get(EffectScheduler), notifier);"
+                }
+            },
+            {
+                "type": "custom",
+                "change": "remove",
+                "values": {
+                    "selector": "VariableStatement:has(>VariableDeclarationList>SyntaxList>VariableDeclaration:has(>[value=prevRefreshingViews]))"
+                }
+            },
+            {
+                "type": "custom",
+                "change": "remove",
+                "values": {
+                    "selector": "ExpressionStatement:has(>CallExpression:has(>[value=setIsRefreshingViews]))"
+                }
+            },
+            {
+                "type": "custom",
+                "change": "remove",
+                "values": {
+                    "selector": "FunctionDeclaration:has(>[value=effect]) IfStatement:has(>[value=ngDevMode])"
+                }
+            }
+        ]
+    },
+    {
+        "fileName": "./import/di/contextual.ts",
+        "rules": [
+            {
+                "type": "custom",
+                "change": "remove",
+                "values": {
+                    "selector": "FunctionDeclaration:has(>[value=runInInjectionContext]) VariableStatement:has([value=prevInjectorProfilerContext])"
+                }
+            }
+        ]
+    },
+    {
+        "fileName": "./import/core_reactivity_export_internal.ts",
+        "rules": [
+            {
+                "type": "custom",
+                "values": {
+                    "selector": "ExportDeclaration ExportSpecifier:has(>::name[value=afterRenderEffect])<SyntaxList<NamedExports<ExportDeclaration"
+                }
+            }
+        ]
+    },
+    {
+        "fileName": "./import/render3/reactivity/microtask_effect.ts",
+        "rules": [
+            {
+                "type": "custom",
+                "change": "remove",
+                "values": {
+                    "selector": "FunctionDeclaration:has(>[value=microtaskEffect]) VariableStatement:like(const cdr)"
+                }
+            },
+            {
+                "type": "custom",
+                "change": "change",
+                "values": {
+                    "selector": "FunctionDeclaration:has(>[value=microtaskEffect])  IfStatement",
+                    "content": "handle.watcher.notify();"
+                }
+            }
+        ]
+    },
+    {
+        "fileName": "./import/linker/destroy_ref.ts",
+        "rules": [
+            {
+                "type": "class",
+                "values": {
+                    "excludes": [
+                        "NodeInjectorDestroyRef"
+                    ]
+                }
+            },
+            {
+                "type": "function",
+                "values": {
+                    "excludes": [
+                        "injectDestroyRef"
+                    ]
+                }
+            },
+            {
+                "type": "custom",
+                "change": "remove",
+                "values": {
+                    "selector": "PropertyDeclaration:has(>[value=__NG_ELEMENT_ID__])"
+                }
+            }
+        ]
+    },
+    {
+        "fileName": "./import/error_handler.ts",
+        "rules": [
+            {
+                "type": "variable",
+                "values": {
+                    "excludes": [
+                        "INTERNAL_APPLICATION_ERROR_HANDLER"
+                    ]
                 }
             }
         ]

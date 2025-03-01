@@ -4,5 +4,5 @@
     "allowSyntheticDefaultImports": true,
     "strict": true
   },
-  "include": ["./test"]
+  "include": ["./test","./typings.d.ts"]
 }

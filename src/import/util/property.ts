@@ -7,7 +7,7 @@
  */
 
 export function getClosureSafeProperty<T>(objWithPropertyToExtract: T): string {
-  for (let key in objWithPropertyToExtract) {
+  for (const key in objWithPropertyToExtract) {
     if (objWithPropertyToExtract[key] === (getClosureSafeProperty as any)) {
       return key;
     }

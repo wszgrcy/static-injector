@@ -9,6 +9,8 @@
     "strict": true
   },
   "include": [
-    "./src/import"
+    "./src/import/**/*.ts",
+    "./src/primitives/**/*.ts",
+    "./typings.d.ts"
   ]
 }

@@ -175,7 +175,7 @@ export function formatRuntimeError<T extends number = RuntimeErrorCode>(
   // We also prepend `0` to non-compile-time errors.
   const fullCode = `NG0${Math.abs(code)}`;
 
-  let errorMessage = `${fullCode}${message ? ': ' + message : ''}`;
+  const errorMessage = `${fullCode}${message ? ': ' + message : ''}`;
 
   if (false) {
   }

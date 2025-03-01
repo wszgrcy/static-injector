@@ -1,3 +1,4 @@
+import { expect } from 'chai';
 import { Injector } from 'static-injector';
 
 class NoProvideError {}
@@ -8,7 +9,7 @@ describe('noProviderError', () => {
     try {
       injector.get(NoProvideError);
     } catch (error) {
-      expect(true).toBe(true);
+      expect(true).eq(true);
       return;
     }
     throw new Error('');

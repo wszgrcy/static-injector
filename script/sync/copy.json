@@ -1,7 +1,7 @@
 [
     {
         "source": "core/src",
-        "target":"./import",
+        "target": "./import",
         "fileList": [
             "/di.ts",
             "/di/index.ts",
@@ -37,7 +37,15 @@
             "/util/empty.ts",
             "/util/property.ts",
             "/util/stringify.ts",
-            "/errors.ts"
+            "/errors.ts",
+            "/pending_tasks.ts",
+            "/error_handler.ts",
+            "/di/contextual.ts",
+            "/linker/destroy_ref.ts",
+            "/util/noop.ts",
+            "/change_detection/scheduling/zoneless_scheduling.ts",
+            "/core_reactivity_export_internal.ts",
+            "/util/callback_scheduler.ts"
         ]
     }
 ]

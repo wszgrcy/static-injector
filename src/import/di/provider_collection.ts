@@ -6,25 +6,12 @@
  * found in the LICENSE file at https://angular.dev/license
  */
 
-import { RuntimeError, RuntimeErrorCode } from '../errors';
 import { Type } from '../interface/type';
 
-import { getFactoryDef } from '../render3/definition_factory';
-
-import { stringifyForError } from '../render3/util/stringify_utils';
-
-import { EMPTY_ARRAY } from '../util/empty';
 import { getClosureSafeProperty } from '../util/property';
-import { stringify } from '../util/stringify';
 
-import { resolveForwardRef } from './forward_ref';
 import { ENVIRONMENT_INITIALIZER } from './initializer_token';
-import { ɵɵinject as inject } from './injector_compatibility';
-import {
-  getInjectorDef,
-  InjectorType,
-  InjectorTypeWithProviders,
-} from './interface/defs';
+import { InjectorType, InjectorTypeWithProviders } from './interface/defs';
 import {
   ClassProvider,
   ConstructorProvider,
@@ -32,14 +19,12 @@ import {
   ExistingProvider,
   FactoryProvider,
   InternalEnvironmentProviders,
-  isEnvironmentProviders,
   ModuleWithProviders,
   Provider,
   StaticClassProvider,
   TypeProvider,
   ValueProvider,
 } from './interface/provider';
-import { INJECTOR_DEF_TYPES } from './internal_tokens';
 
 /**
  * Wrap an array of `Provider`s into `EnvironmentProviders`, preventing them from being accidentally
@@ -212,7 +197,7 @@ export const USE_VALUE = getClosureSafeProperty<ValueProvider>({
 });
 
 export function isValueProvider(value: SingleProvider): value is ValueProvider {
-  return value !== null && typeof value == 'object' && USE_VALUE in value;
+  return value !== null && typeof value === 'object' && USE_VALUE in value;
 }
 
 export function isExistingProvider(

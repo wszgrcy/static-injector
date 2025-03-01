@@ -47,7 +47,6 @@ import {
   isEnvironmentProviders,
   Provider,
   StaticClassProvider,
-  TypeProvider,
 } from './interface/provider';
 import { INJECTOR_DEF_TYPES } from './internal_tokens';
 import { NullInjector } from './null_injector';

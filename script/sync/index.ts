@@ -3,6 +3,7 @@ import type {
   ScriptFunction,
   FileQueryLayer,
 } from '@code-recycle/cli';
+
 const typeMap = {
   class: 'ClassDeclaration',
   enum: 'EnumDeclaration',
@@ -13,7 +14,7 @@ const typeMap = {
   'interface-property': 'PropertySignature',
   'class-method': 'MethodDeclaration',
   'enum-member': 'EnumMember',
-  'variable':'VariableDeclaration'
+  variable: 'VariableDeclaration',
 };
 function importDeclarationByNamed(list: string[]) {
   let listStr = list.map((item) => `[value=${item}]`).join(',');
@@ -45,6 +46,7 @@ let fn: ScriptFunction = async (util, rule, host, injector) => {
     'https://github.com/angular/angular.git',
     [
       '/packages/core/src',
+      '/packages/core/primitives',
       '!**/*.bazel',
       '!**/*spec.ts',
       '!**/*.js',
@@ -52,7 +54,7 @@ let fn: ScriptFunction = async (util, rule, host, injector) => {
     ],
     'packages',
     'branch',
-    '19.2.0'
+    '19.2.0',
   );
   let copyData = require('./copy.json') as {
     source: string;
@@ -72,8 +74,49 @@ let fn: ScriptFunction = async (util, rule, host, injector) => {
           .write(path.join(path.normalize(item.target), filePath), file)
           .subscribe({
             complete: () => res(undefined),
-          })
+          }),
       );
+    }
+  }
+  let copyData2 = require('./dir-copy.json') as {
+    source: string;
+    target: string;
+    fileList: string[];
+  }[];
+
+  let fileList = Object.keys(data);
+  for (const item of copyData2) {
+    for (const fileItem of item.fileList) {
+      let fullGlobPath = path.join(path.normalize(item.source), fileItem);
+
+      for (const fileName of fileList) {
+        let result = fileName.startsWith(fullGlobPath);
+        if (!result) {
+          continue;
+        }
+        let relPath = fileName.slice(item.source.length);
+        let writeFile = item.target
+          ? path.join(path.normalize(item.target), relPath)
+          : path.normalize('.' + relPath);
+        if (
+          writeFile === 'import/render3/reactivity/after_render_effect.ts' ||
+          writeFile === 'import/render3/reactivity/view_effect_runner.ts'
+        ) {
+          continue;
+        }
+        await new Promise((res) =>
+          host
+            .write(
+              item.target
+                ? path.join(path.normalize(item.target), relPath)
+                : path.normalize('.' + relPath),
+              data[fileName],
+            )
+            .subscribe({
+              complete: () => res(undefined),
+            }),
+        );
+      }
     }
   }
 
@@ -138,7 +181,7 @@ let fn: ScriptFunction = async (util, rule, host, injector) => {
               } else {
                 return await rule.common.getData(
                   context,
-                  'node.node.extra.rangeWithComment'
+                  'node.node.extra.rangeWithComment',
                 );
               }
             },
@@ -224,7 +267,7 @@ let fn: ScriptFunction = async (util, rule, host, injector) => {
           return option;
         }),
       };
-    })
+    }),
   );
   await util.updateChangeList(list);
 };

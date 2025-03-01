@@ -1,0 +1,16 @@
+[
+    {
+        "source": "core/src",
+        "target": "./import",
+        "fileList": [
+            "render3/reactivity"
+        ]
+    },
+    {
+        "source": "core",
+        "target": "",
+        "fileList": [
+            "primitives/signals"
+        ]
+    }
+]

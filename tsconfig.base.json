@@ -62,7 +62,12 @@
     "skipLibCheck": true /* Skip type checking of declaration files. */,
     "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */,
     "paths": {
-      "static-injector": ["./src/import"]
+      "static-injector": [
+        "./src/import"
+      ],
+      "@angular/core/primitives/signals": [
+        "./src/primitives/signals/index.ts"
+      ]
     }
   }
 }

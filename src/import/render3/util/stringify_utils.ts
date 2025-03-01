@@ -6,8 +6,6 @@
  * found in the LICENSE file at https://angular.dev/license
  */
 
-import { Type } from '../../interface/type';
-
 /**
  * Used for stringify render output in Ivy.
  * Important! This function is very performance-sensitive and we should

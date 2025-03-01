@@ -32,7 +32,7 @@ export interface TypeDecorator {
   // so we cannot declare this interface as a subtype.
   // see https://github.com/angular/angular/issues/3379#issuecomment-126169417
   (
-    target: Object,
+    target: object,
     propertyKey?: string | symbol,
     parameterIndex?: number,
   ): void;
