@@ -26,12 +26,15 @@
     "url": "https://github.com/wszgrcy/static-injector/issues"
   },
   "homepage": "https://github.com/wszgrcy/static-injector#readme",
-  "main": "commonjs/index.js",
-  "es2022": "fesm2022/index.js",
-  "fesm2022": "fesm2022/index.js",
-  "esm2022": "esm2022/index.js",
-  "module": "fesm2022/index.js",
-  "typings": "typings/index.d.ts",
+  "main": "index.js",
+  "exports": {
+    ".": {
+      "import": "./index.mjs",
+      "require": "./index.js",
+      "default": "./index.mjs",
+      "types": "./dist/import/index.d.ts"
+    }
+  },
   "private": false,
   "scripts": {},
   "author": "wszgrcy",
