@@ -13,7 +13,7 @@
 
 # Source
 
-- Angular 18.0.0
+- Angular 19.2.0
 
 # Usage
 
