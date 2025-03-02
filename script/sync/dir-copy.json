@@ -3,7 +3,8 @@
         "source": "core/src",
         "target": "./import",
         "fileList": [
-            "render3/reactivity"
+            "render3/reactivity",
+            "resource"
         ]
     },
     {

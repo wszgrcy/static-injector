@@ -15,6 +15,8 @@ export * from './render3/instructions/di';
 export * from './core_reactivity_export_internal';
 export * from './change_detection/scheduling/zoneless_scheduling';
 export * from './change_detection/scheduling/zoneless_scheduling_impl';
+
+export * from './resource';
 export class StaticInjectOptions {
   static injectOptions: Parameters<InjectableDecorator>[0];
 }
