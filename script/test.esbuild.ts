@@ -24,6 +24,7 @@ async function main() {
     external: ['rxjs', 'mocha', 'chai'],
     define: {
       ngDevMode: 'false',
+      Zone: 'undefined',
     },
   };
   await esbuild.build(options);
