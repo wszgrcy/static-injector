@@ -1,10 +1,10 @@
 {
   "name": "static-injector",
-  "version": "6.0.0",
+  "version": "6.0.1",
   "description": "Angular 依赖注入独立版本;Angular dependency injection standalone version",
   "keywords": [
     "angular",
-    "angular 19.0.0",
+    "angular 19.2.0",
     "injector",
     "typescript",
     "injectable",
@@ -45,7 +45,9 @@
   "scripts": {},
   "author": "wszgrcy",
   "license": "MIT",
-  "peerDependencies": {},
+  "peerDependencies": {
+    "rxjs": "^7.8.0"
+  },
   "devDependencies": {},
   "sideEffects": false
 }
