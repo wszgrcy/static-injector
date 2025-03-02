@@ -17,7 +17,7 @@
 
 # Usage
 
-- Create a first level dependency injector with `Injector.create`
+- Create a first level dependency injector with `createRootInjector`
 
 ```ts
 import {
