@@ -2,8 +2,10 @@ import {
   ChangeDetectionScheduler,
   ChangeDetectionSchedulerImpl,
   computed,
+  createInjector,
+  createRootInjector,
   effect,
-  inject,
+  EnvironmentInjector,
   Injector,
   INJECTOR_SCOPE,
   RootStaticInjectOptions,
@@ -142,5 +144,58 @@ describe('effect', () => {
     }
     inejctor.get(Test1);
     await p;
+  });
+  it('destroy', async () => {
+    let inejctor = Injector.create({
+      providers: [
+        {
+          provide: ChangeDetectionScheduler,
+          useClass: ChangeDetectionSchedulerImpl,
+        },
+        {
+          provide: INJECTOR_SCOPE,
+          useValue: 'root',
+        },
+      ],
+    });
+    await new Promise<void>((res) => {
+      let ref = effect(
+        (cFn) => {
+          cFn(() => {
+            res();
+          });
+          ref.destroy();
+        },
+        { injector: inejctor },
+      );
+    });
+  });
+  it('injector-destroy', async () => {
+    let inejctor = createRootInjector({
+      providers: [
+        {
+          provide: ChangeDetectionScheduler,
+          useClass: ChangeDetectionSchedulerImpl,
+        },
+      ],
+    });
+
+    let subInjector = createInjector({
+      providers: [{ provide: EnvironmentInjector, useValue: inejctor }],
+      parent: inejctor,
+    });
+    await new Promise<void>((res) => {
+      let ref = effect(
+        (cFn) => {
+          cFn(() => {
+            res();
+          });
+        },
+        { injector: subInjector },
+      );
+      setTimeout(() => {
+        subInjector.destroy();
+      }, 0);
+    });
   });
 });

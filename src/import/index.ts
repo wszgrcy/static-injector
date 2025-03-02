@@ -1,4 +1,11 @@
 import type { InjectableDecorator } from './di/injectable';
+import { Injector } from './di/injector';
+import {
+  EnvironmentProviders,
+  Provider,
+} from './di/interface/provider';
+import { getNullInjector, R3Injector } from './di/r3_injector';
+import { INJECTOR_SCOPE, InjectorScope } from './di/scope';
 
 export * from './di/injectable';
 export * from './di/metadata';
@@ -24,4 +31,36 @@ export class RootStaticInjectOptions {
   static injectOptions: Parameters<InjectableDecorator>[0] = {
     providedIn: 'root',
   };
+}
+
+export function createInjector(options: {
+  providers: Array<Provider | EnvironmentProviders>;
+  parent: Injector;
+  name?: string;
+  scopes?: Set<InjectorScope>;
+}) {
+  return new R3Injector(
+    options.providers,
+    options.parent ?? getNullInjector(),
+    options.name ?? '',
+    options.scopes ?? new Set([]),
+  );
+}
+export function createRootInjector(options: {
+  providers: Array<Provider | EnvironmentProviders>;
+  name?: string;
+  scopes?: Set<InjectorScope>;
+}) {
+  return new R3Injector(
+    [
+      ...options.providers,
+      {
+        provide: INJECTOR_SCOPE,
+        useValue: 'root',
+      },
+    ],
+    getNullInjector(),
+    options.name ?? '',
+    options.scopes ?? new Set([]),
+  );
 }
