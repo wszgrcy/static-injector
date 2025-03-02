@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://angular.dev/license
  */
 
+import { untracked } from 'src/import/core_reactivity_export_internal';
 import { inject } from '../../di/injector_compatibility';
 import { scheduleCallbackWithRafRace } from '../../util/callback_scheduler';
 
@@ -18,10 +19,19 @@ import { EffectScheduler } from 'src/import/render3/reactivity/root_effect_sched
 export class ChangeDetectionSchedulerImpl implements ChangeDetectionScheduler {
   runningTick = false;
   #rootEffectScheduler = inject(EffectScheduler);
+  private cancelScheduledCallback: null | (() => void) = null;
 
   notify(source: NotificationSource): void {
-    scheduleCallbackWithRafRace(() => {
+    this.cancelScheduledCallback = scheduleCallbackWithRafRace(() => {
       this.#rootEffectScheduler.flush();
     });
+  }
+  private cleanup() {
+    this.runningTick = false;
+    this.cancelScheduledCallback?.();
+    this.cancelScheduledCallback = null;
+  }
+  ngOnDestroy() {
+    this.cleanup();
   }
 }
