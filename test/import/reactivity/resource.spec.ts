@@ -11,7 +11,7 @@ import {
 } from 'static-injector';
 
 describe('resource', () => {
-  it.only('hello', async () => {
+  it('hello', async () => {
     let injector = Injector.create({
       providers: [
         {
