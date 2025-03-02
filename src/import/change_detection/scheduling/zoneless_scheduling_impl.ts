@@ -6,7 +6,6 @@
  * found in the LICENSE file at https://angular.dev/license
  */
 
-import { untracked } from 'src/import/core_reactivity_export_internal';
 import { inject } from '../../di/injector_compatibility';
 import { scheduleCallbackWithRafRace } from '../../util/callback_scheduler';
 

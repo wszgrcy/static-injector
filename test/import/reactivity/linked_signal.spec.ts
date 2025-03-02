@@ -11,7 +11,6 @@ import {
   RootStaticInjectOptions,
   signal,
 } from 'static-injector';
-import { value } from 'test/fixture/injection-token';
 
 describe('linkedSignal', () => {
   it('hello', async () => {

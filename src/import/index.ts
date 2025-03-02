@@ -1,9 +1,6 @@
 import type { InjectableDecorator } from './di/injectable';
 import { Injector } from './di/injector';
-import {
-  EnvironmentProviders,
-  Provider,
-} from './di/interface/provider';
+import { EnvironmentProviders, Provider } from './di/interface/provider';
 import { getNullInjector, R3Injector } from './di/r3_injector';
 import { INJECTOR_SCOPE, InjectorScope } from './di/scope';
 

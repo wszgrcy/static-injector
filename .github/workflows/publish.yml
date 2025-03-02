@@ -24,13 +24,13 @@ jobs:
           node-version: 20.x
       - name: install-dependencies
         run: |
-          yarn
+          npm i 
       - name: test
         run: |
-          yarn test
+          npm test
       - name: build
         run: |
-          yarn build
+          npm run build
       - id: publish
         name: publish
         uses: JS-DevTools/npm-publish@v3.1

@@ -13,7 +13,7 @@ async function bundleImport() {
       '.js': '.mjs',
     },
     format: 'esm',
-    minify: true,
+    minify: false,
     tsconfig: 'tsconfig.import.json',
     charset: 'utf8',
     external: ['rxjs', 'mocha', 'chai'],

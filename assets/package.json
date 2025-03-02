@@ -1,10 +1,10 @@
 {
   "name": "static-injector",
-  "version": "5.0.2",
+  "version": "6.0.0",
   "description": "Angular 依赖注入独立版本;Angular dependency injection standalone version",
   "keywords": [
     "angular",
-    "angular 18.0.0",
+    "angular 19.0.0",
     "injector",
     "typescript",
     "injectable",
@@ -16,7 +16,13 @@
     "inversion of control container",
     "ioc",
     "javascript",
-    "node"
+    "node",
+    "signal",
+    "reactivity",
+    "effect",
+    "computed",
+    "resource",
+    "linkedSignal"
   ],
   "repository": {
     "type": "git",
@@ -32,7 +38,7 @@
       "import": "./index.mjs",
       "require": "./index.js",
       "default": "./index.mjs",
-      "types": "./dist/import/index.d.ts"
+      "types": "./import/index.d.ts"
     }
   },
   "private": false,
