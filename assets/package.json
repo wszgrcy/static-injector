@@ -1,6 +1,6 @@
 {
   "name": "static-injector",
-  "version": "6.0.2",
+  "version": "6.0.3",
   "description": "Angular 依赖注入独立版本;Angular dependency injection standalone version",
   "keywords": [
     "angular",
