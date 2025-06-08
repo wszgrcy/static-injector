@@ -16,29 +16,6 @@ export const enum DecoratorFlags {
 }
 
 /**
- * Injection flags for DI.
- *
- * @publicApi
- * @deprecated use an options object for [`inject`](api/core/inject) instead.
- */
-export enum InjectFlags {
-  // TODO(alxhub): make this 'const' (and remove `InternalInjectFlags` enum) when ngc no longer
-  // writes exports of it into ngfactory files.
-
-  /** Check self and check parent injector if needed */
-  Default = 0b0000,
-
-  /** Don't ascend to ancestors of the node requesting injection. */
-  Self = 0b0010,
-
-  /** Skip the node that is requesting injection. */
-  SkipSelf = 0b0100,
-
-  /** Inject `defaultValue` instead if token not found. */
-  Optional = 0b1000,
-}
-
-/**
  * This enum is an exact copy of the `InjectFlags` enum above, but the difference is that this is a
  * const enum, so actual enum values would be inlined in generated code. The `InjectFlags` enum can
  * be turned into a const enum when ViewEngine is removed (see TODO at the `InjectFlags` enum
@@ -50,6 +27,12 @@ export const enum InternalInjectFlags {
   /** Check self and check parent injector if needed */
   Default = 0b0000,
 
+  /**
+   * Specifies that an injector should retrieve a dependency from any injector until reaching the
+   * host element of the current component. (Only used with Element Injector)
+   */
+  Host = 0b0001,
+
   /** Don't ascend to ancestors of the node requesting injection. */
   Self = 0b0010,
 
@@ -58,6 +41,14 @@ export const enum InternalInjectFlags {
 
   /** Inject `defaultValue` instead if token not found. */
   Optional = 0b1000,
+
+  /**
+   * This token is being injected into a pipe.
+   *
+   * This flag is intentionally not in the public facing `InjectFlags` because it is only added by
+   * the compiler and is not a developer applicable flag.
+   */
+  ForPipe = 0b10000,
 }
 
 /**

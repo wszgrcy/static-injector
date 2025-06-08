@@ -67,7 +67,10 @@
       ],
       "@angular/core/primitives/signals": [
         "./src/primitives/signals/index.ts"
-      ]
+      ],
+      "@angular/core/primitives/di": [
+        "./src/primitives/di/index.ts"
+      ],
     }
   }
 }

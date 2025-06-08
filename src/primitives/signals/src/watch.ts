@@ -18,6 +18,10 @@ import {
   SIGNAL,
 } from './graph';
 
+// Required as the signals library is in a separate package, so we need to explicitly ensure the
+// global `ngDevMode` type is defined.
+declare const ngDevMode: boolean | undefined;
+
 /**
  * A cleanup function that can be optionally registered from the watch logic. If registered, the
  * cleanup logic runs before the next watch execution.
@@ -59,11 +63,7 @@ export interface WatchNode extends ReactiveNode {
   ref: Watch;
 }
 
-export function createWatch(
-  fn: (onCleanup: WatchCleanupRegisterFn) => void,
-  schedule: (watch: Watch) => void,
-  allowSignalWrites: boolean,
-): Watch {
+export function createWatch(fn: (onCleanup: WatchCleanupRegisterFn) => void, schedule: (watch: Watch) => void, allowSignalWrites: boolean): Watch {
   const node: WatchNode = Object.create(WATCH_NODE);
   if (allowSignalWrites) {
     node.consumerAllowSignalWrites = true;
@@ -99,9 +99,7 @@ export function createWatch(
     }
 
     if (isInNotificationPhase()) {
-      throw new Error(
-        `Schedulers cannot synchronously execute watches while scheduling.`,
-      );
+      throw new Error(typeof ngDevMode !== 'undefined' && ngDevMode ? 'Schedulers cannot synchronously execute watches while scheduling.' : '');
     }
 
     node.dirty = false;

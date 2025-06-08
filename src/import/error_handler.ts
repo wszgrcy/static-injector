@@ -6,6 +6,10 @@
  * found in the LICENSE file at https://angular.dev/license
  */
 
+import { InjectionToken } from './di/injection_token';
+import { inject } from './di/injector_compatibility';
+import { EnvironmentInjector } from './di/r3_injector';
+
 /**
  * Provides a hook for centralized exception handling.
  *
@@ -47,3 +51,20 @@ export class ErrorHandler {
     this._console.error('ERROR', error);
   }
 }
+
+/**
+ * `InjectionToken` used to configure how to call the `ErrorHandler`.
+ */
+export const INTERNAL_APPLICATION_ERROR_HANDLER = new InjectionToken<(e: any) => void>('', {
+  providedIn: 'root',
+  factory: () => {
+    // The user's error handler may depend on things that create a circular dependency
+    // so we inject it lazily.
+    const injector = inject(EnvironmentInjector);
+    let userErrorHandler: ErrorHandler;
+    return (e: unknown) => {
+      userErrorHandler ??= injector.get(ErrorHandler);
+      userErrorHandler.handleError(e);
+    };
+  },
+});

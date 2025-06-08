@@ -9,15 +9,7 @@
 import { Type } from '../../interface/type';
 import { getClosureSafeProperty } from '../../util/property';
 
-import {
-  ClassProvider,
-  ConstructorProvider,
-  EnvironmentProviders,
-  ExistingProvider,
-  FactoryProvider,
-  StaticClassProvider,
-  ValueProvider,
-} from './provider';
+import { ClassProvider, ConstructorProvider, EnvironmentProviders, ExistingProvider, FactoryProvider, StaticClassProvider, ValueProvider } from './provider';
 
 /**
  * Information about how a type or `InjectionToken` interfaces with the DI system.
@@ -43,13 +35,7 @@ export interface ɵɵInjectableDeclaration<T> {
    * - `null`, does not belong to any injector. Must be explicitly listed in the injector
    *   `providers`.
    */
-  providedIn:
-    | InjectorType<any>
-    | 'root'
-    | 'platform'
-    | 'any'
-    | 'environment'
-    | null;
+  providedIn: InjectorType<any> | 'root' | 'platform' | 'any' | 'environment' | null;
 
   /**
    * The token to which this definition belongs.
@@ -84,17 +70,7 @@ export interface ɵɵInjectableDeclaration<T> {
 export interface ɵɵInjectorDef<T> {
   // TODO(alxhub): Narrow down the type here once decorators properly change the return type of the
   // class they are decorating (to add the ɵprov property for example).
-  providers: (
-    | Type<any>
-    | ValueProvider
-    | ExistingProvider
-    | FactoryProvider
-    | ConstructorProvider
-    | StaticClassProvider
-    | ClassProvider
-    | EnvironmentProviders
-    | any[]
-  )[];
+  providers: (Type<any> | ValueProvider | ExistingProvider | FactoryProvider | ConstructorProvider | StaticClassProvider | ClassProvider | EnvironmentProviders | any[])[];
 
   imports: (InjectorType<any> | InjectorTypeWithProviders<any>)[];
 }
@@ -138,17 +114,7 @@ export interface InjectorType<T> extends Type<T> {
  */
 export interface InjectorTypeWithProviders<T> {
   ngModule: InjectorType<T>;
-  providers?: (
-    | Type<any>
-    | ValueProvider
-    | ExistingProvider
-    | FactoryProvider
-    | ConstructorProvider
-    | StaticClassProvider
-    | ClassProvider
-    | EnvironmentProviders
-    | any[]
-  )[];
+  providers?: (Type<any> | ValueProvider | ExistingProvider | FactoryProvider | ConstructorProvider | StaticClassProvider | ClassProvider | EnvironmentProviders | any[])[];
 }
 
 /**
@@ -169,11 +135,7 @@ export interface InjectorTypeWithProviders<T> {
  * @codeGenApi
  * @publicApi This instruction has been emitted by ViewEngine for some time and is deployed to npm.
  */
-export function ɵɵdefineInjectable<T>(opts: {
-  token: unknown;
-  providedIn?: Type<any> | 'root' | 'platform' | 'any' | 'environment' | null;
-  factory: () => T;
-}): unknown {
+export function ɵɵdefineInjectable<T>(opts: { token: unknown; providedIn?: Type<any> | 'root' | 'platform' | 'any' | 'environment' | null; factory: () => T }): unknown {
   return {
     token: opts.token,
     providedIn: (opts.providedIn as any) || null,
@@ -199,10 +161,7 @@ export function ɵɵdefineInjectable<T>(opts: {
  *
  * @codeGenApi
  */
-export function ɵɵdefineInjector(options: {
-  providers?: any[];
-  imports?: any[];
-}): unknown {
+export function ɵɵdefineInjector(options: { providers?: any[]; imports?: any[] }): unknown {
   return { providers: options.providers || [], imports: options.imports || [] };
 }
 
@@ -212,16 +171,8 @@ export function ɵɵdefineInjector(options: {
  *
  * @param type A type which may have its own (non-inherited) `ɵprov`.
  */
-export function getInjectableDef<T>(
-  type: any,
-): ɵɵInjectableDeclaration<T> | null {
-  return (
-    getOwnDefinition(type, NG_PROV_DEF) || {
-      token: type,
-      factory: () => new type(),
-      ...type.injectOptions,
-    }
-  );
+export function getInjectableDef<T>(type: any): ɵɵInjectableDeclaration<T> | null {
+  return getOwnDefinition(type, NG_PROV_DEF) || { token: type, factory: () => new type(), ...type.injectOptions };
 }
 
 export function isInjectable(type: any): boolean {
@@ -232,11 +183,9 @@ export function isInjectable(type: any): boolean {
  * Return definition only if it is defined directly on `type` and is not inherited from a base
  * class of `type`.
  */
-function getOwnDefinition<T>(
-  type: any,
-  field: string,
-): ɵɵInjectableDeclaration<T> | null {
-  return type.hasOwnProperty(field) ? type[field] : null;
+function getOwnDefinition<T>(type: any, field: string): ɵɵInjectableDeclaration<T> | null {
+  // if the ɵprov prop exist but is undefined we still want to return null
+  return (type.hasOwnProperty(field) && type[field]) || null;
 }
 
 /**
@@ -247,12 +196,12 @@ function getOwnDefinition<T>(
  * @deprecated Will be removed in a future version of Angular, where an error will occur in the
  *     scenario if we find the `ɵprov` on an ancestor only.
  */
-export function getInheritedInjectableDef<T>(
-  type: any,
-): ɵɵInjectableDeclaration<T> | null {
-  const def = type && (type[NG_PROV_DEF] || null);
+export function getInheritedInjectableDef<T>(type: any): ɵɵInjectableDeclaration<T> | null {
+  // if the ɵprov prop exist but is undefined we still want to return null
+  const def = type?.[NG_PROV_DEF] ?? null;
 
   if (def) {
+    undefined as any;
     return def;
   } else {
     return null;
@@ -265,14 +214,8 @@ export function getInheritedInjectableDef<T>(
  * @param type type which may have an injector def (`ɵinj`)
  */
 export function getInjectorDef<T>(type: any): ɵɵInjectorDef<T> | null {
-  return type && (type.hasOwnProperty(NG_INJ_DEF) || false)
-    ? (type as any)[NG_INJ_DEF]
-    : null;
+  return type && type.hasOwnProperty(NG_INJ_DEF) ? (type as any)[NG_INJ_DEF] : null;
 }
 
-export const NG_PROV_DEF = getClosureSafeProperty({
-  ɵprov: getClosureSafeProperty,
-});
-export const NG_INJ_DEF = getClosureSafeProperty({
-  ɵinj: getClosureSafeProperty,
-});
+export const NG_PROV_DEF: string = getClosureSafeProperty({ ɵprov: getClosureSafeProperty });
+export const NG_INJ_DEF: string = getClosureSafeProperty({ ɵinj: getClosureSafeProperty });

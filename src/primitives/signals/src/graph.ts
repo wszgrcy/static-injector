@@ -25,16 +25,21 @@ type Version = number & { __brand: 'Version' };
  */
 let epoch: Version = 1 as Version;
 
+export type ReactiveHookFn = (node: ReactiveNode) => void;
+
+/**
+ * If set, called after a producer `ReactiveNode` is created.
+ */
+let postProducerCreatedFn: ReactiveHookFn | null = null;
+
 /**
  * Symbol used to tell `Signal`s apart from other functions.
  *
  * This can be used to auto-unwrap signals in various cases, or to auto-wrap non-signal values.
  */
-export const SIGNAL = /* @__PURE__ */ Symbol('SIGNAL');
+export const SIGNAL: unique symbol = /* @__PURE__ */ Symbol('SIGNAL');
 
-export function setActiveConsumer(
-  consumer: ReactiveNode | null,
-): ReactiveNode | null {
+export function setActiveConsumer(consumer: ReactiveNode | null): ReactiveNode | null {
   const prev = activeConsumer;
   activeConsumer = consumer;
   return prev;
@@ -215,11 +220,7 @@ interface ProducerNode extends ReactiveNode {
  */
 export function producerAccessed(node: ReactiveNode): void {
   if (inNotificationPhase) {
-    throw new Error(
-      typeof ngDevMode !== 'undefined' && ngDevMode
-        ? `Assertion error: signal read during notification phase`
-        : '',
-    );
+    throw new Error(typeof ngDevMode !== 'undefined' && ngDevMode ? `Assertion error: signal read during notification phase` : '');
   }
 
   if (activeConsumer === null) {
@@ -234,10 +235,7 @@ export function producerAccessed(node: ReactiveNode): void {
 
   assertConsumerNode(activeConsumer);
 
-  if (
-    idx < activeConsumer.producerNode.length &&
-    activeConsumer.producerNode[idx] !== node
-  ) {
+  if (idx < activeConsumer.producerNode.length && activeConsumer.producerNode[idx] !== node) {
     // There's been a change in producers since the last execution of `activeConsumer`.
     // `activeConsumer.producerNode[idx]` holds a stale dependency which will be be removed and
     // replaced with `this`.
@@ -247,10 +245,7 @@ export function producerAccessed(node: ReactiveNode): void {
     // to remove it from the stale producer's `liveConsumer`s.
     if (consumerIsLive(activeConsumer)) {
       const staleProducer = activeConsumer.producerNode[idx];
-      producerRemoveLiveConsumerAtIndex(
-        staleProducer,
-        activeConsumer.producerIndexOfThis[idx],
-      );
+      producerRemoveLiveConsumerAtIndex(staleProducer, activeConsumer.producerIndexOfThis[idx]);
 
       // At this point, the only record of `staleProducer` is the reference at
       // `activeConsumer.producerNode[idx]` which will be overwritten below.
@@ -263,9 +258,7 @@ export function producerAccessed(node: ReactiveNode): void {
 
     // If the active consumer is live, then add it as a live consumer. If not, then use 0 as a
     // placeholder value.
-    activeConsumer.producerIndexOfThis[idx] = consumerIsLive(activeConsumer)
-      ? producerAddLiveConsumer(node, activeConsumer, idx)
-      : 0;
+    activeConsumer.producerIndexOfThis[idx] = consumerIsLive(activeConsumer) ? producerAddLiveConsumer(node, activeConsumer, idx) : 0;
   }
   activeConsumer.producerLastReadVersion[idx] = node.version;
 }
@@ -296,10 +289,7 @@ export function producerUpdateValueVersion(node: ReactiveNode): void {
     return;
   }
 
-  if (
-    !node.producerMustRecompute(node) &&
-    !consumerPollProducersForChange(node)
-  ) {
+  if (!node.producerMustRecompute(node) && !consumerPollProducersForChange(node)) {
     // None of our producers report a change since the last time they were read, so no
     // recomputation of our value is necessary, and we can consider ourselves clean.
     producerMarkClean(node);
@@ -359,9 +349,7 @@ export function producerMarkClean(node: ReactiveNode): void {
  * Must be called by subclasses which represent reactive computations, before those computations
  * begin.
  */
-export function consumerBeforeComputation(
-  node: ReactiveNode | null,
-): ReactiveNode | null {
+export function consumerBeforeComputation(node: ReactiveNode | null): ReactiveNode | null {
   node && (node.nextProducerIndex = 0);
   return setActiveConsumer(node);
 }
@@ -372,18 +360,10 @@ export function consumerBeforeComputation(
  * Must be called by subclasses which represent reactive computations, after those computations
  * have finished.
  */
-export function consumerAfterComputation(
-  node: ReactiveNode | null,
-  prevConsumer: ReactiveNode | null,
-): void {
+export function consumerAfterComputation(node: ReactiveNode | null, prevConsumer: ReactiveNode | null): void {
   setActiveConsumer(prevConsumer);
 
-  if (
-    !node ||
-    node.producerNode === undefined ||
-    node.producerIndexOfThis === undefined ||
-    node.producerLastReadVersion === undefined
-  ) {
+  if (!node || node.producerNode === undefined || node.producerIndexOfThis === undefined || node.producerLastReadVersion === undefined) {
     return;
   }
 
@@ -391,10 +371,7 @@ export function consumerAfterComputation(
     // For live consumers, we need to remove the producer -> consumer edge for any stale producers
     // which weren't dependencies after the recomputation.
     for (let i = node.nextProducerIndex; i < node.producerNode.length; i++) {
-      producerRemoveLiveConsumerAtIndex(
-        node.producerNode[i],
-        node.producerIndexOfThis[i],
-      );
+      producerRemoveLiveConsumerAtIndex(node.producerNode[i], node.producerIndexOfThis[i]);
     }
   }
 
@@ -448,18 +425,12 @@ export function consumerDestroy(node: ReactiveNode): void {
   if (consumerIsLive(node)) {
     // Drop all connections from the graph to this node.
     for (let i = 0; i < node.producerNode.length; i++) {
-      producerRemoveLiveConsumerAtIndex(
-        node.producerNode[i],
-        node.producerIndexOfThis[i],
-      );
+      producerRemoveLiveConsumerAtIndex(node.producerNode[i], node.producerIndexOfThis[i]);
     }
   }
 
   // Truncate all the arrays to drop all connection from this node to the graph.
-  node.producerNode.length =
-    node.producerLastReadVersion.length =
-    node.producerIndexOfThis.length =
-      0;
+  node.producerNode.length = node.producerLastReadVersion.length = node.producerIndexOfThis.length = 0;
   if (node.liveConsumerNode) {
     node.liveConsumerNode.length = node.liveConsumerIndexOfThis!.length = 0;
   }
@@ -471,20 +442,12 @@ export function consumerDestroy(node: ReactiveNode): void {
  * Note that this operation is potentially transitive. If this node becomes live, then it becomes
  * a live consumer of all of its current producers.
  */
-function producerAddLiveConsumer(
-  node: ReactiveNode,
-  consumer: ReactiveNode,
-  indexOfThis: number,
-): number {
+function producerAddLiveConsumer(node: ReactiveNode, consumer: ReactiveNode, indexOfThis: number): number {
   assertProducerNode(node);
   if (node.liveConsumerNode.length === 0 && isConsumerNode(node)) {
     // When going from 0 to 1 live consumers, we become a live consumer to our producers.
     for (let i = 0; i < node.producerNode.length; i++) {
-      node.producerIndexOfThis[i] = producerAddLiveConsumer(
-        node.producerNode[i],
-        node,
-        i,
-      );
+      node.producerIndexOfThis[i] = producerAddLiveConsumer(node.producerNode[i], node, i);
     }
   }
   node.liveConsumerIndexOfThis.push(indexOfThis);
@@ -494,20 +457,11 @@ function producerAddLiveConsumer(
 /**
  * Remove the live consumer at `idx`.
  */
-function producerRemoveLiveConsumerAtIndex(
-  node: ReactiveNode,
-  idx: number,
-): void {
+function producerRemoveLiveConsumerAtIndex(node: ReactiveNode, idx: number): void {
   assertProducerNode(node);
 
-  if (
-    typeof ngDevMode !== 'undefined' &&
-    ngDevMode &&
-    idx >= node.liveConsumerNode.length
-  ) {
-    throw new Error(
-      `Assertion error: active consumer index ${idx} is out of bounds of ${node.liveConsumerNode.length} consumers)`,
-    );
+  if (typeof ngDevMode !== 'undefined' && ngDevMode && idx >= node.liveConsumerNode.length) {
+    throw new Error(`Assertion error: active consumer index ${idx} is out of bounds of ${node.liveConsumerNode.length} consumers)`);
   }
 
   if (node.liveConsumerNode.length === 1 && isConsumerNode(node)) {
@@ -515,10 +469,7 @@ function producerRemoveLiveConsumerAtIndex(
     // ourselves from our producers' tracking (which may cause consumer-producers to lose
     // liveness as well).
     for (let i = 0; i < node.producerNode.length; i++) {
-      producerRemoveLiveConsumerAtIndex(
-        node.producerNode[i],
-        node.producerIndexOfThis[i],
-      );
+      producerRemoveLiveConsumerAtIndex(node.producerNode[i], node.producerIndexOfThis[i]);
     }
   }
 
@@ -559,4 +510,14 @@ function assertProducerNode(node: ReactiveNode): asserts node is ProducerNode {
 
 function isConsumerNode(node: ReactiveNode): node is ConsumerNode {
   return node.producerNode !== undefined;
+}
+
+export function runPostProducerCreatedFn(node: ReactiveNode): void {
+  postProducerCreatedFn?.(node);
+}
+
+export function setPostProducerCreatedFn(fn: ReactiveHookFn | null): ReactiveHookFn | null {
+  const prev = postProducerCreatedFn;
+  postProducerCreatedFn = fn;
+  return prev;
 }

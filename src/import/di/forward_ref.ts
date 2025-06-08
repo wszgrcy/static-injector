@@ -23,9 +23,7 @@ export interface ForwardRefFn {
   (): any;
 }
 
-const __forward_ref__ = getClosureSafeProperty({
-  __forward_ref__: getClosureSafeProperty,
-});
+const __forward_ref__ = getClosureSafeProperty({ __forward_ref__: getClosureSafeProperty });
 
 /**
  * Allows to refer to references which are not yet defined.
@@ -43,24 +41,26 @@ const __forward_ref__ = getClosureSafeProperty({
  * ### Circular standalone reference import example
  * ```angular-ts
  * @Component({
- *   standalone: true,
  *   imports: [ChildComponent],
  *   selector: 'app-parent',
- *   template: `<app-child [hideParent]="hideParent"></app-child>`,
+ *   template: `<app-child [hideParent]="hideParent()"></app-child>`,
  * })
  * export class ParentComponent {
- *   @Input() hideParent: boolean;
+ *    hideParent = input.required<boolean>();
  * }
  *
  *
  * @Component({
- *   standalone: true,
- *   imports: [CommonModule, forwardRef(() => ParentComponent)],
+ *   imports: [forwardRef(() => ParentComponent)],
  *   selector: 'app-child',
- *   template: `<app-parent *ngIf="!hideParent"></app-parent>`,
+ *   template: `
+ *    @if(!hideParent() {
+ *       <app-parent/>
+ *    }
+ *  `,
  * })
  * export class ChildComponent {
- *   @Input() hideParent: boolean;
+ *    hideParent = input.required<boolean>();
  * }
  * ```
  *
@@ -93,9 +93,5 @@ export function resolveForwardRef<T>(type: T): T {
 
 /** Checks whether a function is wrapped by a `forwardRef`. */
 export function isForwardRef(fn: any): fn is () => any {
-  return (
-    typeof fn === 'function' &&
-    fn.hasOwnProperty(__forward_ref__) &&
-    fn.__forward_ref__ === forwardRef
-  );
+  return typeof fn === 'function' && fn.hasOwnProperty(__forward_ref__) && fn.__forward_ref__ === forwardRef;
 }

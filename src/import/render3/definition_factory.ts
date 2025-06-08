@@ -26,9 +26,6 @@ export type FactoryFn<T> = {
 
 export function getFactoryDef<T>(type: any, throwNotFound: true): FactoryFn<T>;
 export function getFactoryDef<T>(type: any): FactoryFn<T> | null;
-export function getFactoryDef<T>(
-  type: any,
-  throwNotFound?: boolean,
-): FactoryFn<T> | null {
+export function getFactoryDef<T>(type: any, throwNotFound?: boolean): FactoryFn<T> | null {
   return () => new type();
 }

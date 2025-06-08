@@ -8,6 +8,8 @@
 
 import { EnvironmentInjector } from '../di';
 
+const EXECUTE_CALLBACK_IF_ALREADY_DESTROYED = false;
+
 /**
  * `DestroyRef` lets you set callbacks to run for any cleanup or destruction behavior.
  * The scope of this destruction depends on where `DestroyRef` is injected. If `DestroyRef`
@@ -40,6 +42,9 @@ export abstract class DestroyRef {
    */
   abstract onDestroy(callback: () => void): () => void;
 
+  /** @internal */
+  abstract get destroyed(): boolean;
+
   /**
    * @internal
    * @nocollapse
@@ -49,7 +54,5 @@ export abstract class DestroyRef {
    * @internal
    * @nocollapse
    */
-  static __NG_ENV_ID__: (injector: EnvironmentInjector) => DestroyRef = (
-    injector,
-  ) => injector;
+  static __NG_ENV_ID__: (injector: EnvironmentInjector) => DestroyRef = (injector) => injector;
 }

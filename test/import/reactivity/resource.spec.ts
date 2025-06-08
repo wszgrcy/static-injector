@@ -1,34 +1,22 @@
 import { expect } from 'chai';
-import {
-  ChangeDetectionScheduler,
-  ChangeDetectionSchedulerImpl,
-  effect,
-  inject,
-  Injector,
-  INJECTOR_SCOPE,
-  resource,
-  signal,
-} from 'static-injector';
+import { ChangeDetectionScheduler, ChangeDetectionSchedulerImpl, createRootInjector, effect, inject, Injector, INJECTOR_SCOPE, resource, signal } from 'static-injector';
 
 describe('resource', () => {
   it('hello', async () => {
-    let injector = Injector.create({
+    let injector = createRootInjector({
       providers: [
         {
           provide: ChangeDetectionScheduler,
           useClass: ChangeDetectionSchedulerImpl,
         },
-        {
-          provide: INJECTOR_SCOPE,
-          useValue: 'root',
-        },
+      
       ],
     });
     let value$ = signal(0);
     let res1$$ = resource({
-      request: () => value$(),
-      loader: async ({ request, abortSignal }) => {
-        return request + 1;
+      params: () => value$(),
+      loader: async ({ params, abortSignal }) => {
+        return params + 1;
       },
       injector: injector,
     });

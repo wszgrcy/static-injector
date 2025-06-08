@@ -14,16 +14,17 @@ import { stringify } from '../util/stringify';
 import { resolveForwardRef } from './forward_ref';
 import { getInjectImplementation, injectRootLimpMode } from './inject_switch';
 import type { Injector } from './injector';
-import {
-  DecoratorFlags,
-  InjectFlags,
-  InjectOptions,
-  InternalInjectFlags,
-} from './interface/injector';
+import { DecoratorFlags, InternalInjectFlags, InjectOptions } from './interface/injector';
 import { ProviderToken } from './provider_token';
+
+import { Injector as PrimitivesInjector, isNotFound, NotFound, InjectionToken as PrimitivesInjectionToken, getCurrentInjector } from '../../primitives/di';
+
+import { InjectionToken } from './injection_token';
 
 const _THROW_IF_NOT_FOUND = {};
 export const THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
+
+export { getCurrentInjector, setCurrentInjector } from '../../primitives/di';
 
 /*
  * Name of a property (that we patch onto DI decorator), which is used as an annotation of which
@@ -32,6 +33,31 @@ export const THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
  */
 const DI_DECORATOR_FLAG = '__NG_DI_FLAG__';
 
+/**
+ * A wrapper around an `Injector` that implements the `PrimitivesInjector` interface.
+ *
+ * This is used to allow the `inject` function to be used with the new primitives-based DI system.
+ */
+export class RetrievingInjector implements PrimitivesInjector {
+  constructor(readonly injector: Injector) {}
+  retrieve<T>(token: PrimitivesInjectionToken<T>, options: unknown): T | NotFound {
+    const flags: InternalInjectFlags = convertToBitFlags(options as InjectOptions | undefined) || InternalInjectFlags.Default;
+    try {
+      return (this.injector as BackwardsCompatibleInjector).get(
+        token as unknown as InjectionToken<T>,
+        // When a dependency is requested with an optional flag, DI returns null as the default value.
+        (flags & InternalInjectFlags.Optional ? null : THROW_IF_NOT_FOUND) as T,
+        flags,
+      ) as T;
+    } catch (e: any) {
+      if (isNotFound(e)) {
+        return e;
+      }
+      throw e;
+    }
+  }
+}
+
 export const NG_TEMP_TOKEN_PATH = 'ngTempTokenPath';
 const NG_TOKEN_PATH = 'ngTokenPath';
 const NEW_LINE = /\n/gm;
@@ -39,45 +65,31 @@ const NO_NEW_LINE = 'ɵ';
 export const SOURCE = '__source';
 
 /**
- * Current injector value used by `inject`.
- * - `undefined`: it is an error to call `inject`
- * - `null`: `inject` can be called but there is no injector (limp-mode).
- * - Injector instance: Use the injector for resolution.
+ * Temporary type to allow internal symbols to use inject flags. This should be
+ * removed once we consolidate the flags and the object literal approach.
  */
-let _currentInjector: Injector | undefined | null = undefined;
-
-export function getCurrentInjector(): Injector | undefined | null {
-  return _currentInjector;
-}
-
-export function setCurrentInjector(
-  injector: Injector | null | undefined,
-): Injector | undefined | null {
-  const former = _currentInjector;
-  _currentInjector = injector;
-  return former;
-}
+export type BackwardsCompatibleInjector = Injector & {
+  get<T>(token: ProviderToken<T>, notFoundValue?: T, options?: InternalInjectFlags | InjectOptions): T;
+};
 
 export function injectInjectorOnly<T>(token: ProviderToken<T>): T;
-export function injectInjectorOnly<T>(
-  token: ProviderToken<T>,
-  flags?: InjectFlags,
-): T | null;
-export function injectInjectorOnly<T>(
-  token: ProviderToken<T>,
-  flags = InjectFlags.Default,
-): T | null {
-  if (_currentInjector === undefined) {
-    throw new RuntimeError(RuntimeErrorCode.MISSING_INJECTION_CONTEXT, null);
-  } else if (_currentInjector === null) {
+export function injectInjectorOnly<T>(token: ProviderToken<T>, flags?: InternalInjectFlags): T | null;
+export function injectInjectorOnly<T>(token: ProviderToken<T>, flags = InternalInjectFlags.Default): T | null {
+  const currentInjector = getCurrentInjector();
+  if (currentInjector === undefined) {
+    throw new RuntimeError(RuntimeErrorCode.MISSING_INJECTION_CONTEXT, undefined as any);
+  } else if (currentInjector === null) {
     return injectRootLimpMode(token, undefined, flags);
   } else {
-    const value = _currentInjector.get(
-      token,
-      flags & InjectFlags.Optional ? null : undefined,
-      flags,
-    );
-
+    const options = convertToInjectOptions(flags);
+    const value = currentInjector.retrieve(token as PrimitivesInjectionToken<T>, options) as T;
+    undefined as any;
+    if (isNotFound(value)) {
+      if (options.optional) {
+        return null;
+      }
+      throw value;
+    }
     return value;
   }
 }
@@ -93,23 +105,11 @@ export function injectInjectorOnly<T>(
  * @publicApi This instruction has been emitted by ViewEngine for some time and is deployed to npm.
  */
 export function ɵɵinject<T>(token: ProviderToken<T>): T;
-export function ɵɵinject<T>(
-  token: ProviderToken<T>,
-  flags?: InjectFlags,
-): T | null;
+export function ɵɵinject<T>(token: ProviderToken<T>, flags?: InternalInjectFlags): T | null;
 
-export function ɵɵinject<T>(
-  token: ProviderToken<T>,
-  flags?: InjectFlags,
-): string | null;
-export function ɵɵinject<T>(
-  token: ProviderToken<T>,
-  flags = InjectFlags.Default,
-): T | null {
-  return (getInjectImplementation() || injectInjectorOnly)(
-    resolveForwardRef(token as Type<T>),
-    flags,
-  );
+export function ɵɵinject<T>(token: ProviderToken<T>, flags?: InternalInjectFlags): string | null;
+export function ɵɵinject<T>(token: ProviderToken<T>, flags = InternalInjectFlags.Default): T | null {
+  return (getInjectImplementation() || injectInjectorOnly)(resolveForwardRef(token as Type<T>), flags);
 }
 
 /**
@@ -122,7 +122,7 @@ export function ɵɵinject<T>(
  * @codeGenApi
  */
 export function ɵɵinvalidFactoryDep(index: number): void {
-  throw new RuntimeError(RuntimeErrorCode.INVALID_FACTORY_DEPENDENCY, null);
+  throw new RuntimeError(RuntimeErrorCode.INVALID_FACTORY_DEPENDENCY, undefined as any);
 }
 
 /**
@@ -135,20 +135,6 @@ export function ɵɵinvalidFactoryDep(index: number): void {
 export function inject<T>(token: ProviderToken<T>): T;
 /**
  * @param token A token that represents a dependency that should be injected.
- * @param flags Control how injection is executed. The flags correspond to injection strategies that
- *     can be specified with parameter decorators `@Host`, `@Self`, `@SkipSelf`, and `@Optional`.
- * @returns the injected value if operation is successful, `null` otherwise.
- * @throws if called outside of a supported context.
- *
- * @publicApi
- * @deprecated prefer an options object instead of `InjectFlags`
- */
-export function inject<T>(
-  token: ProviderToken<T>,
-  flags?: InjectFlags,
-): T | null;
-/**
- * @param token A token that represents a dependency that should be injected.
  * @param options Control how injection is executed. Options correspond to injection strategies
  *     that can be specified with parameter decorators `@Host`, `@Self`, `@SkipSelf`, and
  *     `@Optional`.
@@ -157,10 +143,7 @@ export function inject<T>(
  *
  * @publicApi
  */
-export function inject<T>(
-  token: ProviderToken<T>,
-  options: InjectOptions & { optional?: false },
-): T;
+export function inject<T>(token: ProviderToken<T>, options: InjectOptions & { optional?: false }): T;
 /**
  * @param token A token that represents a dependency that should be injected.
  * @param options Control how injection is executed. Options correspond to injection strategies
@@ -173,10 +156,7 @@ export function inject<T>(
  *
  * @publicApi
  */
-export function inject<T>(
-  token: ProviderToken<T>,
-  options: InjectOptions,
-): T | null;
+export function inject<T>(token: ProviderToken<T>, options: InjectOptions): T | null;
 /**
  * @param token A token that represents a static attribute on the host node that should be injected.
  * @returns Value of the attribute if it exists.
@@ -266,19 +246,14 @@ export function inject<T>(
  *
  * @publicApi
  */
-export function inject<T>(
-  token: ProviderToken<T>,
-  flags: InjectFlags | InjectOptions = InjectFlags.Default,
-) {
+export function inject<T>(token: ProviderToken<T>, options?: InjectOptions) {
   // The `as any` here _shouldn't_ be necessary, but without it JSCompiler
   // throws a disambiguation  error due to the multiple signatures.
-  return ɵɵinject(token as any, convertToBitFlags(flags));
+  return ɵɵinject(token as any, convertToBitFlags(options));
 }
 
 // Converts object-based DI flags (`InjectOptions`) to bit flags (`InjectFlags`).
-export function convertToBitFlags(
-  flags: InjectOptions | InjectFlags | undefined,
-): InjectFlags | undefined {
+export function convertToBitFlags(flags: InjectOptions | InternalInjectFlags | undefined): InternalInjectFlags | undefined {
   if (typeof flags === 'undefined' || typeof flags === 'number') {
     return flags;
   }
@@ -290,8 +265,17 @@ export function convertToBitFlags(
     ((flags.optional && InternalInjectFlags.Optional) as number) |
     0 |
     ((flags.self && InternalInjectFlags.Self) as number) |
-    ((flags.skipSelf &&
-      InternalInjectFlags.SkipSelf) as number)) as InjectFlags;
+    ((flags.skipSelf && InternalInjectFlags.SkipSelf) as number)) as InternalInjectFlags;
+}
+
+// Converts bitflags to inject options
+function convertToInjectOptions(flags: InternalInjectFlags): InjectOptions {
+  return {
+    optional: !!(flags & InternalInjectFlags.Optional),
+    host: !!(flags & InternalInjectFlags.Host),
+    self: !!(flags & InternalInjectFlags.Self),
+    skipSelf: !!(flags & InternalInjectFlags.SkipSelf),
+  };
 }
 
 export function injectArgs(types: (ProviderToken<any> | any[])[]): any[] {
@@ -300,10 +284,10 @@ export function injectArgs(types: (ProviderToken<any> | any[])[]): any[] {
     const arg = resolveForwardRef(types[i]);
     if (Array.isArray(arg)) {
       if (arg.length === 0) {
-        throw new RuntimeError(RuntimeErrorCode.INVALID_DIFFER_INPUT, null);
+        throw new RuntimeError(RuntimeErrorCode.INVALID_DIFFER_INPUT, undefined as any);
       }
       let type: Type<any> | undefined = undefined;
-      let flags: InjectFlags = InjectFlags.Default;
+      let flags: InternalInjectFlags = InternalInjectFlags.Default;
 
       for (let j = 0; j < arg.length; j++) {
         const meta = arg[j];
@@ -338,10 +322,7 @@ export function injectArgs(types: (ProviderToken<any> | any[])[]): any[] {
  * @param decorator Provided DI decorator.
  * @param flag InjectFlag that should be applied.
  */
-export function attachInjectFlag(
-  decorator: any,
-  flag: InternalInjectFlags | DecoratorFlags,
-): any {
+export function attachInjectFlag(decorator: any, flag: InternalInjectFlags | DecoratorFlags): any {
   decorator[DI_DECORATOR_FLAG] = flag;
   decorator.prototype[DI_DECORATOR_FLAG] = flag;
   return decorator;
@@ -356,37 +337,19 @@ export function getInjectFlag(token: any): number | undefined {
   return token[DI_DECORATOR_FLAG];
 }
 
-export function catchInjectorError(
-  e: any,
-  token: any,
-  injectorErrorName: string,
-  source: string | null,
-): never {
+export function catchInjectorError(e: any, token: any, injectorErrorName: string, source: string | null): never {
   const tokenPath: any[] = e[NG_TEMP_TOKEN_PATH];
   if (token[SOURCE]) {
     tokenPath.unshift(token[SOURCE]);
   }
-  e.message = formatError(
-    '\n' + e.message,
-    tokenPath,
-    injectorErrorName,
-    source,
-  );
+  e.message = formatError('\n' + e.message, tokenPath, injectorErrorName, source);
   e[NG_TOKEN_PATH] = tokenPath;
   e[NG_TEMP_TOKEN_PATH] = null;
   throw e;
 }
 
-export function formatError(
-  text: string,
-  obj: any,
-  injectorErrorName: string,
-  source: string | null = null,
-): string {
-  text =
-    text && text.charAt(0) === '\n' && text.charAt(1) == NO_NEW_LINE
-      ? text.slice(2)
-      : text;
+export function formatError(text: string, obj: any, injectorErrorName: string, source: string | null = null): string {
+  text = text && text.charAt(0) === '\n' && text.charAt(1) == NO_NEW_LINE ? text.slice(2) : text;
   let context = stringify(obj);
   if (Array.isArray(obj)) {
     context = obj.map(stringify).join(' -> ');
@@ -395,19 +358,10 @@ export function formatError(
     for (const key in obj) {
       if (obj.hasOwnProperty(key)) {
         const value = obj[key];
-        parts.push(
-          key +
-            ':' +
-            (typeof value === 'string'
-              ? JSON.stringify(value)
-              : stringify(value)),
-        );
+        parts.push(key + ':' + (typeof value === 'string' ? JSON.stringify(value) : stringify(value)));
       }
     }
     context = `{${parts.join(', ')}}`;
   }
-  return `${injectorErrorName}${source ? '(' + source + ')' : ''}[${context}]: ${text.replace(
-    NEW_LINE,
-    '\n  ',
-  )}`;
+  return `${injectorErrorName}${source ? '(' + source + ')' : ''}[${context}]: ${text.replace(NEW_LINE, '\n  ')}`;
 }

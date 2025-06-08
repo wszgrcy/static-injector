@@ -11,7 +11,8 @@
         "source": "core",
         "target": "",
         "fileList": [
-            "primitives/signals"
+            "primitives/signals",
+            "primitives/di"
         ]
     }
 ]

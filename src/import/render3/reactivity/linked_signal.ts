@@ -6,29 +6,18 @@
  * found in the LICENSE file at https://angular.dev/license
  */
 
-import { signalAsReadonlyFn, WritableSignal } from './signal';
+import { ComputationFn, createLinkedSignal, LinkedSignalGetter, LinkedSignalNode, linkedSignalSetFn, linkedSignalUpdateFn, SIGNAL } from '../../../primitives/signals';
 import { Signal, ValueEqualityFn } from './api';
-import {
-  ComputationFn,
-  createLinkedSignal,
-  LinkedSignalGetter,
-  LinkedSignalNode,
-  SIGNAL,
-  linkedSignalSetFn,
-  linkedSignalUpdateFn,
-} from '@angular/core/primitives/signals';
+import { signalAsReadonlyFn, WritableSignal } from './signal';
 
 const identityFn = <T>(v: T) => v;
 
 /**
  * Creates a writable signal whose value is initialized and reset by the linked, reactive computation.
  *
- * @developerPreview
+ * @publicApi 20.0
  */
-export function linkedSignal<D>(
-  computation: () => D,
-  options?: { equal?: ValueEqualityFn<NoInfer<D>> },
-): WritableSignal<D>;
+export function linkedSignal<D>(computation: () => D, options?: { equal?: ValueEqualityFn<NoInfer<D>> }): WritableSignal<D>;
 
 /**
  * Creates a writable signal whose value is initialized and reset by the linked, reactive computation.
@@ -36,14 +25,11 @@ export function linkedSignal<D>(
  *
  * Note: The computation is reactive, meaning the linked signal will automatically update whenever any of the signals used within the computation change.
  *
- * @developerPreview
+ * @publicApi 20.0
  */
 export function linkedSignal<S, D>(options: {
   source: () => S;
-  computation: (
-    source: NoInfer<S>,
-    previous?: { source: NoInfer<S>; value: NoInfer<D> },
-  ) => D;
+  computation: (source: NoInfer<S>, previous?: { source: NoInfer<S>; value: NoInfer<D> }) => D;
   equal?: ValueEqualityFn<NoInfer<D>>;
 }): WritableSignal<D>;
 
@@ -58,25 +44,15 @@ export function linkedSignal<S, D>(
   options?: { equal?: ValueEqualityFn<D> },
 ): WritableSignal<D> {
   if (typeof optionsOrComputation === 'function') {
-    const getter = createLinkedSignal<D, D>(
-      optionsOrComputation,
-      identityFn<D>,
-      options?.equal,
-    ) as LinkedSignalGetter<D, D> & WritableSignal<D>;
+    const getter = createLinkedSignal<D, D>(optionsOrComputation, identityFn<D>, options?.equal) as LinkedSignalGetter<D, D> & WritableSignal<D>;
     return upgradeLinkedSignalGetter(getter);
   } else {
-    const getter = createLinkedSignal<S, D>(
-      optionsOrComputation.source,
-      optionsOrComputation.computation,
-      optionsOrComputation.equal,
-    );
+    const getter = createLinkedSignal<S, D>(optionsOrComputation.source, optionsOrComputation.computation, optionsOrComputation.equal);
     return upgradeLinkedSignalGetter(getter);
   }
 }
 
-function upgradeLinkedSignalGetter<S, D>(
-  getter: LinkedSignalGetter<S, D>,
-): WritableSignal<D> {
+function upgradeLinkedSignalGetter<S, D>(getter: LinkedSignalGetter<S, D>): WritableSignal<D> {
   if (false) {
   }
 
@@ -84,11 +60,8 @@ function upgradeLinkedSignalGetter<S, D>(
   const upgradedGetter = getter as LinkedSignalGetter<S, D> & WritableSignal<D>;
 
   upgradedGetter.set = (newValue: D) => linkedSignalSetFn(node, newValue);
-  upgradedGetter.update = (updateFn: (value: D) => D) =>
-    linkedSignalUpdateFn(node, updateFn);
-  upgradedGetter.asReadonly = signalAsReadonlyFn.bind(
-    getter as any,
-  ) as () => Signal<D>;
+  upgradedGetter.update = (updateFn: (value: D) => D) => linkedSignalUpdateFn(node, updateFn);
+  upgradedGetter.asReadonly = signalAsReadonlyFn.bind(getter as any) as () => Signal<D>;
 
   return upgradedGetter;
 }

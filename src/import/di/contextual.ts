@@ -8,16 +8,11 @@
 
 import { RuntimeError, RuntimeErrorCode } from '../errors';
 
-import {
-  getInjectImplementation,
-  setInjectImplementation,
-} from './inject_switch';
+import { getInjectImplementation, setInjectImplementation } from './inject_switch';
 import type { Injector } from './injector';
-import {
-  getCurrentInjector,
-  setCurrentInjector,
-} from './injector_compatibility';
+import { getCurrentInjector, setCurrentInjector, RetrievingInjector } from './injector_compatibility';
 import { assertNotDestroyed, R3Injector } from './r3_injector';
+import { Injector as PrimitivesInjector } from '@angular/core/primitives/di';
 
 /**
  * Runs the given function in the [context](guide/di/dependency-injection-context) of the given
@@ -33,23 +28,24 @@ import { assertNotDestroyed, R3Injector } from './r3_injector';
  * @returns the return value of the function, if any
  * @publicApi
  */
-export function runInInjectionContext<ReturnT>(
-  injector: Injector,
-  fn: () => ReturnT,
-): ReturnT {
+export function runInInjectionContext<ReturnT>(injector: Injector, fn: () => ReturnT): ReturnT {
+  let internalInjector: PrimitivesInjector;
   if (injector instanceof R3Injector) {
     assertNotDestroyed(injector);
+    internalInjector = injector;
+  } else {
+    internalInjector = new RetrievingInjector(injector);
   }
 
   if (false) {
   }
-  const prevInjector = setCurrentInjector(injector);
+  const prevInjector = setCurrentInjector(internalInjector);
   const previousInjectImplementation = setInjectImplementation(undefined);
   try {
     return fn();
   } finally {
     setCurrentInjector(prevInjector);
-
+    undefined as any;
     setInjectImplementation(previousInjectImplementation);
   }
 }
@@ -58,9 +54,7 @@ export function runInInjectionContext<ReturnT>(
  * Whether the current stack frame is inside an injection context.
  */
 export function isInInjectionContext(): boolean {
-  return (
-    getInjectImplementation() !== undefined || getCurrentInjector() != null
-  );
+  return getInjectImplementation() !== undefined || getCurrentInjector() != null;
 }
 /**
  * Asserts that the current stack frame is within an [injection
@@ -74,6 +68,6 @@ export function assertInInjectionContext(debugFn: Function): void {
   // Taking a `Function` instead of a string name here prevents the unminified name of the function
   // from being retained in the bundle regardless of minification.
   if (!isInInjectionContext()) {
-    throw new RuntimeError(RuntimeErrorCode.MISSING_INJECTION_CONTEXT, null);
+    throw new RuntimeError(RuntimeErrorCode.MISSING_INJECTION_CONTEXT, undefined as any);
   }
 }

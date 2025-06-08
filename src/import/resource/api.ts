@@ -11,49 +11,29 @@ import { Signal, ValueEqualityFn } from '../render3/reactivity/api';
 import { WritableSignal } from '../render3/reactivity/signal';
 
 /**
- * Status of a `Resource`.
+ * String value capturing the status of a `Resource`.
+ *
+ * Possible statuses are:
+ *
+ * `idle` - The resource has no valid request and will not perform any loading. `value()` will be
+ * `undefined`.
+ *
+ * `loading` - The resource is currently loading a new value as a result of a change in its reactive
+ * dependencies. `value()` will be `undefined`.
+ *
+ * `reloading` - The resource is currently reloading a fresh value for the same reactive
+ * dependencies. `value()` will continue to return the previously fetched value during the reloading
+ * operation.
+ *
+ * `error` - Loading failed with an error. `value()` will be `undefined`.
+ *
+ * `resolved` - Loading has completed and the resource has the value returned from the loader.
+ *
+ * `local` - The resource's value was set locally via `.set()` or `.update()`.
  *
  * @experimental
  */
-export enum ResourceStatus {
-  /**
-   * The resource has no valid request and will not perform any loading.
-   *
-   * `value()` will be `undefined`.
-   */
-  Idle,
-
-  /**
-   * Loading failed with an error.
-   *
-   * `value()` will be `undefined`.
-   */
-  Error,
-
-  /**
-   * The resource is currently loading a new value as a result of a change in its `request`.
-   *
-   * `value()` will be `undefined`.
-   */
-  Loading,
-
-  /**
-   * The resource is currently reloading a fresh value for the same request.
-   *
-   * `value()` will continue to return the previously fetched value during the reloading operation.
-   */
-  Reloading,
-
-  /**
-   * Loading has completed and the resource has the value returned from the loader.
-   */
-  Resolved,
-
-  /**
-   * The resource's value was set locally via `.set()` or `.update()`.
-   */
-  Local,
-}
+export type ResourceStatus = 'idle' | 'error' | 'loading' | 'reloading' | 'resolved' | 'local';
 
 /**
  * A Resource is an asynchronous dependency (for example, the results of an API call) that is
@@ -66,7 +46,7 @@ export enum ResourceStatus {
  */
 export interface Resource<T> {
   /**
-   * The current value of the `Resource`, or `undefined` if there is no current value.
+   * The current value of the `Resource`, or throws an error if the resource is in an error state.
    */
   readonly value: Signal<T>;
 
@@ -79,7 +59,7 @@ export interface Resource<T> {
   /**
    * When in the `error` state, this returns the last known error from the `Resource`.
    */
-  readonly error: Signal<unknown>;
+  readonly error: Signal<Error | undefined>;
 
   /**
    * Whether this resource is loading a new value (or reloading the existing one).
@@ -92,16 +72,6 @@ export interface Resource<T> {
    * This function is reactive.
    */
   hasValue(): this is Resource<Exclude<T, undefined>>;
-
-  /**
-   * Instructs the resource to re-load any asynchronous dependency it may have.
-   *
-   * Note that the resource will not enter its reloading state until the actual backend request is
-   * made.
-   *
-   * @returns true if a reload was initiated, false if a reload was unnecessary or unsupported
-   */
-  reload(): boolean;
 }
 
 /**
@@ -125,6 +95,16 @@ export interface WritableResource<T> extends Resource<T> {
    */
   update(updater: (value: T) => T): void;
   asReadonly(): Resource<T>;
+
+  /**
+   * Instructs the resource to re-load any asynchronous dependency it may have.
+   *
+   * Note that the resource will not enter its reloading state until the actual backend request is
+   * made.
+   *
+   * @returns true if a reload was initiated, false if a reload was unnecessary or unsupported
+   */
+  reload(): boolean;
 }
 
 /**
@@ -148,7 +128,7 @@ export interface ResourceRef<T> extends WritableResource<T> {
  * @experimental
  */
 export interface ResourceLoaderParams<R> {
-  request: Exclude<NoInfer<R>, undefined>;
+  params: NoInfer<Exclude<R, undefined>>;
   abortSignal: AbortSignal;
   previous: {
     status: ResourceStatus;
@@ -160,18 +140,14 @@ export interface ResourceLoaderParams<R> {
  *
  * @experimental
  */
-export type ResourceLoader<T, R> = (
-  param: ResourceLoaderParams<R>,
-) => PromiseLike<T>;
+export type ResourceLoader<T, R> = (param: ResourceLoaderParams<R>) => PromiseLike<T>;
 
 /**
  * Streaming loader for a `Resource`.
  *
  * @experimental
  */
-export type ResourceStreamingLoader<T, R> = (
-  param: ResourceLoaderParams<R>,
-) => PromiseLike<Signal<ResourceStreamItem<T>>>;
+export type ResourceStreamingLoader<T, R> = (param: ResourceLoaderParams<R>) => PromiseLike<Signal<ResourceStreamItem<T>>>;
 
 /**
  * Options to the `resource` function, for creating a resource.
@@ -185,11 +161,11 @@ export interface BaseResourceOptions<T, R> {
    *
    * If a request function isn't provided, the loader won't rerun unless the resource is reloaded.
    */
-  request?: () => R;
+  params?: () => R;
 
   /**
    * The value which will be returned from the resource when a server value is unavailable, such as
-   * when the resource is still loading, or in an error state.
+   * when the resource is still loading.
    */
   defaultValue?: NoInfer<T>;
 
@@ -209,8 +185,7 @@ export interface BaseResourceOptions<T, R> {
  *
  * @experimental
  */
-export interface PromiseResourceOptions<T, R>
-  extends BaseResourceOptions<T, R> {
+export interface PromiseResourceOptions<T, R> extends BaseResourceOptions<T, R> {
   /**
    * Loading function which returns a `Promise` of the resource's value for a given request.
    */
@@ -227,8 +202,7 @@ export interface PromiseResourceOptions<T, R>
  *
  * @experimental
  */
-export interface StreamingResourceOptions<T, R>
-  extends BaseResourceOptions<T, R> {
+export interface StreamingResourceOptions<T, R> extends BaseResourceOptions<T, R> {
   /**
    * Loading function which returns a `Promise` of a signal of the resource's value for a given
    * request, which can change over time as new values are received from a stream.
@@ -244,11 +218,9 @@ export interface StreamingResourceOptions<T, R>
 /**
  * @experimental
  */
-export type ResourceOptions<T, R> =
-  | PromiseResourceOptions<T, R>
-  | StreamingResourceOptions<T, R>;
+export type ResourceOptions<T, R> = PromiseResourceOptions<T, R> | StreamingResourceOptions<T, R>;
 
 /**
  * @experimental
  */
-export type ResourceStreamItem<T> = { value: T } | { error: unknown };
+export type ResourceStreamItem<T> = { value: T } | { error: Error };

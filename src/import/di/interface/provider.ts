@@ -255,13 +255,7 @@ export interface FactoryProvider extends FactorySansProvider {
  *
  * @publicApi
  */
-export type StaticProvider =
-  | ValueProvider
-  | ExistingProvider
-  | StaticClassProvider
-  | ConstructorProvider
-  | FactoryProvider
-  | any[];
+export type StaticProvider = ValueProvider | ExistingProvider | StaticClassProvider | ConstructorProvider | FactoryProvider | any[];
 
 /**
  * Configures the `Injector` to return an instance of `Type` when `Type' is used as the token.
@@ -333,14 +327,7 @@ export interface ClassProvider extends ClassSansProvider {
  *
  * @publicApi
  */
-export type Provider =
-  | TypeProvider
-  | ValueProvider
-  | ClassProvider
-  | ConstructorProvider
-  | ExistingProvider
-  | FactoryProvider
-  | any[];
+export type Provider = TypeProvider | ValueProvider | ClassProvider | ConstructorProvider | ExistingProvider | FactoryProvider | any[];
 
 /**
  * Encapsulated `Provider`s that are only accepted during creation of an `EnvironmentInjector` (e.g.
@@ -372,9 +359,7 @@ export interface InternalEnvironmentProviders extends EnvironmentProviders {
   ɵfromNgModule?: true;
 }
 
-export function isEnvironmentProviders(
-  value: Provider | EnvironmentProviders | InternalEnvironmentProviders,
-): value is InternalEnvironmentProviders {
+export function isEnvironmentProviders(value: Provider | EnvironmentProviders | InternalEnvironmentProviders): value is InternalEnvironmentProviders {
   return value && !!(value as InternalEnvironmentProviders).ɵproviders;
 }
 

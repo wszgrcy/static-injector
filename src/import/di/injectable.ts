@@ -9,27 +9,14 @@
 import { Type } from '../interface/type';
 import { TypeDecorator } from '../util/decorators';
 
-import {
-  ClassSansProvider,
-  ConstructorSansProvider,
-  ExistingSansProvider,
-  FactorySansProvider,
-  StaticClassSansProvider,
-  ValueSansProvider,
-} from './interface/provider';
+import { ClassSansProvider, ConstructorSansProvider, ExistingSansProvider, FactorySansProvider, StaticClassSansProvider, ValueSansProvider } from './interface/provider';
 
 /**
  * Injectable providers used in `@Injectable` decorator.
  *
  * @publicApi
  */
-export type InjectableProvider =
-  | ValueSansProvider
-  | ExistingSansProvider
-  | StaticClassSansProvider
-  | ConstructorSansProvider
-  | FactorySansProvider
-  | ClassSansProvider;
+export type InjectableProvider = ValueSansProvider | ExistingSansProvider | StaticClassSansProvider | ConstructorSansProvider | FactorySansProvider | ClassSansProvider;
 
 /**
  * Type of the Injectable decorator / constructor function.
@@ -57,17 +44,9 @@ export interface InjectableDecorator {
    *
    */
   (): TypeDecorator;
-  (
-    options?: {
-      providedIn: Type<any> | 'root' | 'platform' | 'any' | null;
-    } & InjectableProvider,
-  ): TypeDecorator;
+  (options?: { providedIn: Type<any> | 'root' | 'platform' | 'any' | null } & InjectableProvider): TypeDecorator;
   new (): Injectable;
-  new (
-    options?: {
-      providedIn: Type<any> | 'root' | 'platform' | 'any' | null;
-    } & InjectableProvider,
-  ): Injectable;
+  new (options?: { providedIn: Type<any> | 'root' | 'platform' | 'any' | null } & InjectableProvider): Injectable;
 }
 
 /**

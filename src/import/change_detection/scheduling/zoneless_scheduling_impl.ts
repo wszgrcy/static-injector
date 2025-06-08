@@ -9,10 +9,7 @@
 import { inject } from '../../di/injector_compatibility';
 import { scheduleCallbackWithRafRace } from '../../util/callback_scheduler';
 
-import {
-  ChangeDetectionScheduler,
-  NotificationSource,
-} from './zoneless_scheduling';
+import { ChangeDetectionScheduler, NotificationSource } from './zoneless_scheduling';
 import { EffectScheduler } from 'src/import/render3/reactivity/root_effect_scheduler';
 
 export class ChangeDetectionSchedulerImpl implements ChangeDetectionScheduler {

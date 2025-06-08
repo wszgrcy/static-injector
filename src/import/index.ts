@@ -23,6 +23,8 @@ export * from './change_detection/scheduling/zoneless_scheduling_impl';
 
 export * from './resource';
 export * from './di/provider_token';
+export * from './error_handler';
+export * from './pending_tasks';
 export function Injectable(args?: any) {
   return (constructor: Function) => {};
 }
@@ -35,24 +37,10 @@ export class RootStaticInjectOptions {
   };
 }
 
-export function createInjector(options: {
-  providers: Array<Provider | EnvironmentProviders>;
-  parent: Injector;
-  name?: string;
-  scopes?: Set<InjectorScope>;
-}) {
-  return new R3Injector(
-    options.providers,
-    options.parent ?? getNullInjector(),
-    options.name ?? '',
-    options.scopes ?? new Set([]),
-  );
+export function createInjector(options: { providers: Array<Provider | EnvironmentProviders>; parent: Injector; name?: string; scopes?: Set<InjectorScope> }) {
+  return new R3Injector(options.providers, options.parent ?? getNullInjector(), options.name ?? '', options.scopes ?? new Set([]));
 }
-export function createRootInjector(options: {
-  providers: Array<Provider | EnvironmentProviders>;
-  name?: string;
-  scopes?: Set<InjectorScope>;
-}) {
+export function createRootInjector(options: { providers: Array<Provider | EnvironmentProviders>; name?: string; scopes?: Set<InjectorScope> }) {
   return new R3Injector(
     [
       ...options.providers,
@@ -63,6 +51,6 @@ export function createRootInjector(options: {
     ],
     getNullInjector(),
     options.name ?? '',
-    options.scopes ?? new Set([]),
+    options.scopes ?? new Set(['environment']),
   );
 }

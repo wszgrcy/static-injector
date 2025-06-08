@@ -46,7 +46,5 @@ export function truncateMiddle(str: string, maxLength = 100): string {
   if (maxLength == 1) return str.substring(0, 1) + '...';
 
   const halfLimit = Math.round(maxLength / 2);
-  return (
-    str.substring(0, halfLimit) + '...' + str.substring(str.length - halfLimit)
-  );
+  return str.substring(0, halfLimit) + '...' + str.substring(str.length - halfLimit);
 }

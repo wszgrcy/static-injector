@@ -18,6 +18,14 @@ import { DecoratorFlags, InternalInjectFlags } from './interface/injector';
  */
 export interface InjectDecorator {
   /**
+   * Warning: String tokens are not recommended.
+   *
+   * Use an InjectionToken or a class as a token instead.
+   */
+  (token: string): any;
+  new (token: string): Inject;
+
+  /**
    * Parameter decorator on a dependency parameter of a class constructor
    * that specifies a custom provider of the dependency.
    *
@@ -104,10 +112,7 @@ export interface Optional {}
 export const Optional: OptionalDecorator =
   // Disable tslint because `InternalInjectFlags` is a const enum which gets inlined.
   // tslint:disable-next-line: no-toplevel-property-access
-  attachInjectFlag(
-    makeParamDecorator('Optional'),
-    InternalInjectFlags.Optional,
-  );
+  attachInjectFlag(makeParamDecorator('Optional'), InternalInjectFlags.Optional);
 
 /**
  * Type of the Self decorator / constructor function.
@@ -200,7 +205,4 @@ export interface SkipSelf {}
 export const SkipSelf: SkipSelfDecorator =
   // Disable tslint because `InternalInjectFlags` is a const enum which gets inlined.
   // tslint:disable-next-line: no-toplevel-property-access
-  attachInjectFlag(
-    makeParamDecorator('SkipSelf'),
-    InternalInjectFlags.SkipSelf,
-  );
+  attachInjectFlag(makeParamDecorator('SkipSelf'), InternalInjectFlags.SkipSelf);

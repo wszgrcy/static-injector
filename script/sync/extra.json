@@ -7,14 +7,16 @@
                 "type": "custom",
                 "change": "change",
                 "values": {
-                    "selector": "ConditionalExpression:has(>Identifier[value=ngDevMode])",
+                    "selector": "ConditionalExpression:like(ngDevMode)",
                     "replaceSelector": ">ColonToken+*"
                 }
             },
             {
                 "type": "custom",
+                "change": "change",
                 "values": {
-                    "selector": "ExpressionStatement:like(ngDevMode)"
+                    "selector": "BinaryExpression:has(::parent[tag!=IfStatement]):has(::children(0):like(ngDevMode)):has(>[tag=AmpersandAmpersandToken])",
+                    "content": "undefined as any"
                 }
             },
             {
@@ -35,14 +37,6 @@
             },
             {
                 "type": "custom",
-                "change": "change",
-                "values": {
-                    "selector": "ThrowStatement NewExpression:has(>::expression[value=RuntimeError]) SyntaxList[value*=ngDevMode] PropertyAccessExpression+CommaToken+*",
-                    "content": "null"
-                }
-            },
-            {
-                "type": "custom",
                 "values": {
                     "selector": "ImportSpecifier:has(>::name[value=assertNotEqual])<SyntaxList<NamedImports<ImportClause<ImportDeclaration"
                 }
@@ -57,7 +51,14 @@
     },
     {
         "fileName": "./import/di/create_injector.ts",
-        "rules": []
+        "rules": [
+            {
+                "type": "custom",
+                "values": {
+                    "selector": "FunctionDeclaration:has(>[value=createInjectorWithoutInjectorInstances]) CallExpression:has(>[value=importProvidersFrom])"
+                }
+            }
+        ]
     },
     {
         "fileName": "./import/di/forward_ref.ts",
@@ -249,7 +250,10 @@
                     "excludes": [
                         "validateProvider",
                         "walkProviderTree",
-                        "deepForEachProvider"
+                        "deepForEachProvider",
+                        "importProvidersFrom",
+                        "internalImportProvidersFrom",
+                        "processInjectorTypesWithProviders"
                     ]
                 }
             }
@@ -268,7 +272,6 @@
                     "excludes": [
                         "newArray",
                         "getComponentDef",
-                        "throwCyclicDependencyError",
                         "emitInstanceCreatedByInjectorEvent",
                         "emitProviderConfiguredEvent",
                         "InjectorProfilerContext",
@@ -328,22 +331,6 @@
                 "type": "custom",
                 "change": "change",
                 "values": {
-                    "selector": "*:has(>::name[value=getInheritedInjectableDef]) ElementAccessExpression:has([value*=NG_INJECTABLE_DEF])",
-                    "content": "null"
-                }
-            },
-            {
-                "type": "custom",
-                "change": "change",
-                "values": {
-                    "selector": "*:has(>::name[value=getInjectorDef]) Identifier[value=NG_INJECTOR_DEF]<SyntaxList<CallExpression",
-                    "content": "false"
-                }
-            },
-            {
-                "type": "custom",
-                "change": "change",
-                "values": {
                     "selector": "FunctionDeclaration:has(>Identifier[value=getInjectableDef])>Block",
                     "content": "{return getOwnDefinition(type, NG_PROV_DEF) ||{ token:type,factory:()=>new type(),...type.injectOptions}}"
                 }
@@ -352,22 +339,7 @@
     },
     {
         "fileName": "./import/di/interface/injector.ts",
-        "rules": [
-            {
-                "type": "custom",
-                "values": {
-                    "selector": "*:has(>::name[value=InjectFlags]) *:has(>::name[value=Host]):use(*,+CommaToken)",
-                    "removeComment": true
-                }
-            },
-            {
-                "type": "custom",
-                "values": {
-                    "selector": "*:has(>::name[value=InternalInjectFlags]) *:has(>::name:is([value=Host],[value=ForPipe])):use(*,+CommaToken)",
-                    "removeComment": true
-                }
-            }
-        ]
+        "rules": []
     },
     {
         "fileName": "./import/di/interface/provider.ts",
@@ -424,7 +396,8 @@
                 "type": "function",
                 "values": {
                     "includes": [
-                        "throwProviderNotFoundError"
+                        "throwProviderNotFoundError",
+                        "throwCyclicDependencyError"
                     ]
                 }
             }
@@ -591,16 +564,7 @@
     },
     {
         "fileName": "./import/render3/errors_di.ts",
-        "rules": [
-            {
-                "type": "custom",
-                "change": "change",
-                "values": {
-                    "selector": "BinaryExpression:has(>Identifier[value=ngDevMode])",
-                    "content": "null"
-                }
-            }
-        ]
+        "rules": []
     },
     {
         "fileName": "./import/di/index.ts",
@@ -704,26 +668,6 @@
         ]
     },
     {
-        "fileName": "./import/render3/reactivity/microtask_effect.ts",
-        "rules": [
-            {
-                "type": "custom",
-                "change": "remove",
-                "values": {
-                    "selector": "FunctionDeclaration:has(>[value=microtaskEffect]) VariableStatement:like(const cdr)"
-                }
-            },
-            {
-                "type": "custom",
-                "change": "change",
-                "values": {
-                    "selector": "FunctionDeclaration:has(>[value=microtaskEffect])  IfStatement",
-                    "content": "handle.watcher.notify();"
-                }
-            }
-        ]
-    },
-    {
         "fileName": "./import/linker/destroy_ref.ts",
         "rules": [
             {
@@ -758,7 +702,24 @@
                 "type": "variable",
                 "values": {
                     "excludes": [
-                        "INTERNAL_APPLICATION_ERROR_HANDLER"
+                        "globalErrorListeners",
+                        "errorHandlerEnvironmentInitializer"
+                    ]
+                }
+            },
+            {
+                "type": "function",
+                "values": {
+                    "excludes": [
+                        "provideBrowserGlobalErrorListeners"
+                    ]
+                }
+            },
+            {
+                "type": "import",
+                "values": {
+                    "excludes": [
+                        "DOCUMENT"
                     ]
                 }
             }

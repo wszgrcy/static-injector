@@ -11,7 +11,7 @@ import { OnDestroy } from '../interface/lifecycle_hooks';
 import { Type } from '../interface/type';
 
 import { FactoryFn, getFactoryDef } from '../render3/definition_factory';
-
+import { throwCyclicDependencyError } from '../render3/errors_di';
 import { NG_ENV_ID } from '../render3/fields';
 
 import { EMPTY_ARRAY } from '../util/empty';
@@ -22,43 +22,18 @@ import { ENVIRONMENT_INITIALIZER } from './initializer_token';
 import { setInjectImplementation } from './inject_switch';
 import { InjectionToken } from './injection_token';
 import type { Injector } from './injector';
-import {
-  catchInjectorError,
-  convertToBitFlags,
-  injectArgs,
-  NG_TEMP_TOKEN_PATH,
-  setCurrentInjector,
-  THROW_IF_NOT_FOUND,
-  ɵɵinject,
-} from './injector_compatibility';
+import { BackwardsCompatibleInjector, catchInjectorError, convertToBitFlags, injectArgs, NG_TEMP_TOKEN_PATH, setCurrentInjector, THROW_IF_NOT_FOUND, ɵɵinject } from './injector_compatibility';
 import { INJECTOR } from './injector_token';
-import {
-  getInheritedInjectableDef,
-  getInjectableDef,
-  InjectorType,
-  ɵɵInjectableDeclaration,
-} from './interface/defs';
-import { InjectFlags, InjectOptions } from './interface/injector';
-import {
-  ClassProvider,
-  ConstructorProvider,
-  EnvironmentProviders,
-  InternalEnvironmentProviders,
-  isEnvironmentProviders,
-  Provider,
-  StaticClassProvider,
-} from './interface/provider';
+import { getInheritedInjectableDef, getInjectableDef, InjectorType, ɵɵInjectableDeclaration } from './interface/defs';
+import { InternalInjectFlags, InjectOptions } from './interface/injector';
+import { ClassProvider, ConstructorProvider, EnvironmentProviders, InternalEnvironmentProviders, isEnvironmentProviders, Provider, StaticClassProvider } from './interface/provider';
 import { INJECTOR_DEF_TYPES } from './internal_tokens';
 import { NullInjector } from './null_injector';
-import {
-  isExistingProvider,
-  isFactoryProvider,
-  isTypeProvider,
-  isValueProvider,
-  SingleProvider,
-} from './provider_collection';
+import { isExistingProvider, isFactoryProvider, isTypeProvider, isValueProvider, SingleProvider } from './provider_collection';
 import { ProviderToken } from './provider_token';
 import { INJECTOR_SCOPE, InjectorScope } from './scope';
+
+import { Injector as PrimitivesInjector, InjectionToken as PrimitivesInjectionToken, NotFound, isNotFound } from '@angular/core/primitives/di';
 
 /**
  * Marker which indicates that a value has not yet been created from the factory function.
@@ -99,6 +74,8 @@ interface Record<T> {
 /**
  * An `Injector` that's part of the environment injector hierarchy, which exists outside of the
  * component tree.
+ *
+ * @publicApi
  */
 export abstract class EnvironmentInjector implements Injector {
   /**
@@ -118,37 +95,18 @@ export abstract class EnvironmentInjector implements Injector {
    * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
    * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
    */
-  abstract get<T>(
-    token: ProviderToken<T>,
-    notFoundValue: null | undefined,
-    options: InjectOptions,
-  ): T | null;
+  abstract get<T>(token: ProviderToken<T>, notFoundValue: null | undefined, options: InjectOptions): T | null;
   /**
    * Retrieves an instance from the injector based on the provided token.
    * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
    * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
    */
-  abstract get<T>(
-    token: ProviderToken<T>,
-    notFoundValue?: T,
-    options?: InjectOptions,
-  ): T;
-  /**
-   * Retrieves an instance from the injector based on the provided token.
-   * @returns The instance from the injector if defined, otherwise the `notFoundValue`.
-   * @throws When the `notFoundValue` is `undefined` or `Injector.THROW_IF_NOT_FOUND`.
-   * @deprecated use object-based flags (`InjectOptions`) instead.
-   */
-  abstract get<T>(
-    token: ProviderToken<T>,
-    notFoundValue?: T,
-    flags?: InjectFlags,
-  ): T;
+  abstract get<T>(token: ProviderToken<T>, notFoundValue?: T, options?: InjectOptions): T;
   /**
    * @deprecated from v4.0.0 use ProviderToken<T>
    * @suppress {duplicate}
    */
-  abstract get(token: any, notFoundValue?: any): any;
+  abstract get<T>(token: string | ProviderToken<T>, notFoundValue?: any): any;
 
   /**
    * Runs the given function in the context of this `EnvironmentInjector`.
@@ -165,13 +123,16 @@ export abstract class EnvironmentInjector implements Injector {
 
   abstract destroy(): void;
 
+  /** @internal */
+  abstract get destroyed(): boolean;
+
   /**
    * @internal
    */
   abstract onDestroy(callback: () => void): () => void;
 }
 
-export class R3Injector extends EnvironmentInjector {
+export class R3Injector extends EnvironmentInjector implements PrimitivesInjector {
   /**
    * Map of tokens to records which contain the instances of those tokens.
    * - `null` value implies that we don't have the record. Used by tree-shakable injectors
@@ -189,7 +150,7 @@ export class R3Injector extends EnvironmentInjector {
   /**
    * Flag indicating that this injector was previously destroyed.
    */
-  get destroyed(): boolean {
+  override get destroyed(): boolean {
     return this._destroyed;
   }
   private _destroyed = false;
@@ -204,10 +165,7 @@ export class R3Injector extends EnvironmentInjector {
   ) {
     super();
     // Start off by creating Records for every provider.
-    forEachSingleProvider(
-      providers as Array<Provider | InternalEnvironmentProviders>,
-      (provider) => this.processProvider(provider),
-    );
+    forEachSingleProvider(providers as Array<Provider | InternalEnvironmentProviders>, (provider) => this.processProvider(provider));
 
     // Make sure the INJECTOR token provides this injector.
     this.records.set(INJECTOR, makeRecord(undefined, this));
@@ -219,16 +177,29 @@ export class R3Injector extends EnvironmentInjector {
 
     // Detect whether this injector has the APP_ROOT_SCOPE token and thus should provide
     // any injectable scoped to APP_ROOT_SCOPE.
-    const record = this.records.get(
-      INJECTOR_SCOPE,
-    ) as Record<InjectorScope | null>;
+    const record = this.records.get(INJECTOR_SCOPE) as Record<InjectorScope | null>;
     if (record != null && typeof record.value === 'string') {
       this.scopes.add(record.value as InjectorScope);
     }
 
-    this.injectorDefTypes = new Set(
-      this.get(INJECTOR_DEF_TYPES, EMPTY_ARRAY, InjectFlags.Self),
-    );
+    this.injectorDefTypes = new Set(this.get(INJECTOR_DEF_TYPES, EMPTY_ARRAY, { self: true }));
+  }
+
+  retrieve<T>(token: PrimitivesInjectionToken<T>, options?: unknown): T | NotFound {
+    const flags: InternalInjectFlags = convertToBitFlags(options as InjectOptions | undefined) || InternalInjectFlags.Default;
+    try {
+      return (this as BackwardsCompatibleInjector).get(
+        token as unknown as InjectionToken<T>,
+        // When a dependency is requested with an optional flag, DI returns null as the default value.
+        THROW_IF_NOT_FOUND as T,
+        flags,
+      );
+    } catch (e: any) {
+      if (isNotFound(e)) {
+        return e;
+      }
+      throw e;
+    }
   }
 
   /**
@@ -283,21 +254,18 @@ export class R3Injector extends EnvironmentInjector {
     } finally {
       setCurrentInjector(previousInjector);
       setInjectImplementation(previousInjectImplementation);
+      undefined as any;
     }
   }
 
-  override get<T>(
-    token: ProviderToken<T>,
-    notFoundValue: any = THROW_IF_NOT_FOUND,
-    flags: InjectFlags | InjectOptions = InjectFlags.Default,
-  ): T {
+  override get<T>(token: ProviderToken<T>, notFoundValue: any = THROW_IF_NOT_FOUND, options?: InjectOptions): T {
     assertNotDestroyed(this);
 
     if (token.hasOwnProperty(NG_ENV_ID)) {
       return (token as any)[NG_ENV_ID](this);
     }
 
-    flags = convertToBitFlags(flags) as InjectFlags;
+    const flags = convertToBitFlags(options) as InternalInjectFlags;
 
     // Set the injection context.
     if (false) {
@@ -306,7 +274,7 @@ export class R3Injector extends EnvironmentInjector {
     const previousInjectImplementation = setInjectImplementation(undefined);
     try {
       // Check for the SkipSelf flag.
-      if (!(flags & InjectFlags.SkipSelf)) {
+      if (!(flags & InternalInjectFlags.SkipSelf)) {
         // SkipSelf isn't set, check if the record belongs to this injector.
         let record: Record<T> | undefined | null = this.records.get(token);
         if (record === undefined) {
@@ -320,10 +288,7 @@ export class R3Injector extends EnvironmentInjector {
             if (false) {
             }
 
-            record = makeRecord(
-              injectableDefOrInjectorDefFactory(token),
-              NOT_YET,
-            );
+            record = makeRecord(injectableDefOrInjectorDefFactory(token), NOT_YET);
           } else {
             record = null;
           }
@@ -337,20 +302,15 @@ export class R3Injector extends EnvironmentInjector {
 
       // Select the next injector based on the Self flag - if self is set, the next injector is
       // the NullInjector, otherwise it's the parent.
-      const nextInjector = !(flags & InjectFlags.Self)
-        ? this.parent
-        : getNullInjector();
+      const nextInjector = !(flags & InternalInjectFlags.Self) ? this.parent : getNullInjector();
       // Set the notFoundValue based on the Optional flag - if optional is set and notFoundValue
       // is undefined, the value is null, otherwise it's the notFoundValue.
-      notFoundValue =
-        flags & InjectFlags.Optional && notFoundValue === THROW_IF_NOT_FOUND
-          ? null
-          : notFoundValue;
+      notFoundValue = flags & InternalInjectFlags.Optional && notFoundValue === THROW_IF_NOT_FOUND ? null : notFoundValue;
       return nextInjector.get(token, notFoundValue);
     } catch (e: any) {
-      if (e.name === 'NullInjectorError') {
-        const path: any[] = (e[NG_TEMP_TOKEN_PATH] =
-          e[NG_TEMP_TOKEN_PATH] || []);
+      if (isNotFound(e)) {
+        // @ts-ignore
+        const path: any[] = (e[NG_TEMP_TOKEN_PATH] = e[NG_TEMP_TOKEN_PATH] || []);
         path.unshift(stringify(token));
         if (previousInjector) {
           // We still have a parent injector, keep throwing
@@ -366,6 +326,7 @@ export class R3Injector extends EnvironmentInjector {
       // Lastly, restore the previous injection context.
       setInjectImplementation(previousInjectImplementation);
       setCurrentInjector(previousInjector);
+      undefined as any;
     }
   }
 
@@ -377,11 +338,7 @@ export class R3Injector extends EnvironmentInjector {
     }
 
     try {
-      const initializers = this.get(
-        ENVIRONMENT_INITIALIZER,
-        EMPTY_ARRAY,
-        InjectFlags.Self,
-      );
+      const initializers = this.get(ENVIRONMENT_INITIALIZER, EMPTY_ARRAY, { self: true });
       if (false) {
       }
       for (const initializer of initializers) {
@@ -390,6 +347,7 @@ export class R3Injector extends EnvironmentInjector {
     } finally {
       setCurrentInjector(previousInjector);
       setInjectImplementation(previousInjectImplementation);
+      undefined as any;
     }
   }
 
@@ -409,9 +367,7 @@ export class R3Injector extends EnvironmentInjector {
     // Determine the token from the provider. Either it's its own token, or has a {provide: ...}
     // property.
     provider = resolveForwardRef(provider);
-    let token: any = isTypeProvider(provider)
-      ? provider
-      : resolveForwardRef(provider && provider.provide);
+    let token: any = isTypeProvider(provider) ? provider : resolveForwardRef(provider && provider.provide);
 
     // Construct a `Record` for the provider.
     const record = providerToRecord(provider);
@@ -442,7 +398,8 @@ export class R3Injector extends EnvironmentInjector {
 
   private hydrate<T>(token: ProviderToken<T>, record: Record<T>): T {
     try {
-      if (false) {
+      if (record.value === CIRCULAR) {
+        throwCyclicDependencyError(stringify(token));
       } else if (record.value === NOT_YET) {
         record.value = CIRCULAR;
 
@@ -451,11 +408,7 @@ export class R3Injector extends EnvironmentInjector {
           record.value = record.factory!();
         }
       }
-      if (
-        typeof record.value === 'object' &&
-        record.value &&
-        hasOnDestroy(record.value)
-      ) {
+      if (typeof record.value === 'object' && record.value && hasOnDestroy(record.value)) {
         this._ngOnDestroyHooks.add(record.value);
       }
       return record.value as T;
@@ -483,13 +436,10 @@ export class R3Injector extends EnvironmentInjector {
   }
 }
 
-function injectableDefOrInjectorDefFactory(
-  token: ProviderToken<any>,
-): FactoryFn<any> {
+function injectableDefOrInjectorDefFactory(token: ProviderToken<any>): FactoryFn<any> {
   // Most tokens will have an injectable def directly on them, which specifies a factory directly.
   const injectableDef = getInjectableDef(token);
-  const factory =
-    injectableDef !== null ? injectableDef.factory : getFactoryDef(token);
+  const factory = injectableDef !== null ? injectableDef.factory : getFactoryDef(token);
 
   if (factory !== null) {
     return factory;
@@ -498,7 +448,7 @@ function injectableDefOrInjectorDefFactory(
   // InjectionTokens should have an injectable def (ɵprov) and thus should be handled above.
   // If it's missing that, it's an error.
   if (token instanceof InjectionToken) {
-    throw new RuntimeError(RuntimeErrorCode.INVALID_INJECTION_TOKEN, null);
+    throw new RuntimeError(RuntimeErrorCode.INVALID_INJECTION_TOKEN, undefined as any);
   }
 
   // Undecorated types can sometimes be created if they have no constructor arguments.
@@ -507,14 +457,14 @@ function injectableDefOrInjectorDefFactory(
   }
 
   // There was no way to resolve a factory for this token.
-  throw new RuntimeError(RuntimeErrorCode.INVALID_INJECTION_TOKEN, null);
+  throw new RuntimeError(RuntimeErrorCode.INVALID_INJECTION_TOKEN, undefined as any);
 }
 
 function getUndecoratedInjectableFactory(token: Function) {
   // If the token has parameters then it has dependencies that we cannot resolve implicitly.
   const paramLength = token.length;
   if (paramLength > 0) {
-    throw new RuntimeError(RuntimeErrorCode.INVALID_INJECTION_TOKEN, null);
+    throw new RuntimeError(RuntimeErrorCode.INVALID_INJECTION_TOKEN, undefined as any);
   }
 
   // The constructor function appears to have no parameters.
@@ -544,21 +494,14 @@ function providerToRecord(provider: SingleProvider): Record<any> {
  *
  * @param provider provider to convert to factory
  */
-export function providerToFactory(
-  provider: SingleProvider,
-  ngModuleType?: InjectorType<any>,
-  providers?: any[],
-): () => any {
+export function providerToFactory(provider: SingleProvider, ngModuleType?: InjectorType<any>, providers?: any[]): () => any {
   let factory: (() => any) | undefined = undefined;
   if (false) {
   }
 
   if (isTypeProvider(provider)) {
     const unwrappedProvider = resolveForwardRef(provider);
-    return (
-      getFactoryDef(unwrappedProvider) ||
-      injectableDefOrInjectorDefFactory(unwrappedProvider)
-    );
+    return getFactoryDef(unwrappedProvider) || injectableDefOrInjectorDefFactory(unwrappedProvider);
   } else {
     if (isValueProvider(provider)) {
       factory = () => resolveForwardRef(provider.useValue);
@@ -567,19 +510,13 @@ export function providerToFactory(
     } else if (isExistingProvider(provider)) {
       factory = () => ɵɵinject(resolveForwardRef(provider.useExisting));
     } else {
-      const classRef = resolveForwardRef(
-        provider &&
-          ((provider as StaticClassProvider | ClassProvider).useClass ||
-            provider.provide),
-      );
+      const classRef = resolveForwardRef(provider && ((provider as StaticClassProvider | ClassProvider).useClass || provider.provide));
       if (false) {
       }
       if (hasDeps(provider)) {
         factory = () => new classRef(...injectArgs(provider.deps));
       } else {
-        return (
-          getFactoryDef(classRef) || injectableDefOrInjectorDefFactory(classRef)
-        );
+        return getFactoryDef(classRef) || injectableDefOrInjectorDefFactory(classRef);
       }
     }
   }
@@ -588,15 +525,11 @@ export function providerToFactory(
 
 export function assertNotDestroyed(injector: R3Injector): void {
   if (injector.destroyed) {
-    throw new RuntimeError(RuntimeErrorCode.INJECTOR_ALREADY_DESTROYED, null);
+    throw new RuntimeError(RuntimeErrorCode.INJECTOR_ALREADY_DESTROYED, undefined as any);
   }
 }
 
-function makeRecord<T>(
-  factory: (() => T) | undefined,
-  value: T | {},
-  multi: boolean = false,
-): Record<T> {
+function makeRecord<T>(factory: (() => T) | undefined, value: T | {}, multi: boolean = false): Record<T> {
   return {
     factory: factory,
     value: value,
@@ -604,31 +537,19 @@ function makeRecord<T>(
   };
 }
 
-function hasDeps(
-  value: ClassProvider | ConstructorProvider | StaticClassProvider,
-): value is ClassProvider & { deps: any[] } {
+function hasDeps(value: ClassProvider | ConstructorProvider | StaticClassProvider): value is ClassProvider & { deps: any[] } {
   return !!(value as any).deps;
 }
 
 function hasOnDestroy(value: any): value is OnDestroy {
-  return (
-    value !== null &&
-    typeof value === 'object' &&
-    typeof (value as OnDestroy).ngOnDestroy === 'function'
-  );
+  return value !== null && typeof value === 'object' && typeof (value as OnDestroy).ngOnDestroy === 'function';
 }
 
 function couldBeInjectableType(value: any): value is ProviderToken<any> {
-  return (
-    typeof value === 'function' ||
-    (typeof value === 'object' && value instanceof InjectionToken)
-  );
+  return typeof value === 'function' || (typeof value === 'object' && value.ngMetadataName === 'InjectionToken');
 }
 
-function forEachSingleProvider(
-  providers: Array<Provider | EnvironmentProviders>,
-  fn: (provider: SingleProvider) => void,
-): void {
+function forEachSingleProvider(providers: Array<Provider | EnvironmentProviders>, fn: (provider: SingleProvider) => void): void {
   for (const provider of providers) {
     if (Array.isArray(provider)) {
       forEachSingleProvider(provider, fn);

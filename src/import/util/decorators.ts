@@ -31,11 +31,7 @@ export interface TypeDecorator {
   // ParameterDecorator is declared in lib.d.ts as a `declare type`
   // so we cannot declare this interface as a subtype.
   // see https://github.com/angular/angular/issues/3379#issuecomment-126169417
-  (
-    target: object,
-    propertyKey?: string | symbol,
-    parameterIndex?: number,
-  ): void;
+  (target: object, propertyKey?: string | symbol, parameterIndex?: number): void;
   // Standard (non-experimental) Decorator signature that avoids direct usage of
   // any TS 5.0+ specific types.
   (target: unknown, context: unknown): void;
@@ -53,17 +49,10 @@ function makeMetadataCtor(props?: (...args: any[]) => any): any {
   };
 }
 
-export function makeParamDecorator(
-  name: string,
-  props?: (...args: any[]) => any,
-  parentClass?: any,
-): any {
+export function makeParamDecorator(name: string, props?: (...args: any[]) => any, parentClass?: any): any {
   return noSideEffects(() => {
     const metaCtor = makeMetadataCtor(props);
-    function ParamDecoratorFactory(
-      this: unknown | typeof ParamDecoratorFactory,
-      ...args: any[]
-    ): any {
+    function ParamDecoratorFactory(this: unknown | typeof ParamDecoratorFactory, ...args: any[]): any {
       metaCtor.apply(this, args);
       return this;
     }

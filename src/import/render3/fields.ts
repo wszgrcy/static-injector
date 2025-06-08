@@ -7,9 +7,7 @@
  */
 
 import { getClosureSafeProperty } from '../util/property';
-export const NG_FACTORY_DEF = getClosureSafeProperty({
-  ɵfac: getClosureSafeProperty,
-});
+export const NG_FACTORY_DEF: string = getClosureSafeProperty({ ɵfac: getClosureSafeProperty });
 
 /**
  * The `NG_ENV_ID` field on a DI token indicates special processing in the `EnvironmentInjector`:
@@ -19,6 +17,4 @@ export const NG_FACTORY_DEF = getClosureSafeProperty({
  * This particular retrieval of DI tokens is mostly done to eliminate circular dependencies and
  * improve tree-shaking.
  */
-export const NG_ENV_ID = getClosureSafeProperty({
-  __NG_ENV_ID__: getClosureSafeProperty,
-});
+export const NG_ENV_ID: string = getClosureSafeProperty({ __NG_ENV_ID__: getClosureSafeProperty });

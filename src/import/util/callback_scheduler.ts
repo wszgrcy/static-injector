@@ -40,10 +40,7 @@ export function scheduleCallbackWithRafRace(callback: Function): () => void {
   function cleanup() {
     callback = noop;
     try {
-      if (
-        animationFrameId !== undefined &&
-        typeof cancelAnimationFrame === 'function'
-      ) {
+      if (animationFrameId !== undefined && typeof cancelAnimationFrame === 'function') {
         cancelAnimationFrame(animationFrameId);
       }
       if (timeoutId !== undefined) {
