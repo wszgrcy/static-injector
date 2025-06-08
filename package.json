@@ -6,6 +6,7 @@
   "scripts": {
     "sync": "code-recycle ./script/sync/index.ts --cwd ./src && eslint --fix ./src &&  prettier ./src --write",
     "test": "rimraf -g ./test-dist/**/*.mjs && tsx ./script/test.esbuild.ts && mocha \"./test-dist/**/*.spec.mjs\" --enable-source-maps --inspect",
+    "coverage": "c8 npm run test",
     "build": "rimraf dist && npm run build:import",
     "build:import": "tsx ./script/build && tsc -p tsconfig.type.json && cpx ./assets/package.json ./dist && cpx -v ./readme.md ./dist"
   },
@@ -21,6 +22,7 @@
     "@types/chai": "^5.0.1",
     "@types/mocha": "^10.0.10",
     "@types/node": "^20.11.30",
+    "c8": "^10.1.3",
     "chai": "^5.2.0",
     "cpx": "^1.5.0",
     "esbuild": "^0.25.0",

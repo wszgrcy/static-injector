@@ -1,0 +1,16 @@
+{
+  "extension": [
+    ".ts"
+  ],
+  "reporter": [
+    "html",
+    "text"
+  ],
+  "exclude": [
+    "**/*.spec.ts",
+    "script",
+    "test/fixture"
+  ],
+  "exclude-after-remap": true,
+  "all": false
+}
