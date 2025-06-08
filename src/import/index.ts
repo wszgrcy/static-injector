@@ -23,6 +23,9 @@ export * from './change_detection/scheduling/zoneless_scheduling_impl';
 
 export * from './resource';
 export * from './di/provider_token';
+export function Injectable(args?: any) {
+  return (constructor: Function) => {};
+}
 export class StaticInjectOptions {
   static injectOptions: Parameters<InjectableDecorator>[0];
 }
