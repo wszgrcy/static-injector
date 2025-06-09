@@ -25,6 +25,7 @@ export * from './resource';
 export * from './di/provider_token';
 export * from './error_handler';
 export * from './pending_tasks';
+export * from './linker/destroy_ref';
 export function Injectable(args?: any) {
   return (constructor: Function) => {};
 }
