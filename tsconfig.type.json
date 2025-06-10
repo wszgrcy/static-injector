@@ -8,7 +8,8 @@
     "moduleResolution": "node",
     "strict": true,
     "declaration": true,
-    "emitDeclarationOnly": true
+    "emitDeclarationOnly": true,
+    "stripInternal": true
   },
   "files": [
     "./src/import/index.ts",
