@@ -52,6 +52,7 @@ export default [
       "@typescript-eslint/no-unsafe-function-type":"warn",
       "@typescript-eslint/no-empty-object-type":"warn",
       "no-prototype-builtins":"warn",
+      "no-var":"warn",
     },
   },
 ];

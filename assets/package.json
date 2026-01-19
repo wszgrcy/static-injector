@@ -4,7 +4,7 @@
   "description": "Angular 依赖注入独立版本;Angular dependency injection standalone version",
   "keywords": [
     "angular",
-    "angular 20.0.2",
+    "angular 20.3.15",
     "injector",
     "typescript",
     "injectable",

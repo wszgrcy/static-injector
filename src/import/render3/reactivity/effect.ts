@@ -6,17 +6,7 @@
  * found in the LICENSE file at https://angular.dev/license
  */
 
-import {
-  REACTIVE_NODE,
-  ReactiveNode,
-  SIGNAL,
-  consumerAfterComputation,
-  consumerBeforeComputation,
-  consumerDestroy,
-  consumerPollProducersForChange,
-  isInNotificationPhase,
-  setActiveConsumer,
-} from '../../../primitives/signals';
+import { SIGNAL, consumerDestroy, isInNotificationPhase, setActiveConsumer, BaseEffectNode, BASE_EFFECT_NODE, runEffect } from '../../../primitives/signals';
 import { inject } from '../../di/injector_compatibility';
 import { Injector } from '../../di/injector';
 import { assertNotInReactiveContext } from './asserts';
@@ -91,12 +81,16 @@ export interface CreateEffectOptions {
  * before the next effect run. The cleanup function makes it possible to "cancel" any work that the
  * previous effect run might have started.
  *
+ * @see [Effect cleanup functions](guide/signals#effect-cleanup-functions)
+ *
  * @publicApi 20.0
  */
 export type EffectCleanupFn = () => void;
 
 /**
  * A callback passed to the effect function that makes it possible to register cleanup logic.
+ *
+ * @see [Effect cleanup functions](guide/signals#effect-cleanup-functions)
  *
  * @publicApi 20.0
  */
@@ -117,6 +111,8 @@ export type EffectCleanupRegisterFn = (cleanupFn: EffectCleanupFn) => void;
  * and have no connection to the component tree or change detection.
  *
  * `effect()` must be run in injection context, unless the `injector` option is manually specified.
+ *
+ * @see [Effects](guide/signals#effects)
  *
  * @publicApi 20.0
  */
@@ -150,61 +146,37 @@ export function effect(effectFn: (onCleanup: EffectCleanupRegisterFn) => void, o
   return effectRef;
 }
 
-export interface EffectNode extends ReactiveNode, SchedulableEffect {
-  hasRun: boolean;
+export interface EffectNode extends BaseEffectNode, SchedulableEffect {
   cleanupFns: EffectCleanupFn[] | undefined;
   injector: Injector;
   notifier: ChangeDetectionScheduler;
 
   onDestroyFn: () => void;
-  fn: (cleanupFn: EffectCleanupRegisterFn) => void;
-  run(): void;
-  destroy(): void;
-  maybeCleanup(): void;
 }
 
 export interface RootEffectNode extends EffectNode {
   scheduler: EffectScheduler;
 }
 
-export const BASE_EFFECT_NODE: Omit<EffectNode, 'fn' | 'destroy' | 'injector' | 'notifier'> = /* @__PURE__ */ (() => ({
-  ...REACTIVE_NODE,
-  consumerIsAlwaysLive: true,
-  consumerAllowSignalWrites: true,
-  dirty: true,
-  hasRun: false,
+export const EFFECT_NODE: Omit<EffectNode, 'fn' | 'destroy' | 'injector' | 'notifier'> = /* @__PURE__ */ (() => ({
+  ...BASE_EFFECT_NODE,
   cleanupFns: undefined,
   zone: null,
-  kind: 'effect',
   onDestroyFn: noop,
   run(this: EffectNode): void {
-    this.dirty = false;
-
     if (ngDevMode && isInNotificationPhase()) {
       throw new Error(`Schedulers cannot synchronously execute watches while scheduling.`);
     }
-
-    if (this.hasRun && !consumerPollProducersForChange(this)) {
-      return;
-    }
-    this.hasRun = true;
-
-    const registerCleanupFn: EffectCleanupRegisterFn = (cleanupFn) => (this.cleanupFns ??= []).push(cleanupFn);
-
-    const prevNode = consumerBeforeComputation(this);
-
     // We clear `setIsRefreshingViews` so that `markForCheck()` within the body of an effect will
     // cause CD to reach the component in question.
 
     try {
-      this.maybeCleanup();
-      this.fn(registerCleanupFn);
+      runEffect(this);
     } finally {
-      consumerAfterComputation(this, prevNode);
     }
   },
 
-  maybeCleanup(this: EffectNode): void {
+  cleanup(this: EffectNode): void {
     if (!this.cleanupFns?.length) {
       return;
     }
@@ -224,7 +196,7 @@ export const BASE_EFFECT_NODE: Omit<EffectNode, 'fn' | 'destroy' | 'injector' | 
 }))();
 
 export const ROOT_EFFECT_NODE: Omit<RootEffectNode, 'fn' | 'scheduler' | 'notifier' | 'injector'> = /* @__PURE__ */ (() => ({
-  ...BASE_EFFECT_NODE,
+  ...EFFECT_NODE,
   consumerMarkedDirty(this: RootEffectNode) {
     this.scheduler.schedule(this);
     this.notifier.notify(NotificationSource.RootEffect);
@@ -232,18 +204,24 @@ export const ROOT_EFFECT_NODE: Omit<RootEffectNode, 'fn' | 'scheduler' | 'notifi
   destroy(this: RootEffectNode) {
     consumerDestroy(this);
     this.onDestroyFn();
-    this.maybeCleanup();
+    this.cleanup();
     this.scheduler.remove(this);
   },
 }))();
 
 export function createRootEffect(fn: (onCleanup: EffectCleanupRegisterFn) => void, scheduler: EffectScheduler, notifier: ChangeDetectionScheduler): RootEffectNode {
   const node = Object.create(ROOT_EFFECT_NODE) as RootEffectNode;
-  node.fn = fn;
+  node.fn = createEffectFn(node, fn);
   node.scheduler = scheduler;
   node.notifier = notifier;
   node.zone = typeof Zone !== 'undefined' ? Zone.current : null;
   node.scheduler.add(node);
   node.notifier.notify(NotificationSource.RootEffect);
   return node;
+}
+
+function createEffectFn(node: EffectNode, fn: (onCleanup: EffectCleanupRegisterFn) => void) {
+  return () => {
+    fn((cleanupFn) => (node.cleanupFns ??= []).push(cleanupFn));
+  };
 }

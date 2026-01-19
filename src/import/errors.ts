@@ -64,7 +64,7 @@ export const enum RuntimeErrorCode {
 
   // Bootstrap Errors
   MULTIPLE_PLATFORMS = 400,
-  PLATFORM_NOT_FOUND = 401,
+  PLATFORM_NOT_FOUND = -401,
   MISSING_REQUIRED_INJECTABLE_IN_BOOTSTRAP = 402,
   BOOTSTRAP_COMPONENTS_NOT_FOUND = -403,
   PLATFORM_ALREADY_DESTROYED = 404,
@@ -89,8 +89,8 @@ export const enum RuntimeErrorCode {
   REQUIRE_SYNC_WITHOUT_SYNC_EMIT = 601,
   ASSERTION_NOT_INSIDE_REACTIVE_CONTEXT = -602,
 
-  // Styling Errors
-
+  // Animation Errors
+  ANIMATE_INVALID_VALUE = 650,
   // Declarations Errors
 
   // i18n Errors
@@ -116,6 +116,11 @@ export const enum RuntimeErrorCode {
   TYPE_IS_NOT_STANDALONE = 907,
   MISSING_ZONEJS = 908,
   UNEXPECTED_ZONE_STATE = 909,
+  UNSAFE_ATTRIBUTE_BINDING = -910,
+  /**
+   * @deprecated use `UNSAFE_ATTRIBUTE_BINDING` instead.
+   */
+  // tslint:disable-next-line:no-duplicate-enum-values
   UNSAFE_IFRAME_ATTRS = -910,
   VIEW_ALREADY_DESTROYED = 911,
   COMPONENT_ID_COLLISION = -912,
@@ -124,6 +129,7 @@ export const enum RuntimeErrorCode {
   MISSING_NG_MODULE_DEFINITION = 915,
   MISSING_DIRECTIVE_DEFINITION = 916,
   NO_COMPONENT_FACTORY_FOUND = 917,
+  EXTERNAL_RESOURCE_LOADING_FAILED = 918,
 
   // Signal integration errors
   REQUIRED_INPUT_NO_VALUE = -950,
@@ -141,7 +147,7 @@ export const enum RuntimeErrorCode {
   RUNTIME_DEPS_INVALID_IMPORTED_TYPE = 980,
   RUNTIME_DEPS_ORPHAN_COMPONENT = 981,
 
-  // Resource errors
+  // resource() API errors
   MUST_PROVIDE_STREAM_OPTION = 990,
   RESOURCE_COMPLETED_BEFORE_PRODUCING_VALUE = 991,
 

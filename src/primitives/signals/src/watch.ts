@@ -56,7 +56,6 @@ export interface Watch {
   [SIGNAL]: WatchNode;
 }
 export interface WatchNode extends ReactiveNode {
-  hasRun: boolean;
   fn: ((onCleanup: WatchCleanupRegisterFn) => void) | null;
   schedule: ((watch: Watch) => void) | null;
   cleanupFn: WatchCleanupFn;
@@ -103,10 +102,10 @@ export function createWatch(fn: (onCleanup: WatchCleanupRegisterFn) => void, sch
     }
 
     node.dirty = false;
-    if (node.hasRun && !consumerPollProducersForChange(node)) {
+    if (node.version > 0 && !consumerPollProducersForChange(node)) {
       return;
     }
-    node.hasRun = true;
+    node.version++;
 
     const prevConsumer = consumerBeforeComputation(node);
     try {
@@ -143,6 +142,5 @@ const WATCH_NODE: Partial<WatchNode> = /* @__PURE__ */ (() => ({
       node.schedule(node.ref);
     }
   },
-  hasRun: false,
   cleanupFn: NOOP_CLEANUP_FN,
 }))();

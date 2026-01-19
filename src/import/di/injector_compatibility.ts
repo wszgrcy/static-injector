@@ -82,6 +82,8 @@ export function injectInjectorOnly<T>(token: ProviderToken<T>, flags = InternalI
     return injectRootLimpMode(token, undefined, flags);
   } else {
     const options = convertToInjectOptions(flags);
+    // TODO: improve the typings here.
+    // `token` can be a multi: true provider definition, which is considered as a Token but not represented in the typings
     const value = currentInjector.retrieve(token as PrimitivesInjectionToken<T>, options) as T;
     undefined as any;
     if (isNotFound(value)) {
@@ -244,6 +246,8 @@ export function inject<T>(token: ProviderToken<T>, options: InjectOptions): T | 
  * }
  * ```
  *
+ * @see [Injecting dependencies with inject()](guide/di#injecting-dependencies-with-inject)
+ *
  * @publicApi
  */
 export function inject<T>(token: ProviderToken<T>, options?: InjectOptions) {
@@ -335,17 +339,6 @@ export function attachInjectFlag(decorator: any, flag: InternalInjectFlags | Dec
  */
 export function getInjectFlag(token: any): number | undefined {
   return token[DI_DECORATOR_FLAG];
-}
-
-export function catchInjectorError(e: any, token: any, injectorErrorName: string, source: string | null): never {
-  const tokenPath: any[] = e[NG_TEMP_TOKEN_PATH];
-  if (token[SOURCE]) {
-    tokenPath.unshift(token[SOURCE]);
-  }
-  e.message = formatError('\n' + e.message, tokenPath, injectorErrorName, source);
-  e[NG_TOKEN_PATH] = tokenPath;
-  e[NG_TEMP_TOKEN_PATH] = null;
-  throw e;
 }
 
 export function formatError(text: string, obj: any, injectorErrorName: string, source: string | null = null): string {

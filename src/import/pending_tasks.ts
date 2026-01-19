@@ -107,6 +107,9 @@ export class PendingTasksInternal implements OnDestroy {
  * taskCleanup();
  * ```
  *
+ *
+ * @see [PendingTasks for Server Side Rendering (SSR)](guide/zoneless#pendingtasks-for-server-side-rendering-ssr)
+ *
  * @publicApi 20.0
  */
 export class PendingTasks {

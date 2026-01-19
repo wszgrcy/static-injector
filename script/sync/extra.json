@@ -397,7 +397,10 @@
                 "values": {
                     "includes": [
                         "throwProviderNotFoundError",
-                        "throwCyclicDependencyError"
+                        "throwCyclicDependencyError",
+                        "getRuntimeErrorCode",
+                        "createRuntimeError",
+                        "cyclicDependencyError"
                     ]
                 }
             }

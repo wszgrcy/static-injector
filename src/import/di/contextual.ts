@@ -22,6 +22,8 @@ import { Injector as PrimitivesInjector } from '@angular/core/primitives/di';
  * from the given `Injector`. Note that `inject` is only usable synchronously, and cannot be used in
  * any asynchronous callbacks or after any `await` points.
  *
+ * @see [Run within an injection context](guide/di/dependency-injection-context#run-within-an-injection-context)
+ *
  * @param injector the injector which will satisfy calls to [`inject`](api/core/inject) while `fn`
  *     is executing
  * @param fn the closure to be run in the context of `injector`
@@ -61,6 +63,8 @@ export function isInInjectionContext(): boolean {
  * context](guide/di/dependency-injection-context) and has access to `inject`.
  *
  * @param debugFn a reference to the function making the assertion (used for the error message).
+ *
+ * @see [Asserts the context](guide/di/dependency-injection-context#asserts-the-context)
  *
  * @publicApi
  */

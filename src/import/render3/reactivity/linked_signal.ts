@@ -17,7 +17,7 @@ const identityFn = <T>(v: T) => v;
  *
  * @publicApi 20.0
  */
-export function linkedSignal<D>(computation: () => D, options?: { equal?: ValueEqualityFn<NoInfer<D>> }): WritableSignal<D>;
+export function linkedSignal<D>(computation: () => D, options?: { equal?: ValueEqualityFn<NoInfer<D>>; debugName?: string }): WritableSignal<D>;
 
 /**
  * Creates a writable signal whose value is initialized and reset by the linked, reactive computation.
@@ -26,11 +26,13 @@ export function linkedSignal<D>(computation: () => D, options?: { equal?: ValueE
  * Note: The computation is reactive, meaning the linked signal will automatically update whenever any of the signals used within the computation change.
  *
  * @publicApi 20.0
+ * @see [Dependent state with linkedSignal](guide/signals/linked-signal)
  */
 export function linkedSignal<S, D>(options: {
   source: () => S;
   computation: (source: NoInfer<S>, previous?: { source: NoInfer<S>; value: NoInfer<D> }) => D;
   equal?: ValueEqualityFn<NoInfer<D>>;
+  debugName?: string;
 }): WritableSignal<D>;
 
 export function linkedSignal<S, D>(
@@ -39,20 +41,21 @@ export function linkedSignal<S, D>(
         source: () => S;
         computation: ComputationFn<S, D>;
         equal?: ValueEqualityFn<D>;
+        debugName?: string;
       }
     | (() => D),
-  options?: { equal?: ValueEqualityFn<D> },
+  options?: { equal?: ValueEqualityFn<D>; debugName?: string },
 ): WritableSignal<D> {
   if (typeof optionsOrComputation === 'function') {
     const getter = createLinkedSignal<D, D>(optionsOrComputation, identityFn<D>, options?.equal) as LinkedSignalGetter<D, D> & WritableSignal<D>;
-    return upgradeLinkedSignalGetter(getter);
+    return upgradeLinkedSignalGetter(getter, options?.debugName);
   } else {
     const getter = createLinkedSignal<S, D>(optionsOrComputation.source, optionsOrComputation.computation, optionsOrComputation.equal);
-    return upgradeLinkedSignalGetter(getter);
+    return upgradeLinkedSignalGetter(getter, optionsOrComputation.debugName);
   }
 }
 
-function upgradeLinkedSignalGetter<S, D>(getter: LinkedSignalGetter<S, D>): WritableSignal<D> {
+function upgradeLinkedSignalGetter<S, D>(getter: LinkedSignalGetter<S, D>, debugName?: string): WritableSignal<D> {
   if (false) {
   }
 
