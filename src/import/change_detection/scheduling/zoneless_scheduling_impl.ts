@@ -7,7 +7,7 @@
  */
 
 import { inject } from '../../di/injector_compatibility';
-import { scheduleCallbackWithRafRace } from '../../util/callback_scheduler';
+import { scheduleCallbackWithMicrotask } from '../../util/callback_scheduler';
 
 import { ChangeDetectionScheduler, NotificationSource } from './zoneless_scheduling';
 import { EffectScheduler } from 'src/import/render3/reactivity/root_effect_scheduler';
@@ -18,8 +18,10 @@ export class ChangeDetectionSchedulerImpl implements ChangeDetectionScheduler {
   private cancelScheduledCallback: null | (() => void) = null;
 
   notify(source: NotificationSource): void {
-    this.cancelScheduledCallback = scheduleCallbackWithRafRace(() => {
+    this.cancelScheduledCallback = scheduleCallbackWithMicrotask(() => {
+      this.runningTick = true;
       this.#rootEffectScheduler.flush();
+      this.cleanup();
     });
   }
   private cleanup() {
