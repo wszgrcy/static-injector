@@ -36,7 +36,7 @@ jobs:
           npm run build
       - id: publish
         name: publish
-        uses: JS-DevTools/npm-publish@v3.1
+        uses: JS-DevTools/npm-publish@v4
         with:
           package: ./dist/package.json
       - if: steps.publish.outputs.old-version != steps.publish.outputs.version
