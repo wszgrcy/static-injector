@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+permissions:
+  id-token: write  
+  contents: read
 env:
   REPOSITORY_PATH: https://${{secrets.ACCESS_TOKEN}}@github.com/
   # GITHUB_TOKEN: ${{secrets.ACCESS_TOKEN}}
@@ -17,11 +20,11 @@ jobs:
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "${GITHUB_ACTOR}@gmail.com"
       - name: pull-code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
       - name: install-node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v6
         with:
-          node-version: 20.x
+          node-version: 22.x
       - name: install-dependencies
         run: |
           npm i 
@@ -35,7 +38,6 @@ jobs:
         name: publish
         uses: JS-DevTools/npm-publish@v3.1
         with:
-          token: ${{ secrets.NPM_PUBLISH_TOKEN }}
           package: ./dist/package.json
       - if: steps.publish.outputs.old-version != steps.publish.outputs.version
         run: |
