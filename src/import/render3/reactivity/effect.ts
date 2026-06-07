@@ -16,6 +16,8 @@ import { noop } from '../../util/noop';
 import { ChangeDetectionScheduler, NotificationSource } from '../../change_detection/scheduling/zoneless_scheduling';
 import { EffectScheduler, SchedulableEffect } from './root_effect_scheduler';
 
+import { emitEffectCreatedEvent, setInjectorProfilerContext } from '../debug/injector_profiler';
+
 /**
  * A global reactive effect, which can be manually destroyed.
  *
@@ -142,6 +144,16 @@ export function effect(effectFn: (onCleanup: EffectCleanupRegisterFn) => void, o
   }
 
   const effectRef = new EffectRefImpl(node);
+
+  if (ngDevMode) {
+    node.debugName = options?.debugName ?? '';
+    const prevInjectorProfilerContext = setInjectorProfilerContext({ injector, token: null });
+    try {
+      emitEffectCreatedEvent(effectRef);
+    } finally {
+      setInjectorProfilerContext(prevInjectorProfilerContext);
+    }
+  }
 
   return effectRef;
 }

@@ -24,6 +24,7 @@ async function main() {
     packages: 'external',
     define: {
       Zone: 'undefined',
+      ERROR_DETAILS_PAGE_BASE_URL: `'https://v20.angular.dev/errors'`,
     },
     inject: ['./script/shim.js'],
   };

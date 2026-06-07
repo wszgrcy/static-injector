@@ -41,7 +41,8 @@ export function runInInjectionContext<ReturnT>(injector: Injector, fn: () => Ret
   }
 
   let prevInjectorProfilerContext: InjectorProfilerContext;
-  if (false) {
+  if (ngDevMode) {
+    prevInjectorProfilerContext = setInjectorProfilerContext({ injector, token: null });
   }
   const prevInjector = setCurrentInjector(internalInjector);
   const previousInjectImplementation = setInjectImplementation(undefined);

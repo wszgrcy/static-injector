@@ -9,9 +9,16 @@
 import { RuntimeError, RuntimeErrorCode } from '../errors';
 import { OnDestroy } from '../interface/lifecycle_hooks';
 import { Type } from '../interface/type';
-import { InjectorProfilerContext, setInjectorProfilerContext } from '../render3/debug/injector_profiler';
+import {
+  emitInjectorToCreateInstanceEvent,
+  emitInstanceCreatedByInjectorEvent,
+  emitProviderConfiguredEvent,
+  InjectorProfilerContext,
+  runInInjectorProfilerContext,
+  setInjectorProfilerContext,
+} from '../render3/debug/injector_profiler';
 import { FactoryFn, getFactoryDef } from '../render3/definition_factory';
-import { cyclicDependencyError, getRuntimeErrorCode } from '../render3/errors_di';
+import { augmentRuntimeError, cyclicDependencyError, getRuntimeErrorCode, prependTokenToDependencyPath, throwInvalidProviderError, throwMixedMultiProviderError } from '../render3/errors_di';
 import { NG_ENV_ID } from '../render3/fields';
 import { newArray } from '../util/array_utils';
 import { EMPTY_ARRAY } from '../util/empty';
@@ -26,7 +33,7 @@ import { BackwardsCompatibleInjector, convertToBitFlags, injectArgs, setCurrentI
 import { INJECTOR } from './injector_token';
 import { getInheritedInjectableDef, getInjectableDef, InjectorType, ɵɵInjectableDeclaration } from './interface/defs';
 import { InternalInjectFlags, InjectOptions } from './interface/injector';
-import { ClassProvider, ConstructorProvider, EnvironmentProviders, InternalEnvironmentProviders, isEnvironmentProviders, Provider, StaticClassProvider } from './interface/provider';
+import { ClassProvider, ConstructorProvider, EnvironmentProviders, InternalEnvironmentProviders, isEnvironmentProviders, Provider, StaticClassProvider, TypeProvider } from './interface/provider';
 import { INJECTOR_DEF_TYPES } from './internal_tokens';
 import { NullInjector } from './null_injector';
 import { isExistingProvider, isFactoryProvider, isTypeProvider, isValueProvider, SingleProvider } from './provider_collection';
@@ -250,7 +257,8 @@ export class R3Injector extends EnvironmentInjector implements PrimitivesInjecto
     const previousInjectImplementation = setInjectImplementation(undefined);
 
     let prevInjectContext: InjectorProfilerContext | undefined;
-    if (false) {
+    if (ngDevMode) {
+      prevInjectContext = setInjectorProfilerContext({ injector: this, token: null });
     }
 
     try {
@@ -273,7 +281,8 @@ export class R3Injector extends EnvironmentInjector implements PrimitivesInjecto
 
     // Set the injection context.
     let prevInjectContext: InjectorProfilerContext;
-    if (false) {
+    if (ngDevMode) {
+      prevInjectContext = setInjectorProfilerContext({ injector: this, token: token as Type<T> });
     }
     const previousInjector = setCurrentInjector(this);
     const previousInjectImplementation = setInjectImplementation(undefined);
@@ -290,7 +299,10 @@ export class R3Injector extends EnvironmentInjector implements PrimitivesInjecto
             // Found an injectable def and it's scoped to this injector. Pretend as if it was here
             // all along.
 
-            if (false) {
+            if (ngDevMode) {
+              runInInjectorProfilerContext(this, token as Type<T>, () => {
+                emitProviderConfiguredEvent(token as TypeProvider);
+              });
             }
 
             record = makeRecord(injectableDefOrInjectorDefFactory(token), NOT_YET);
@@ -326,7 +338,16 @@ export class R3Injector extends EnvironmentInjector implements PrimitivesInjecto
         // inside a function body, so the block may remain in the bundle.
         // Using a conditional ensures the dev-only logic is reliably tree-shaken
         // in production builds.
-        if (false) {
+        if (ngDevMode) {
+          prependTokenToDependencyPath(error, token);
+
+          if (previousInjector) {
+            // We still have a parent injector, keep throwing
+            throw error;
+          } else {
+            // Format & throw the final error message when we don't have any previous injector
+            throw augmentRuntimeError(error, this.source);
+          }
         } else {
           throw new RuntimeError(errorCode, null);
         }
@@ -346,12 +367,20 @@ export class R3Injector extends EnvironmentInjector implements PrimitivesInjecto
     const previousInjector = setCurrentInjector(this);
     const previousInjectImplementation = setInjectImplementation(undefined);
     let prevInjectContext: InjectorProfilerContext | undefined;
-    if (false) {
+    if (ngDevMode) {
+      prevInjectContext = setInjectorProfilerContext({ injector: this, token: null });
     }
 
     try {
       const initializers = this.get(ENVIRONMENT_INITIALIZER, EMPTY_ARRAY, { self: true });
-      if (false) {
+      if (ngDevMode && !Array.isArray(initializers)) {
+        throw new RuntimeError(
+          RuntimeErrorCode.INVALID_MULTI_PROVIDER,
+          'Unexpected type of the `ENVIRONMENT_INITIALIZER` token value ' +
+            `(expected an array, but got ${typeof initializers}). ` +
+            'Please check that the `ENVIRONMENT_INITIALIZER` token is configured as a ' +
+            '`multi: true` provider.',
+        );
       }
       for (const initializer of initializers) {
         initializer();
@@ -383,7 +412,18 @@ export class R3Injector extends EnvironmentInjector implements PrimitivesInjecto
 
     // Construct a `Record` for the provider.
     const record = providerToRecord(provider);
-    if (false) {
+    if (ngDevMode) {
+      runInInjectorProfilerContext(this, token, () => {
+        // Emit InjectorProfilerEventType.Create if provider is a value provider because
+        // these are the only providers that do not go through the value hydration logic
+        // where this event would normally be emitted from.
+        if (isValueProvider(provider)) {
+          emitInjectorToCreateInstanceEvent(token);
+          emitInstanceCreatedByInjectorEvent(provider.useValue);
+        }
+
+        emitProviderConfiguredEvent(provider);
+      });
     }
 
     if (!isTypeProvider(provider) && provider.multi === true) {
@@ -392,7 +432,8 @@ export class R3Injector extends EnvironmentInjector implements PrimitivesInjecto
       let multiRecord = this.records.get(token);
       if (multiRecord) {
         // It has. Throw a nice error if
-        if (false) {
+        if (ngDevMode && multiRecord.multi === undefined) {
+          throwMixedMultiProviderError();
         }
       } else {
         multiRecord = makeRecord(undefined, NOT_YET, true);
@@ -402,7 +443,11 @@ export class R3Injector extends EnvironmentInjector implements PrimitivesInjecto
       token = provider;
       multiRecord.multi!.push(provider);
     } else {
-      if (false) {
+      if (ngDevMode) {
+        const existing = this.records.get(token);
+        if (existing && existing.multi !== undefined) {
+          throwMixedMultiProviderError();
+        }
       }
     }
     this.records.set(token, record);
@@ -415,7 +460,12 @@ export class R3Injector extends EnvironmentInjector implements PrimitivesInjecto
       } else if (record.value === NOT_YET) {
         record.value = CIRCULAR;
 
-        if (false) {
+        if (ngDevMode) {
+          runInInjectorProfilerContext(this, token as Type<T>, () => {
+            emitInjectorToCreateInstanceEvent(token);
+            record.value = record.factory!(undefined, flags);
+            emitInstanceCreatedByInjectorEvent(record.value);
+          });
         } else {
           record.value = record.factory!(undefined, flags);
         }
@@ -508,7 +558,8 @@ function providerToRecord(provider: SingleProvider): Record<any> {
  */
 export function providerToFactory(provider: SingleProvider, ngModuleType?: InjectorType<any>, providers?: any[]): (type?: Type<unknown>, flags?: number) => any {
   let factory: ((type?: Type<unknown>, flags?: InternalInjectFlags) => any) | undefined = undefined;
-  if (false) {
+  if (ngDevMode && isEnvironmentProviders(provider)) {
+    throwInvalidProviderError(undefined, providers, provider);
   }
 
   if (isTypeProvider(provider)) {
@@ -523,7 +574,8 @@ export function providerToFactory(provider: SingleProvider, ngModuleType?: Injec
       factory = (_, flags) => ɵɵinject(resolveForwardRef(provider.useExisting), flags !== undefined && flags & InternalInjectFlags.Optional ? InternalInjectFlags.Optional : undefined);
     } else {
       const classRef = resolveForwardRef(provider && ((provider as StaticClassProvider | ClassProvider).useClass || provider.provide));
-      if (false) {
+      if (ngDevMode && !classRef) {
+        throwInvalidProviderError(ngModuleType, providers, provider);
       }
       if (hasDeps(provider)) {
         factory = () => new classRef(...injectArgs(provider.deps));

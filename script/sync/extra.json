@@ -5,22 +5,7 @@
         "rules": [
 
     
-            {
-                "type": "custom",
-                "change": "change",
-                "values": {
-                    "selector": "IfStatement:has(>BinaryExpression:like(ngDevMode),>Identifier:like(ngDevMode))>CloseParenToken+Block",
-                    "content": "{}"
-                }
-            },
-            {
-                "type": "custom",
-                "change": "change",
-                "values": {
-                    "selector": "IfStatement:has(>BinaryExpression:like(ngDevMode),>Identifier:like(ngDevMode))>OpenParenToken+*",
-                    "content": "false"
-                }
-            },
+   
             {
                 "type": "custom",
                 "values": {
@@ -341,18 +326,7 @@
     {
         "fileName": "./import/render3/errors_di.ts",
         "rules": [
-            {
-                "type": "function",
-                "values": {
-                    "includes": [
-                        "throwProviderNotFoundError",
-                        "throwCyclicDependencyError",
-                        "getRuntimeErrorCode",
-                        "createRuntimeError",
-                        "cyclicDependencyError"
-                    ]
-                }
-            }
+      
         ]
     },
     {
@@ -388,14 +362,7 @@
     {
         "fileName": "./import/render3/instructions/di.ts",
         "rules": [
-            {
-                "type": "custom",
-                "change": "change",
-                "values": {
-                    "selector": "ConditionalExpression:has(>::condition[value*=ngDevMode])",
-                    "content": "'invalid'"
-                }
-            },
+       
             {
                 "type": "import",
                 "values": {
@@ -484,6 +451,15 @@
                 "type": "import",
                 "values": {
                     "all": true
+                }
+            },
+            {
+                "type": "custom",
+                "change": "change" ,
+                "values": {
+                    "selector":"CallExpression[value^=initNgDevMode]" , 
+                    "content": "true"
+               
                 }
             }
         ]
@@ -586,14 +562,8 @@
                 "values": {
                     "selector": "ExpressionStatement:has(>CallExpression:has(>[value=setIsRefreshingViews]))"
                 }
-            },
-            {
-                "type": "custom",
-                "change": "remove",
-                "values": {
-                    "selector": "FunctionDeclaration:has(>[value=effect]) IfStatement:has(>[value=ngDevMode])"
-                }
             }
+          
         ]
     },
     {

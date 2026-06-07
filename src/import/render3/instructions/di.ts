@@ -19,6 +19,6 @@
  * @codeGenApi
  */
 export function ɵɵinvalidFactory(): never {
-  const msg = 'invalid';
+  const msg = ngDevMode ? `This constructor was not compatible with Dependency Injection.` : 'invalid';
   throw new Error(msg);
 }

@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.dev/license
  */
 
-import { createComputed } from '../../../primitives/signals';
+import { createComputed, SIGNAL } from '../../../primitives/signals';
 
 import { Signal, ValueEqualityFn } from './api';
 
@@ -32,7 +32,9 @@ export interface CreateComputedOptions<T> {
 export function computed<T>(computation: () => T, options?: CreateComputedOptions<T>): Signal<T> {
   const getter = createComputed(computation, options?.equal);
 
-  if (false) {
+  if (ngDevMode) {
+    getter.toString = () => `[Computed: ${getter()}]`;
+    getter[SIGNAL].debugName = options?.debugName;
   }
 
   return getter;

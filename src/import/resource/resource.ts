@@ -14,6 +14,7 @@ import { effect, EffectRef } from '../render3/reactivity/effect';
 import { ResourceOptions, ResourceStatus, WritableResource, Resource, ResourceRef, ResourceStreamingLoader, StreamingResourceOptions, ResourceStreamItem, ResourceLoaderParams } from './api';
 
 import { Injector } from '../di/injector';
+import { assertInInjectionContext } from '../di/contextual';
 import { inject } from '../di/injector_compatibility';
 import { PendingTasks } from '../pending_tasks';
 import { linkedSignal } from '../render3/reactivity/linked_signal';
@@ -46,7 +47,8 @@ export function resource<T, R>(options: ResourceOptions<T, R> & { defaultValue: 
  */
 export function resource<T, R>(options: ResourceOptions<T, R>): ResourceRef<T | undefined>;
 export function resource<T, R>(options: ResourceOptions<T, R>): ResourceRef<T | undefined> {
-  if (false) {
+  if (ngDevMode && !options?.injector) {
+    assertInInjectionContext(resource);
   }
 
   const oldNameForParams = (options as ResourceOptions<T, R> & { request: ResourceOptions<T, R>['params'] }).request;
