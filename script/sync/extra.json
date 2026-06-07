@@ -3,22 +3,8 @@
         "glob": true,
         "fileName": "./import/**/*[!definition_factory]*.ts",
         "rules": [
-            {
-                "type": "custom",
-                "change": "change",
-                "values": {
-                    "selector": "ConditionalExpression:like(ngDevMode)",
-                    "replaceSelector": ">ColonToken+*"
-                }
-            },
-            {
-                "type": "custom",
-                "change": "change",
-                "values": {
-                    "selector": "BinaryExpression:has(::parent[tag!=IfStatement]):has(::children(0):like(ngDevMode)):has(>[tag=AmpersandAmpersandToken])",
-                    "content": "undefined as any"
-                }
-            },
+
+    
             {
                 "type": "custom",
                 "change": "change",
@@ -106,14 +92,7 @@
     {
         "fileName": "./import/di/injection_token.ts",
         "rules": [
-            {
-                "type": "import",
-                "values": {
-                    "excludes": [
-                        "assertLessThan"
-                    ]
-                }
-            },
+
             {
                 "type": "custom",
                 "values": {
@@ -158,16 +137,6 @@
                 "values": {
                     "selector": "FunctionDeclaration UnionType:like(ProviderToken<T>|HostAttributeToken)",
                     "content": "ProviderToken<T>"
-                }
-            },
-            {
-                "type": "import",
-                "change": "remove",
-                "values": {
-                    "excludes": [
-                        "emitInjectEvent",
-                        "HostAttributeToken"
-                    ]
                 }
             }
         ]
@@ -266,28 +235,8 @@
     {
         "fileName": "./import/di/r3_injector.ts",
         "rules": [
-            {
-                "type": "import",
-                "values": {
-                    "excludes": [
-                        "newArray",
-                        "getComponentDef",
-                        "emitInstanceCreatedByInjectorEvent",
-                        "emitProviderConfiguredEvent",
-                        "InjectorProfilerContext",
-                        "runInInjectorProfilerContext",
-                        "setInjectorProfilerContext",
-                        "emitInjectEvent",
-                        "setActiveConsumer"
-                    ]
-                }
-            },
-            {
-                "type": "custom",
-                "values": {
-                    "selector": "VariableDeclaration:has(>::name[value=prevInjectContext])<SyntaxList<VariableDeclarationList"
-                }
-            },
+    
+      
             {
                 "type": "custom",
                 "values": {
@@ -577,7 +526,7 @@
                 "change": "change",
                 "values": {
                     "selector": "SourceFile",
-                    "content": "export {ProviderToken} from './provider_token';export {assertInInjectionContext, runInInjectionContext} from './contextual';export { EnvironmentInjector } from './r3_injector';"
+                    "content": "export {ProviderToken} from './provider_token';export {assertInInjectionContext, runInInjectionContext} from './contextual';export { EnvironmentInjector } from './r3_injector';export { FactoryProvider } from './interface/provider';"
                 }
             }
         ]
@@ -650,13 +599,7 @@
     {
         "fileName": "./import/di/contextual.ts",
         "rules": [
-            {
-                "type": "custom",
-                "change": "remove",
-                "values": {
-                    "selector": "FunctionDeclaration:has(>[value=runInInjectionContext]) VariableStatement:has([value=prevInjectorProfilerContext])"
-                }
-            }
+        
         ]
     },
     {
@@ -726,6 +669,20 @@
                     ]
                 }
             }
+        ]
+    },
+    {
+        "fileName": "./import/render3/debug/injector_profiler.ts",
+        "rules": [
+            {
+                "type": "interface-property",
+                "values": {
+                    "includes": [
+                        "injectedIn"
+                    ]
+                }
+            }
+         
         ]
     }
 ]

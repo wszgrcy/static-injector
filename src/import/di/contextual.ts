@@ -7,6 +7,7 @@
  */
 
 import { RuntimeError, RuntimeErrorCode } from '../errors';
+import { InjectorProfilerContext, setInjectorProfilerContext } from '../render3/debug/injector_profiler';
 
 import { getInjectImplementation, setInjectImplementation } from './inject_switch';
 import type { Injector } from './injector';
@@ -39,6 +40,7 @@ export function runInInjectionContext<ReturnT>(injector: Injector, fn: () => Ret
     internalInjector = new RetrievingInjector(injector);
   }
 
+  let prevInjectorProfilerContext: InjectorProfilerContext;
   if (false) {
   }
   const prevInjector = setCurrentInjector(internalInjector);
@@ -47,7 +49,7 @@ export function runInInjectionContext<ReturnT>(injector: Injector, fn: () => Ret
     return fn();
   } finally {
     setCurrentInjector(prevInjector);
-    undefined as any;
+    ngDevMode && setInjectorProfilerContext(prevInjectorProfilerContext!);
     setInjectImplementation(previousInjectImplementation);
   }
 }
@@ -72,6 +74,9 @@ export function assertInInjectionContext(debugFn: Function): void {
   // Taking a `Function` instead of a string name here prevents the unminified name of the function
   // from being retained in the bundle regardless of minification.
   if (!isInInjectionContext()) {
-    throw new RuntimeError(RuntimeErrorCode.MISSING_INJECTION_CONTEXT, undefined as any);
+    throw new RuntimeError(
+      RuntimeErrorCode.MISSING_INJECTION_CONTEXT,
+      ngDevMode && debugFn.name + '() can only be used within an injection context such as a constructor, a factory function, a field initializer, or a function used with `runInInjectionContext`',
+    );
   }
 }

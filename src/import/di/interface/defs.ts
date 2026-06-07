@@ -201,7 +201,11 @@ export function getInheritedInjectableDef<T>(type: any): ɵɵInjectableDeclarati
   const def = type?.[NG_PROV_DEF] ?? null;
 
   if (def) {
-    undefined as any;
+    ngDevMode &&
+      console.warn(
+        `DEPRECATED: DI is instantiating a token "${type.name}" that inherits its @Injectable decorator but does not provide one itself.\n` +
+          `This will become an error in a future version of Angular. Please add @Injectable() to the "${type.name}" class.`,
+      );
     return def;
   } else {
     return null;

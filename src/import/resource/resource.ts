@@ -426,12 +426,12 @@ export function encapsulateResourceError(error: unknown): Error {
 
 class ResourceValueError extends Error {
   constructor(error: Error) {
-    super(error.message, { cause: error });
+    super(ngDevMode ? `Resource is currently in an error state (see Error.cause for details): ${error.message}` : error.message, { cause: error });
   }
 }
 
 class ResourceWrappedError extends Error {
   constructor(error: unknown) {
-    super(String(error), { cause: error });
+    super(ngDevMode ? `Resource returned an error that's not an Error instance: ${String(error)}. Check this error's .cause for the actual error.` : String(error), { cause: error });
   }
 }

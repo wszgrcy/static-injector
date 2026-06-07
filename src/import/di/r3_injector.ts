@@ -9,11 +9,11 @@
 import { RuntimeError, RuntimeErrorCode } from '../errors';
 import { OnDestroy } from '../interface/lifecycle_hooks';
 import { Type } from '../interface/type';
-
+import { InjectorProfilerContext, setInjectorProfilerContext } from '../render3/debug/injector_profiler';
 import { FactoryFn, getFactoryDef } from '../render3/definition_factory';
 import { cyclicDependencyError, getRuntimeErrorCode } from '../render3/errors_di';
 import { NG_ENV_ID } from '../render3/fields';
-
+import { newArray } from '../util/array_utils';
 import { EMPTY_ARRAY } from '../util/empty';
 import { stringify } from '../util/stringify';
 
@@ -32,7 +32,6 @@ import { NullInjector } from './null_injector';
 import { isExistingProvider, isFactoryProvider, isTypeProvider, isValueProvider, SingleProvider } from './provider_collection';
 import { ProviderToken } from './provider_token';
 import { INJECTOR_SCOPE, InjectorScope } from './scope';
-
 import { Injector as PrimitivesInjector, InjectionToken as PrimitivesInjectionToken, NotFound, isNotFound } from '@angular/core/primitives/di';
 
 /**
@@ -250,6 +249,7 @@ export class R3Injector extends EnvironmentInjector implements PrimitivesInjecto
     const previousInjector = setCurrentInjector(this);
     const previousInjectImplementation = setInjectImplementation(undefined);
 
+    let prevInjectContext: InjectorProfilerContext | undefined;
     if (false) {
     }
 
@@ -258,7 +258,7 @@ export class R3Injector extends EnvironmentInjector implements PrimitivesInjecto
     } finally {
       setCurrentInjector(previousInjector);
       setInjectImplementation(previousInjectImplementation);
-      undefined as any;
+      ngDevMode && setInjectorProfilerContext(prevInjectContext!);
     }
   }
 
@@ -272,6 +272,7 @@ export class R3Injector extends EnvironmentInjector implements PrimitivesInjecto
     const flags = convertToBitFlags(options) as InternalInjectFlags;
 
     // Set the injection context.
+    let prevInjectContext: InjectorProfilerContext;
     if (false) {
     }
     const previousInjector = setCurrentInjector(this);
@@ -336,7 +337,7 @@ export class R3Injector extends EnvironmentInjector implements PrimitivesInjecto
       // Lastly, restore the previous injection context.
       setInjectImplementation(previousInjectImplementation);
       setCurrentInjector(previousInjector);
-      undefined as any;
+      ngDevMode && setInjectorProfilerContext(prevInjectContext!);
     }
   }
 
@@ -344,6 +345,7 @@ export class R3Injector extends EnvironmentInjector implements PrimitivesInjecto
   resolveInjectorInitializers() {
     const previousInjector = setCurrentInjector(this);
     const previousInjectImplementation = setInjectImplementation(undefined);
+    let prevInjectContext: InjectorProfilerContext | undefined;
     if (false) {
     }
 
@@ -357,7 +359,7 @@ export class R3Injector extends EnvironmentInjector implements PrimitivesInjecto
     } finally {
       setCurrentInjector(previousInjector);
       setInjectImplementation(previousInjectImplementation);
-      undefined as any;
+      ngDevMode && setInjectorProfilerContext(prevInjectContext!);
     }
   }
 
@@ -458,7 +460,7 @@ function injectableDefOrInjectorDefFactory(token: ProviderToken<any>): FactoryFn
   // InjectionTokens should have an injectable def (ɵprov) and thus should be handled above.
   // If it's missing that, it's an error.
   if (token instanceof InjectionToken) {
-    throw new RuntimeError(RuntimeErrorCode.INVALID_INJECTION_TOKEN, undefined as any);
+    throw new RuntimeError(RuntimeErrorCode.INVALID_INJECTION_TOKEN, ngDevMode && `Token ${stringify(token)} is missing a ɵprov definition.`);
   }
 
   // Undecorated types can sometimes be created if they have no constructor arguments.
@@ -467,14 +469,14 @@ function injectableDefOrInjectorDefFactory(token: ProviderToken<any>): FactoryFn
   }
 
   // There was no way to resolve a factory for this token.
-  throw new RuntimeError(RuntimeErrorCode.INVALID_INJECTION_TOKEN, undefined as any);
+  throw new RuntimeError(RuntimeErrorCode.INVALID_INJECTION_TOKEN, ngDevMode && 'unreachable');
 }
 
 function getUndecoratedInjectableFactory(token: Function) {
   // If the token has parameters then it has dependencies that we cannot resolve implicitly.
   const paramLength = token.length;
   if (paramLength > 0) {
-    throw new RuntimeError(RuntimeErrorCode.INVALID_INJECTION_TOKEN, undefined as any);
+    throw new RuntimeError(RuntimeErrorCode.INVALID_INJECTION_TOKEN, ngDevMode && `Can't resolve all parameters for ${stringify(token)}: (${newArray(paramLength, '?').join(', ')}).`);
   }
 
   // The constructor function appears to have no parameters.
@@ -535,7 +537,7 @@ export function providerToFactory(provider: SingleProvider, ngModuleType?: Injec
 
 export function assertNotDestroyed(injector: R3Injector): void {
   if (injector.destroyed) {
-    throw new RuntimeError(RuntimeErrorCode.INJECTOR_ALREADY_DESTROYED, undefined as any);
+    throw new RuntimeError(RuntimeErrorCode.INJECTOR_ALREADY_DESTROYED, ngDevMode && 'Injector has already been destroyed.');
   }
 }
 

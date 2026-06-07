@@ -8,7 +8,7 @@
 
 import { RuntimeError, RuntimeErrorCode } from '../errors';
 import { Type } from '../interface/type';
-
+import { emitInjectEvent } from '../render3/debug/injector_profiler';
 import { stringify } from '../util/stringify';
 
 import { resolveForwardRef } from './forward_ref';
@@ -16,7 +16,6 @@ import { getInjectImplementation, injectRootLimpMode } from './inject_switch';
 import type { Injector } from './injector';
 import { DecoratorFlags, InternalInjectFlags, InjectOptions } from './interface/injector';
 import { ProviderToken } from './provider_token';
-
 import { Injector as PrimitivesInjector, isNotFound, NotFound, InjectionToken as PrimitivesInjectionToken, getCurrentInjector } from '../../primitives/di';
 
 import { InjectionToken } from './injection_token';
@@ -77,7 +76,11 @@ export function injectInjectorOnly<T>(token: ProviderToken<T>, flags?: InternalI
 export function injectInjectorOnly<T>(token: ProviderToken<T>, flags = InternalInjectFlags.Default): T | null {
   const currentInjector = getCurrentInjector();
   if (currentInjector === undefined) {
-    throw new RuntimeError(RuntimeErrorCode.MISSING_INJECTION_CONTEXT, undefined as any);
+    throw new RuntimeError(
+      RuntimeErrorCode.MISSING_INJECTION_CONTEXT,
+      ngDevMode &&
+        `The \`${stringify(token)}\` token injection failed. \`inject()\` function must be called from an injection context such as a constructor, a factory function, a field initializer, or a function used with \`runInInjectionContext\`.`,
+    );
   } else if (currentInjector === null) {
     return injectRootLimpMode(token, undefined, flags);
   } else {
@@ -85,7 +88,7 @@ export function injectInjectorOnly<T>(token: ProviderToken<T>, flags = InternalI
     // TODO: improve the typings here.
     // `token` can be a multi: true provider definition, which is considered as a Token but not represented in the typings
     const value = currentInjector.retrieve(token as PrimitivesInjectionToken<T>, options) as T;
-    undefined as any;
+    ngDevMode && emitInjectEvent(token as Type<unknown>, value, flags);
     if (isNotFound(value)) {
       if (options.optional) {
         return null;
@@ -124,7 +127,14 @@ export function ɵɵinject<T>(token: ProviderToken<T>, flags = InternalInjectFla
  * @codeGenApi
  */
 export function ɵɵinvalidFactoryDep(index: number): void {
-  throw new RuntimeError(RuntimeErrorCode.INVALID_FACTORY_DEPENDENCY, undefined as any);
+  throw new RuntimeError(
+    RuntimeErrorCode.INVALID_FACTORY_DEPENDENCY,
+    ngDevMode &&
+      `This constructor is not compatible with Angular Dependency Injection because its dependency at index ${index} of the parameter list is invalid.
+This can happen if the dependency type is a primitive like a string or if an ancestor of this class is missing an Angular decorator.
+
+Please check that 1) the type for the parameter at index ${index} is correct and 2) the correct Angular decorators are defined for this class and its ancestors.`,
+  );
 }
 
 /**
@@ -288,7 +298,7 @@ export function injectArgs(types: (ProviderToken<any> | any[])[]): any[] {
     const arg = resolveForwardRef(types[i]);
     if (Array.isArray(arg)) {
       if (arg.length === 0) {
-        throw new RuntimeError(RuntimeErrorCode.INVALID_DIFFER_INPUT, undefined as any);
+        throw new RuntimeError(RuntimeErrorCode.INVALID_DIFFER_INPUT, ngDevMode && 'Arguments array must have arguments.');
       }
       let type: Type<any> | undefined = undefined;
       let flags: InternalInjectFlags = InternalInjectFlags.Default;

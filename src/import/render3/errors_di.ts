@@ -10,19 +10,21 @@ import type { ProviderToken } from '../di';
 import { RuntimeError, RuntimeErrorCode } from '../errors';
 import { getClosureSafeProperty } from '../util/property';
 
+import { stringifyForError } from './util/stringify_utils';
+
 const NG_RUNTIME_ERROR_CODE = getClosureSafeProperty({ ngErrorCode: getClosureSafeProperty });
 const NG_RUNTIME_ERROR_MESSAGE = getClosureSafeProperty({ ngErrorMessage: getClosureSafeProperty });
 const NG_TOKEN_PATH = getClosureSafeProperty({ ngTokenPath: getClosureSafeProperty });
 
 /** Creates a circular dependency runtime error. */
 export function cyclicDependencyError(token: string, path?: string[]): Error {
-  const message = '';
+  const message = ngDevMode ? `Circular dependency detected for \`${token}\`.` : '';
   return createRuntimeError(message, RuntimeErrorCode.CYCLIC_DI_DEPENDENCY, path);
 }
 
 /** Throws an error when a token is not found in DI. */
 export function throwProviderNotFoundError(token: ProviderToken<unknown>, injectorName?: string): never {
-  const errorMessage = undefined as any;
+  const errorMessage = ngDevMode && `No provider for ${stringifyForError(token)} found${injectorName ? ` in ${injectorName}` : ''}`;
   throw new RuntimeError(RuntimeErrorCode.PROVIDER_NOT_FOUND, errorMessage);
 }
 

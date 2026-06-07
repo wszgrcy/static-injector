@@ -16,11 +16,11 @@ async function bundleImport() {
     minify: false,
     tsconfig: 'tsconfig.import.json',
     charset: 'utf8',
-    external: ['rxjs', 'mocha', 'chai'],
+    packages: 'external',
     define: {
-      ngDevMode: 'false',
       Zone: 'undefined',
     },
+    inject: ['./script/shim.js'],
   };
   await esbuild.build({ ...options, outdir: './dist' });
   await esbuild.build({

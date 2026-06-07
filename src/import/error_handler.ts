@@ -58,7 +58,7 @@ export class ErrorHandler {
 /**
  * `InjectionToken` used to configure how to call the `ErrorHandler`.
  */
-export const INTERNAL_APPLICATION_ERROR_HANDLER = new InjectionToken<(e: any) => void>('', {
+export const INTERNAL_APPLICATION_ERROR_HANDLER = new InjectionToken<(e: any) => void>(typeof ngDevMode === 'undefined' || ngDevMode ? 'internal error handler' : '', {
   providedIn: 'root',
   factory: () => {
     // The user's error handler may depend on things that create a circular dependency

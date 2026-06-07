@@ -21,11 +21,11 @@ async function main() {
     // minify: true,
     tsconfig: 'tsconfig.spec.json',
     charset: 'utf8',
-    external: ['rxjs', 'mocha', 'chai'],
+    packages: 'external',
     define: {
-      ngDevMode: 'false',
       Zone: 'undefined',
     },
+    inject: ['./script/shim.js'],
   };
   await esbuild.build(options);
 }

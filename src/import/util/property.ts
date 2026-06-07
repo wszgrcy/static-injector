@@ -14,5 +14,5 @@ export function getClosureSafeProperty<T>(objWithPropertyToExtract: T): string {
   }
   // Cannot change it to `RuntimeError` because the `util` target cannot
   // circularly depend on the `core` target.
-  throw Error('');
+  throw Error(typeof ngDevMode !== 'undefined' && ngDevMode ? 'Could not find renamed property on target object.' : '');
 }

@@ -32,6 +32,7 @@
             "/render3/fields.ts",
             "/render3/instructions/di.ts",
             "/render3/util/stringify_utils.ts",
+            "/render3/debug/injector_profiler.ts",
             "/util/closure.ts",
             "/util/decorators.ts",
             "/util/empty.ts",
@@ -45,7 +46,9 @@
             "/util/noop.ts",
             "/change_detection/scheduling/zoneless_scheduling.ts",
             "/core_reactivity_export_internal.ts",
-            "/util/callback_scheduler.ts"
+            "/util/callback_scheduler.ts",
+            "/util/assert.ts",
+            "/util/array_utils.ts"
         ]
     }
 ]
