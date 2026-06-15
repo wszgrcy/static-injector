@@ -574,7 +574,6 @@
   {
     "fileName": "./import/zone/ng_zone.ts",
     "rules": [
-    
       {
         "type": "custom",
         "change": "change",
@@ -588,7 +587,7 @@
         "change": "change",
         "values": {
           "selector": "ClassDeclaration:has(>Identifier[value=NgZone])>CloseBraceToken",
-          "content":"/** @nocollapse */\nstatic ɵprov = /**\n@pureOrBreakMyCode */ /* @__PURE__ */\nɵɵdefineInjectable({\ntoken: NgZone,\nprovidedIn: \n'root',\nfactory: () => new NoopNgZone(),\n});}"
+          "content": "/** @nocollapse */\nstatic ɵprov = /**\n@pureOrBreakMyCode */ /* @__PURE__ */\nɵɵdefineInjectable({\ntoken: NgZone,\nprovidedIn: \n'root',\nfactory: () => new NoopNgZone(),\n});}"
         }
       },
       {
@@ -596,7 +595,18 @@
         "change": "change",
         "values": {
           "selector": "ImportDeclaration:like(noop)",
-          "content":"{{''|ctxValue}}\nimport { ɵɵdefineInjectable } from '../di/interface/defs';"
+          "content": "{{''|ctxValue}}\nimport { ɵɵdefineInjectable } from '../di/interface/defs';"
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/change_detection/scheduling/zoneless_scheduling.ts",
+    "rules": [
+      {
+        "type": "variable",
+        "values": {
+          "excludes": ["SCHEDULE_IN_ROOT_ZONE", "PROVIDED_ZONELESS", "ZONELESS_ENABLED"]
         }
       }
     ]
