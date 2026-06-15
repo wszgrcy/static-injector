@@ -25,6 +25,7 @@ async function main() {
     define: {
       Zone: 'undefined',
       ERROR_DETAILS_PAGE_BASE_URL: `'https://v20.angular.dev/errors'`,
+      ngServerMode: 'true',
     },
     inject: ['./script/shim.js'],
   };

@@ -135,13 +135,17 @@ export interface InjectorTypeWithProviders<T> {
  * @codeGenApi
  * @publicApi This instruction has been emitted by ViewEngine for some time and is deployed to npm.
  */
-export function ɵɵdefineInjectable<T>(opts: { token: unknown; providedIn?: Type<any> | 'root' | 'platform' | 'any' | 'environment' | null; factory: () => T }): unknown {
+export function ɵɵdefineInjectable<T>(opts: {
+  token: unknown;
+  providedIn?: Type<any> | 'root' | 'platform' | 'any' | 'environment' | null;
+  factory: (parent?: Type<any>) => T;
+}): ɵɵInjectableDeclaration<T> {
   return {
     token: opts.token,
     providedIn: (opts.providedIn as any) || null,
     factory: opts.factory,
     value: undefined,
-  } as ɵɵInjectableDeclaration<T>;
+  };
 }
 
 /**

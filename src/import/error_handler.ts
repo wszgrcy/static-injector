@@ -10,6 +10,8 @@ import { InjectionToken } from './di/injection_token';
 import { inject } from './di/injector_compatibility';
 import { EnvironmentInjector } from './di/r3_injector';
 
+import { NgZone } from './zone/ng_zone';
+
 /**
  * Provides a hook for centralized exception handling.
  *
@@ -59,21 +61,23 @@ export class ErrorHandler {
  * `InjectionToken` used to configure how to call the `ErrorHandler`.
  */
 export const INTERNAL_APPLICATION_ERROR_HANDLER = new InjectionToken<(e: any) => void>(typeof ngDevMode === 'undefined' || ngDevMode ? 'internal error handler' : '', {
-  providedIn: 'root',
   factory: () => {
     // The user's error handler may depend on things that create a circular dependency
     // so we inject it lazily.
+    const zone = inject(NgZone);
     const injector = inject(EnvironmentInjector);
     let userErrorHandler: ErrorHandler;
     return (e: unknown) => {
-      if (injector.destroyed && !userErrorHandler) {
-        setTimeout(() => {
-          throw e;
-        });
-      } else {
-        userErrorHandler ??= injector.get(ErrorHandler);
-        userErrorHandler.handleError(e);
-      }
+      zone.runOutsideAngular(() => {
+        if (injector.destroyed && !userErrorHandler) {
+          setTimeout(() => {
+            throw e;
+          });
+        } else {
+          userErrorHandler ??= injector.get(ErrorHandler);
+          userErrorHandler.handleError(e);
+        }
+      });
     };
   },
 });

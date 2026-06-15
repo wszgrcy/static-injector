@@ -54,7 +54,7 @@ let fn: ScriptFunction = async (util, rule, host, injector) => {
     ],
     'packages',
     'branch',
-    'v20.3.24',
+    'v22.0.1',
   );
   let copyData = require('./copy.json') as {
     source: string;
@@ -67,7 +67,7 @@ let fn: ScriptFunction = async (util, rule, host, injector) => {
     for (const filePath of item.fileList) {
       let file = data[path.join(nDir, filePath)];
       if (!file) {
-        throw new Error(`${file} 不存在`);
+        throw new Error(`${path.join(nDir, filePath)} 不存在`);
       }
       await new Promise((res) =>
         host

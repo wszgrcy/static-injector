@@ -8,7 +8,7 @@
 
 export { SIGNAL as ɵSIGNAL } from '../primitives/signals';
 
-export { isSignal, Signal, ValueEqualityFn } from './render3/reactivity/api';
+export { isSignal, isWritableSignal, Signal, ValueEqualityFn } from './render3/reactivity/api';
 export { computed, CreateComputedOptions } from './render3/reactivity/computed';
 export { CreateSignalOptions, signal, WritableSignal, ɵunwrapWritableSignal } from './render3/reactivity/signal';
 export { linkedSignal } from './render3/reactivity/linked_signal';

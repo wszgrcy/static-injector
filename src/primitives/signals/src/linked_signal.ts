@@ -17,6 +17,7 @@ import {
   REACTIVE_NODE,
   ReactiveNode,
   runPostProducerCreatedFn,
+  setActiveConsumer,
   SIGNAL,
 } from './graph';
 import { signalSetFn, signalUpdateFn } from './signal';
@@ -89,8 +90,7 @@ export function createLinkedSignal<S, D>(sourceFn: () => S, computationFn: Compu
   const getter = linkedSignalGetter as LinkedSignalGetter<S, D>;
   getter[SIGNAL] = node;
   if (typeof ngDevMode !== 'undefined' && ngDevMode) {
-    const debugName = node.debugName ? ' (' + node.debugName + ')' : '';
-    getter.toString = () => `[LinkedSignal${debugName}: ${node.value}]`;
+    getter.toString = () => `[LinkedSignal${node.debugName ? ' (' + node.debugName + ')' : ''}: ${String(node.value)}]`;
   }
 
   runPostProducerCreatedFn(node);
@@ -106,14 +106,17 @@ export function linkedSignalSetFn<S, D>(node: LinkedSignalNode<S, D>, newValue: 
 
 export function linkedSignalUpdateFn<S, D>(node: LinkedSignalNode<S, D>, updater: (value: D) => D): void {
   producerUpdateValueVersion(node);
+  // update() on a linked signal can't work if the current state is ERRORED, as there's no value.
+  if (node.value === ERRORED) {
+    throw node.error;
+  }
   signalUpdateFn(node, updater);
   producerMarkClean(node);
 }
 
 // Note: Using an IIFE here to ensure that the spread assignment is not considered
 // a side-effect, ending up preserving `LINKED_SIGNAL_NODE` and `REACTIVE_NODE`.
-// TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
-export const LINKED_SIGNAL_NODE: object = /* @__PURE__ */ (() => ({
+export const LINKED_SIGNAL_NODE: Omit<LinkedSignalNode<unknown, unknown>, 'computation' | 'source' | 'sourceValue'> = /* @__PURE__ */ (() => ({
   ...REACTIVE_NODE,
   value: UNSET,
   dirty: true,
@@ -138,17 +141,22 @@ export const LINKED_SIGNAL_NODE: object = /* @__PURE__ */ (() => ({
 
     const prevConsumer = consumerBeforeComputation(node);
     let newValue: unknown;
+    let wasEqual = false;
     try {
       const newSourceValue = node.source();
-      const prev =
-        oldValue === UNSET || oldValue === ERRORED
-          ? undefined
-          : {
-              source: node.sourceValue,
-              value: oldValue,
-            };
+      const oldValueValid = oldValue !== UNSET && oldValue !== ERRORED;
+      const prev = oldValueValid
+        ? {
+            source: node.sourceValue,
+            value: oldValue,
+          }
+        : undefined;
       newValue = node.computation(newSourceValue, prev);
       node.sourceValue = newSourceValue;
+      // We want to mark this node as errored if calling `equal` throws; however, we don't want
+      // to track any reactive reads inside `equal`.
+      setActiveConsumer(null);
+      wasEqual = oldValueValid && newValue !== ERRORED && node.equal(oldValue, newValue);
     } catch (err) {
       newValue = ERRORED;
       node.error = err;
@@ -156,7 +164,7 @@ export const LINKED_SIGNAL_NODE: object = /* @__PURE__ */ (() => ({
       consumerAfterComputation(node, prevConsumer);
     }
 
-    if (oldValue !== UNSET && newValue !== ERRORED && node.equal(oldValue, newValue)) {
+    if (wasEqual) {
       // No change to `valueVersion` - old and new values are
       // semantically equivalent.
       node.value = oldValue;

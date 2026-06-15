@@ -14,7 +14,7 @@ import { InternalInjectFlags } from '../../di/interface/injector';
 import type { SingleProvider } from '../../di/provider_collection';
 import { Type } from '../../interface/type';
 import { throwError } from '../../util/assert';
-import type { EffectRef } from '../reactivity/effect';
+import type { EffectRefImpl } from '../reactivity/effect';
 
 /**
  * An enum describing the types of events that can be emitted from the injector profiler
@@ -41,6 +41,11 @@ export const enum InjectorProfilerEventType {
   EffectCreated,
 
   /**
+   * Emits when an after render effect phase is created.
+   */
+  AfterRenderEffectPhaseCreated,
+
+  /**
    * Emits when an Angular DI system is about to create an instance corresponding to a given token.
    */
   InjectorToCreateInstanceEvent,
@@ -61,11 +66,19 @@ export interface ProviderConfiguredEvent {}
 
 export interface EffectCreatedEvent {}
 
+export interface AfterRenderEffectPhaseCreatedEvent {}
+
 /**
  * An object representing an event that is emitted through the injector profiler
  */
 
-export type InjectorProfilerEvent = InjectedServiceEvent | InjectorToCreateInstanceEvent | InjectorCreatedInstanceEvent | ProviderConfiguredEvent | EffectCreatedEvent;
+export type InjectorProfilerEvent =
+  | InjectedServiceEvent
+  | InjectorToCreateInstanceEvent
+  | InjectorCreatedInstanceEvent
+  | ProviderConfiguredEvent
+  | EffectCreatedEvent
+  | AfterRenderEffectPhaseCreatedEvent;
 
 /**
  * An object that contains information about a provider that has been configured
@@ -246,7 +259,7 @@ export function emitInjectEvent(token: Type<unknown>, value: unknown, flags: Int
   });
 }
 
-export function emitEffectCreatedEvent(effect: EffectRef): void {
+export function emitEffectCreatedEvent(effect: EffectRefImpl): void {
   !ngDevMode && throwError('Injector profiler should never be called in production mode');
 
   injectorProfiler({

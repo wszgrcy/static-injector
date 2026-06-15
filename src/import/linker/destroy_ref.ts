@@ -7,6 +7,7 @@
  */
 
 import { EnvironmentInjector } from '../di';
+import { registerSpecialProvider } from '../render3/debug/special_providers';
 
 /**
  * `DestroyRef` lets you set callbacks to run for any cleanup or destruction behavior.
@@ -63,4 +64,8 @@ export abstract class DestroyRef {
    * @nocollapse
    */
   static __NG_ENV_ID__: (injector: EnvironmentInjector) => DestroyRef = (injector) => injector;
+}
+
+if (typeof ngDevMode === 'undefined' || ngDevMode) {
+  registerSpecialProvider(DestroyRef);
 }
