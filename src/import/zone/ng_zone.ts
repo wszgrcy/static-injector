@@ -9,9 +9,7 @@
 // Needed for the global `Zone` ambient types to be available.
 import type {} from 'zone.js';
 
-import { RuntimeError, RuntimeErrorCode } from '../errors';
 import { EventEmitter } from '../event_emitter';
-import { scheduleCallbackWithRafRace } from '../util/callback_scheduler';
 import { noop } from '../util/noop';
 import { ɵɵdefineInjectable } from '../di/interface/defs';
 
@@ -22,7 +20,7 @@ declare const Zone: any;
 const isAngularZoneProperty = 'isAngularZone';
 export const angularZoneInstanceIdProperty = isAngularZoneProperty + '_ID';
 
-let ngZoneInstanceId = 0;
+const ngZoneInstanceId = 0;
 
 /**
  * An injectable service for executing work inside or outside of the Angular zone.
@@ -139,28 +137,14 @@ export class NgZone {
   /**
     This method checks whether the method call happens within an Angular Zone instance.
   */
-  static isInAngularZone(): boolean {
-    // Zone needs to be checked, because this method might be called even when NoopNgZone is used.
-    return typeof Zone !== 'undefined' && Zone.current.get(isAngularZoneProperty) === true;
-  }
 
   /**
     Assures that the method is called within the Angular Zone, otherwise throws an error.
   */
-  static assertInAngularZone(): void {
-    if (!NgZone.isInAngularZone()) {
-      throw new RuntimeError(RuntimeErrorCode.UNEXPECTED_ZONE_STATE, ngDevMode && 'Expected to be in Angular Zone, but it is not!');
-    }
-  }
 
   /**
     Assures that the method is called outside of the Angular Zone, otherwise throws an error.
   */
-  static assertNotInAngularZone(): void {
-    if (NgZone.isInAngularZone()) {
-      throw new RuntimeError(RuntimeErrorCode.UNEXPECTED_ZONE_STATE, ngDevMode && 'Expected to not be in Angular Zone, but it is!');
-    }
-  }
 
   /**
    * Executes the `fn` function synchronously within the Angular zone and returns value returned by
@@ -300,176 +284,6 @@ export interface NgZonePrivate extends NgZone {
   scheduleInRootZone: boolean;
 }
 
-function checkStable(zone: NgZonePrivate) {
-  // TODO: @JiaLiPassion, should check zone.isCheckStableRunning to prevent
-  // re-entry. The case is:
-  //
-  // @Component({...})
-  // export class AppComponent {
-  // constructor(private ngZone: NgZone) {
-  //   this.ngZone.onStable.subscribe(() => {
-  //     this.ngZone.run(() => console.log('stable'););
-  //   });
-  // }
-  //
-  // The onStable subscriber run another function inside ngZone
-  // which causes `checkStable()` re-entry.
-  // But this fix causes some issues in g3, so this fix will be
-  // launched in another PR.
-  if (zone._nesting == 0 && !zone.hasPendingMicrotasks && !zone.isStable) {
-    try {
-      zone._nesting++;
-      zone.onMicrotaskEmpty.emit(null);
-    } finally {
-      zone._nesting--;
-      if (!zone.hasPendingMicrotasks) {
-        try {
-          zone.runOutsideAngular(() => zone.onStable.emit(null));
-        } finally {
-          zone.isStable = true;
-        }
-      }
-    }
-  }
-}
-
-function delayChangeDetectionForEvents(zone: NgZonePrivate) {
-  /**
-   * We also need to check _nesting here
-   * Consider the following case with shouldCoalesceRunChangeDetection = true
-   *
-   * ngZone.run(() => {});
-   * ngZone.run(() => {});
-   *
-   * We want the two `ngZone.run()` only trigger one change detection
-   * when shouldCoalesceRunChangeDetection is true.
-   * And because in this case, change detection run in async way(requestAnimationFrame),
-   * so we also need to check the _nesting here to prevent multiple
-   * change detections.
-   */
-  if (zone.isCheckStableRunning || zone.callbackScheduled) {
-    return;
-  }
-  zone.callbackScheduled = true;
-  function scheduleCheckStable() {
-    scheduleCallbackWithRafRace(() => {
-      zone.callbackScheduled = false;
-      updateMicroTaskStatus(zone);
-      zone.isCheckStableRunning = true;
-      checkStable(zone);
-      zone.isCheckStableRunning = false;
-    });
-  }
-  if (zone.scheduleInRootZone) {
-    Zone.root.run(() => {
-      scheduleCheckStable();
-    });
-  } else {
-    zone._outer.run(() => {
-      scheduleCheckStable();
-    });
-  }
-  updateMicroTaskStatus(zone);
-}
-
-function forkInnerZoneWithAngularBehavior(zone: NgZonePrivate) {
-  const delayChangeDetectionForEventsDelegate = () => {
-    delayChangeDetectionForEvents(zone);
-  };
-  const instanceId = ngZoneInstanceId++;
-  zone._inner = zone._inner.fork({
-    name: 'angular',
-    properties: <any>{
-      [isAngularZoneProperty]: true,
-      [angularZoneInstanceIdProperty]: instanceId,
-      [angularZoneInstanceIdProperty + instanceId]: true,
-    },
-    onInvokeTask: (delegate: ZoneDelegate, current: Zone, target: Zone, task: Task, applyThis: any, applyArgs: any): any => {
-      // Prevent triggering change detection when the flag is detected.
-      if (shouldBeIgnoredByZone(applyArgs)) {
-        return delegate.invokeTask(target, task, applyThis, applyArgs);
-      }
-
-      try {
-        onEnter(zone);
-        return delegate.invokeTask(target, task, applyThis, applyArgs);
-      } finally {
-        if ((zone.shouldCoalesceEventChangeDetection && task.type === 'eventTask') || zone.shouldCoalesceRunChangeDetection) {
-          delayChangeDetectionForEventsDelegate();
-        }
-        onLeave(zone);
-      }
-    },
-
-    onInvoke: (delegate: ZoneDelegate, current: Zone, target: Zone, callback: Function, applyThis: any, applyArgs?: any[], source?: string): any => {
-      try {
-        onEnter(zone);
-        return delegate.invoke(target, callback, applyThis, applyArgs, source);
-      } finally {
-        if (
-          zone.shouldCoalesceRunChangeDetection &&
-          // Do not delay change detection when the task is the scheduler's tick.
-          // We need to synchronously trigger the stability logic so that the
-          // zone-based scheduler can prevent a duplicate ApplicationRef.tick
-          // by first checking if the scheduler tick is running. This does seem a bit roundabout,
-          // but we _do_ still want to trigger all the correct events when we exit the zone.run
-          // (`onMicrotaskEmpty` and `onStable` _should_ emit; developers can have code which
-          // relies on these events happening after change detection runs).
-          // Note: `zone.callbackScheduled` is already in delayChangeDetectionForEventsDelegate
-          // but is added here as well to prevent reads of applyArgs when not necessary
-          !zone.callbackScheduled &&
-          !isSchedulerTick(applyArgs)
-        ) {
-          delayChangeDetectionForEventsDelegate();
-        }
-        onLeave(zone);
-      }
-    },
-
-    onHasTask: (delegate: ZoneDelegate, current: Zone, target: Zone, hasTaskState: HasTaskState) => {
-      delegate.hasTask(target, hasTaskState);
-      if (current === target) {
-        // We are only interested in hasTask events which originate from our zone
-        // (A child hasTask event is not interesting to us)
-        if (hasTaskState.change == 'microTask') {
-          zone._hasPendingMicrotasks = hasTaskState.microTask;
-          updateMicroTaskStatus(zone);
-          checkStable(zone);
-        } else if (hasTaskState.change == 'macroTask') {
-          zone.hasPendingMacrotasks = hasTaskState.macroTask;
-        }
-      }
-    },
-
-    onHandleError: (delegate: ZoneDelegate, current: Zone, target: Zone, error: any): boolean => {
-      delegate.handleError(target, error);
-      zone.runOutsideAngular(() => zone.onError.emit(error));
-      return false;
-    },
-  });
-}
-
-function updateMicroTaskStatus(zone: NgZonePrivate) {
-  if (zone._hasPendingMicrotasks || ((zone.shouldCoalesceEventChangeDetection || zone.shouldCoalesceRunChangeDetection) && zone.callbackScheduled === true)) {
-    zone.hasPendingMicrotasks = true;
-  } else {
-    zone.hasPendingMicrotasks = false;
-  }
-}
-
-function onEnter(zone: NgZonePrivate) {
-  zone._nesting++;
-  if (zone.isStable) {
-    zone.isStable = false;
-    zone.onUnstable.emit(null);
-  }
-}
-
-function onLeave(zone: NgZonePrivate) {
-  zone._nesting--;
-  checkStable(zone);
-}
-
 /**
  * Provides a noop implementation of `NgZone` which does nothing. This zone requires explicit calls
  * to framework to perform rendering.
@@ -500,42 +314,10 @@ export class NoopNgZone implements NgZone {
   }
 }
 
-function shouldBeIgnoredByZone(applyArgs: unknown): boolean {
-  return hasApplyArgsData(applyArgs, '__ignore_ng_zone__');
-}
-
-function isSchedulerTick(applyArgs: unknown): boolean {
-  return hasApplyArgsData(applyArgs, '__scheduler_tick__');
-}
-
-function hasApplyArgsData(applyArgs: unknown, key: string) {
-  if (!Array.isArray(applyArgs)) {
-    return false;
-  }
-
-  // We should only ever get 1 arg passed through to invokeTask.
-  // Short circuit here incase that behavior changes.
-  if (applyArgs.length !== 1) {
-    return false;
-  }
-
-  return applyArgs[0]?.data?.[key] === true;
-}
-
 // Set of options recognized by the NgZone.
 export interface InternalNgZoneOptions {
   enableLongStackTrace?: boolean;
   shouldCoalesceEventChangeDetection?: boolean;
   shouldCoalesceRunChangeDetection?: boolean;
   scheduleInRootZone?: boolean;
-}
-
-export function getNgZone(ngZoneToUse: NgZone | 'zone.js' | 'noop' = 'zone.js', options: InternalNgZoneOptions): NgZone {
-  if (ngZoneToUse === 'noop') {
-    return new NoopNgZone();
-  }
-  if (ngZoneToUse === 'zone.js') {
-    return new NgZone(options);
-  }
-  return ngZoneToUse;
 }

@@ -584,6 +584,13 @@
       },
       {
         "type": "custom",
+        "change": "remove",
+        "values": {
+          "selector": "ClassDeclaration:has(>Identifier[value=NgZone]) MethodDeclaration:has(>SyntaxList[value=static])"
+        }
+      },
+      {
+        "type": "custom",
         "change": "change",
         "values": {
           "selector": "ClassDeclaration:has(>Identifier[value=NgZone])>CloseBraceToken",
@@ -596,6 +603,23 @@
         "values": {
           "selector": "ImportDeclaration:like(noop)",
           "content": "{{''|ctxValue}}\nimport { ɵɵdefineInjectable } from '../di/interface/defs';"
+        }
+      },
+      {
+        "type": "function",
+        "values": {
+          "excludes": [
+            "getNgZone",
+            "forkInnerZoneWithAngularBehavior",
+            "onEnter",
+            "onLeave",
+            "delayChangeDetectionForEvents",
+            "updateMicroTaskStatus",
+            "checkStable",
+            "isSchedulerTick",
+            "shouldBeIgnoredByZone",
+            "hasApplyArgsData"
+          ]
         }
       }
     ]
