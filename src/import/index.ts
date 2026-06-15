@@ -28,6 +28,7 @@ export * from './pending_tasks';
 export * from './linker/destroy_ref';
 export { StaticProvider } from './di/interface/provider';
 export { EffectScheduler } from './render3/reactivity/root_effect_scheduler';
+export { runInInjectionContext } from './di/contextual';
 export function Injectable(args?: any) {
   return (constructor: Function) => {};
 }
