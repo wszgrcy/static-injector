@@ -59,7 +59,11 @@
       "/application/application_tokens.ts",
       "/document.ts",
       "/event_emitter.ts",
-      "/authoring/output/output_ref.ts"
+      "/authoring/output/output_ref.ts",
+      "/di/inject_async.ts",
+      "/defer/idle_service.ts",
+      "/util/default_export.ts",
+      "/util/promise_with_resolvers.ts"
     ]
   }
 ]
