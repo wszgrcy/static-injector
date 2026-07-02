@@ -6,8 +6,6 @@
  * found in the LICENSE file at https://angular.dev/license
  */
 
-import { InjectionToken } from '../../di/injection_token';
-
 export const enum NotificationSource {
   // Change detection needs to run in order to synchronize application state
   // with the DOM when the following notifications are received:
@@ -62,14 +60,3 @@ export abstract class ChangeDetectionScheduler {
   abstract notify(source: NotificationSource): void;
   abstract runningTick: boolean;
 }
-
-/** Token used to indicate if zoneless was enabled via provideZonelessChangeDetection(). */
-export const ZONELESS_ENABLED = new InjectionToken<boolean>(typeof ngDevMode === 'undefined' || ngDevMode ? 'Zoneless enabled' : '', { providedIn: 'root', factory: () => false });
-
-/** Token used to indicate `provideZonelessChangeDetection` was used. */
-export const PROVIDED_ZONELESS = new InjectionToken<boolean>(typeof ngDevMode === 'undefined' || ngDevMode ? 'Zoneless provided' : '', { providedIn: 'root', factory: () => false });
-
-export const ZONELESS_SCHEDULER_DISABLED = new InjectionToken<boolean>(typeof ngDevMode === 'undefined' || ngDevMode ? 'scheduler disabled' : '');
-
-// TODO(atscott): Remove in v19. Scheduler should be done with runOutsideAngular.
-export const SCHEDULE_IN_ROOT_ZONE = new InjectionToken<boolean>(typeof ngDevMode === 'undefined' || ngDevMode ? 'run changes outside zone in root' : '');

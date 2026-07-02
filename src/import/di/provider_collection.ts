@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.dev/license
  */
 
-import { Type } from '../interface/type';
+import { AbstractType, Type } from '../interface/type';
 
 import { getClosureSafeProperty } from '../util/property';
 
@@ -81,7 +81,7 @@ export function provideEnvironmentInitializer(initializerFn: () => void): Enviro
  */
 export type ImportProvidersSource = Type<unknown> | ModuleWithProviders<unknown> | Array<ImportProvidersSource>;
 
-type WalkProviderTreeVisitor = (provider: SingleProvider, container: Type<unknown> | InjectorType<unknown>) => void;
+type WalkProviderTreeVisitor = (provider: SingleProvider, container: Type<unknown> | AbstractType<unknown> | InjectorType<unknown>) => void;
 
 /**
  * Internal type for a single provider in a deep provider array.

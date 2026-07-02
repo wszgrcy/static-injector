@@ -26,6 +26,23 @@ export * from './di/provider_token';
 export * from './error_handler';
 export * from './pending_tasks';
 export * from './linker/destroy_ref';
+
+export { StateKey, makeStateKey, TransferState } from './transfer_state';
+export { EventEmitter } from './event_emitter';
+export { Type, AbstractType } from './interface/type';
+export { IdleService, provideIdleServiceWith } from './defer/idle_service';
+export { OnDestroy } from './change_detection/lifecycle_hooks';
+export { runInInjectionContext, assertInInjectionContext } from './di/contextual';
+export { APP_ID } from './application/application_tokens';
+export { ForwardRefFn, forwardRef, resolveForwardRef } from './di/forward_ref';
+export { OutputRefSubscription, OutputRef } from './authoring/output/output_ref';
+export { TypeDecorator } from './util/decorators';
+export { injectAsync, InjectAsyncOptions, PrefetchTrigger, onIdle } from './di/inject_async';
+export { Signal, isSignal, ValueEqualityFn, isWritableSignal } from './render3/reactivity/api';
+export { assertNotInReactiveContext } from './render3/reactivity/asserts';
+export { EffectRef, CreateEffectOptions, EffectCleanupFn, EffectCleanupRegisterFn, effect } from './render3/reactivity/effect';
+export { linkedSignal } from './render3/reactivity/linked_signal';
+export { WritableSignal, signal } from './render3/reactivity/signal';
 export { StaticProvider } from './di/interface/provider';
 export { EffectScheduler } from './render3/reactivity/root_effect_scheduler';
 export function Injectable(args?: any) {

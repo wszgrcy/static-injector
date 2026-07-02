@@ -1,658 +1,638 @@
 [
-    {
-        "glob": true,
-        "fileName": "./import/**/*[!definition_factory]*.ts",
-        "rules": [
+  {
+    "glob": true,
+    "fileName": "./import/**/*[!definition_factory]*.ts",
+    "rules": [
+      {
+        "type": "custom",
+        "values": {
+          "selector": "ImportSpecifier:has(>::name[value=assertNotEqual])<SyntaxList<NamedImports<ImportClause<ImportDeclaration"
+        }
+      },
+      {
+        "type": "custom",
+        "values": {
+          "selector": "ImportDeclaration[value*=\"ng_dev_mode\"]"
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/di/create_injector.ts",
+    "rules": [
+      {
+        "type": "custom",
+        "values": {
+          "selector": "FunctionDeclaration:has(>[value=createInjectorWithoutInjectorInstances]) CallExpression:has(>[value=importProvidersFrom])"
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/di/forward_ref.ts",
+    "rules": []
+  },
+  {
+    "fileName": "./import/di/initializer_token.ts",
+    "rules": []
+  },
+  {
+    "fileName": "./import/di/injectable.ts",
+    "rules": [
+      {
+        "type": "import",
+        "values": {
+          "excludes": ["compileInjectable"]
+        }
+      },
+      {
+        "type": "import",
+        "values": {
+          "namedImports": ["makeDecorator"]
+        }
+      },
+      {
+        "type": "custom",
+        "values": {
+          "selector": "ExportDeclaration ExportSpecifier:has(>::name[value=compileInjectable])<SyntaxList<NamedExports<ExportDeclaration"
+        }
+      },
+      {
+        "type": "variable",
+        "values": {
+          "excludes": ["Injectable"]
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/di/injection_token.ts",
+    "rules": [
+      {
+        "type": "custom",
+        "values": {
+          "selector": "*:has(>::name[value=InjectionToken]) Constructor ExpressionStatement[value*=\"__NG_ELEMENT_ID__\"]",
+          "removeComment": true
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/di/injector.ts",
+    "rules": []
+  },
+  {
+    "fileName": "./import/di/injector_compatibility.ts",
+    "rules": [
+      {
+        "type": "custom",
+        "change": "change",
+        "values": {
+          "selector": "*:has(>::name[value=ɵɵinvalidFactoryDep]) NeverKeyword",
+          "content": "void"
+        }
+      },
+      {
+        "type": "custom",
+        "change": "change",
+        "values": {
+          "selector": "*:has(>::name[value=convertToBitFlags]) AsExpression[value*=Host]<ParenthesizedExpression",
+          "content": "0"
+        }
+      },
+      {
+        "type": "custom",
+        "values": {
+          "selector": "FunctionDeclaration:like(HostAttributeToken):not(:like(ProviderToken))"
+        }
+      },
+      {
+        "type": "custom",
+        "change": "change",
+        "values": {
+          "selector": "FunctionDeclaration UnionType:like(ProviderToken<T>|HostAttributeToken)",
+          "content": "ProviderToken<T>"
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/di/injector_marker.ts",
+    "rules": []
+  },
+  {
+    "fileName": "./import/di/injector_token.ts",
+    "rules": []
+  },
+  {
+    "fileName": "./import/di/inject_switch.ts",
+    "rules": [
+      {
+        "type": "function",
+        "values": {
+          "excludes": ["assertInjectImplementationNotEqual"]
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/di/internal_tokens.ts",
+    "rules": []
+  },
+  {
+    "fileName": "./import/di/metadata.ts",
+    "rules": [
+      {
+        "type": "interface",
+        "values": {
+          "excludes": ["HostDecorator", "Host"]
+        }
+      },
+      {
+        "type": "variable",
+        "values": {
+          "excludes": ["Host"]
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/di/null_injector.ts",
+    "rules": []
+  },
+  {
+    "fileName": "./import/di/provider_collection.ts",
+    "rules": [
+      {
+        "type": "custom",
+        "change": "change",
+        "values": {
+          "selector": "CallExpression:has(>::expression[value=getComponentDef])",
+          "content": "null"
+        }
+      },
+      {
+        "type": "import",
+        "values": {
+          "excludes": ["getComponentDef", "throwCyclicDependencyError", "deepForEach"]
+        }
+      },
+      {
+        "type": "function",
+        "values": {
+          "excludes": ["validateProvider", "walkProviderTree", "deepForEachProvider", "importProvidersFrom", "internalImportProvidersFrom", "processInjectorTypesWithProviders"]
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/di/provider_token.ts",
+    "rules": []
+  },
+  {
+    "fileName": "./import/di/r3_injector.ts",
+    "rules": [
+      {
+        "type": "custom",
+        "values": {
+          "selector": "VariableStatement:like(setActiveConsumer)"
+        }
+      },
+      {
+        "type": "custom",
+        "values": {
+          "selector": "ExpressionStatement:like(setActiveConsumer)"
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/di/scope.ts",
+    "rules": []
+  },
+  {
+    "fileName": "./import/di/interface/defs.ts",
+    "rules": [
+      {
+        "type": "interface-property",
+        "values": {
+          "excludes": ["ɵinj"]
+        }
+      },
 
-    
-   
-            {
-                "type": "custom",
-                "values": {
-                    "selector": "ImportSpecifier:has(>::name[value=assertNotEqual])<SyntaxList<NamedImports<ImportClause<ImportDeclaration"
-                }
-            },
-            {
-                "type": "custom",
-                "values": {
-                    "selector": "ImportDeclaration[value*=\"ng_dev_mode\"]"
-                }
-            }
-        ]
-    },
-    {
-        "fileName": "./import/di/create_injector.ts",
-        "rules": [
-            {
-                "type": "custom",
-                "values": {
-                    "selector": "FunctionDeclaration:has(>[value=createInjectorWithoutInjectorInstances]) CallExpression:has(>[value=importProvidersFrom])"
-                }
-            }
-        ]
-    },
-    {
-        "fileName": "./import/di/forward_ref.ts",
-        "rules": []
-    },
-    {
-        "fileName": "./import/di/initializer_token.ts",
-        "rules": []
-    },
-    {
-        "fileName": "./import/di/injectable.ts",
-        "rules": [
-            {
-                "type": "import",
-                "values": {
-                    "excludes": [
-                        "compileInjectable"
-                    ]
-                }
-            },
-            {
-                "type": "import",
-                "values": {
-                    "namedImports": [
-                        "makeDecorator"
-                    ]
-                }
-            },
-            {
-                "type": "custom",
-                "values": {
-                    "selector": "ExportDeclaration ExportSpecifier:has(>::name[value=compileInjectable])<SyntaxList<NamedExports<ExportDeclaration"
-                }
-            },
-            {
-                "type": "variable",
-                "values": {
-                    "excludes": [
-                        "Injectable"
-                    ]
-                }
-            }
-        ]
-    },
-    {
-        "fileName": "./import/di/injection_token.ts",
-        "rules": [
+      {
+        "type": "custom",
+        "change": "change",
+        "values": {
+          "selector": "FunctionDeclaration:has(>Identifier[value=getInjectableDef])>Block",
+          "content": "{return getOwnDefinition(type, NG_PROV_DEF) ||{ token:type,factory:()=>new type(),...type.injectOptions}}"
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/di/interface/injector.ts",
+    "rules": []
+  },
+  {
+    "fileName": "./import/di/interface/provider.ts",
+    "rules": []
+  },
 
-            {
-                "type": "custom",
-                "values": {
-                    "selector": "*:has(>::name[value=InjectionToken]) Constructor ExpressionStatement[value*=\"__NG_ELEMENT_ID__\"]",
-                    "removeComment": true
-                }
-            }
-        ]
-    },
-    {
-        "fileName": "./import/di/injector.ts",
-        "rules": []
-    },
-    {
-        "fileName": "./import/di/injector_compatibility.ts",
-        "rules": [
-            {
-                "type": "custom",
-                "change": "change",
-                "values": {
-                    "selector": "*:has(>::name[value=ɵɵinvalidFactoryDep]) NeverKeyword",
-                    "content": "void"
-                }
-            },
-            {
-                "type": "custom",
-                "change": "change",
-                "values": {
-                    "selector": "*:has(>::name[value=convertToBitFlags]) AsExpression[value*=Host]<ParenthesizedExpression",
-                    "content": "0"
-                }
-            },
-            {
-                "type": "custom",
-                "values": {
-                    "selector": "FunctionDeclaration:like(HostAttributeToken):not(:like(ProviderToken))"
-                }
-            },
-            {
-                "type": "custom",
-                "change": "change",
-                "values": {
-                    "selector": "FunctionDeclaration UnionType:like(ProviderToken<T>|HostAttributeToken)",
-                    "content": "ProviderToken<T>"
-                }
-            }
-        ]
-    },
-    {
-        "fileName": "./import/di/injector_marker.ts",
-        "rules": []
-    },
-    {
-        "fileName": "./import/di/injector_token.ts",
-        "rules": []
-    },
-    {
-        "fileName": "./import/di/inject_switch.ts",
-        "rules": [
-            {
-                "type": "function",
-                "values": {
-                    "excludes": [
-                        "assertInjectImplementationNotEqual"
-                    ]
-                }
-            }
-        ]
-    },
-    {
-        "fileName": "./import/di/internal_tokens.ts",
-        "rules": []
-    },
-    {
-        "fileName": "./import/di/metadata.ts",
-        "rules": [
-            {
-                "type": "interface",
-                "values": {
-                    "excludes": [
-                        "HostDecorator",
-                        "Host"
-                    ]
-                }
-            },
-            {
-                "type": "variable",
-                "values": {
-                    "excludes": [
-                        "Host"
-                    ]
-                }
-            }
-        ]
-    },
-    {
-        "fileName": "./import/di/null_injector.ts",
-        "rules": []
-    },
-    {
-        "fileName": "./import/di/provider_collection.ts",
-        "rules": [
-            {
-                "type": "custom",
-                "change": "change",
-                "values": {
-                    "selector": "CallExpression:has(>::expression[value=getComponentDef])",
-                    "content": "null"
-                }
-            },
-            {
-                "type": "import",
-                "values": {
-                    "excludes": [
-                        "getComponentDef",
-                        "throwCyclicDependencyError",
-                        "deepForEach"
-                    ]
-                }
-            },
-            {
-                "type": "function",
-                "values": {
-                    "excludes": [
-                        "validateProvider",
-                        "walkProviderTree",
-                        "deepForEachProvider",
-                        "importProvidersFrom",
-                        "internalImportProvidersFrom",
-                        "processInjectorTypesWithProviders"
-                    ]
-                }
-            }
-        ]
-    },
-    {
-        "fileName": "./import/di/provider_token.ts",
-        "rules": []
-    },
-    {
-        "fileName": "./import/di/r3_injector.ts",
-        "rules": [
-    
-      
-            {
-                "type": "custom",
-                "values": {
-                    "selector": "VariableStatement:like(setActiveConsumer)"
-                }
-            },
-            {
-                "type": "custom",
-                "values": {
-                    "selector": "ExpressionStatement:like(setActiveConsumer)"
-                }
-            }
-        ]
-    },
-    {
-        "fileName": "./import/di/scope.ts",
-        "rules": []
-    },
-    {
-        "fileName": "./import/di/interface/defs.ts",
-        "rules": [
-            {
-                "type": "interface-property",
-                "values": {
-                    "excludes": [
-                        "ɵinj"
-                    ]
-                }
-            },
-            {
-                "type": "variable",
-                "values": {
-                    "excludes": [
-                        "defineInjectable",
-                        "NG_INJECTABLE_DEF",
-                        "NG_INJECTOR_DEF"
-                    ]
-                }
-            },
-            {
-                "type": "custom",
-                "change": "change",
-                "values": {
-                    "selector": "FunctionDeclaration:has(>Identifier[value=getInjectableDef])>Block",
-                    "content": "{return getOwnDefinition(type, NG_PROV_DEF) ||{ token:type,factory:()=>new type(),...type.injectOptions}}"
-                }
-            }
-        ]
-    },
-    {
-        "fileName": "./import/di/interface/injector.ts",
-        "rules": []
-    },
-    {
-        "fileName": "./import/di/interface/provider.ts",
-        "rules": []
-    },
-    {
-        "fileName": "./import/interface/lifecycle_hooks.ts",
-        "rules": [
-            {
-                "type": "interface",
-                "values": {
-                    "excludes": [
-                        "OnChanges",
-                        "OnInit",
-                        "DoCheck",
-                        "AfterContentInit",
-                        "AfterContentChecked",
-                        "AfterViewInit",
-                        "AfterViewChecked"
-                    ]
-                }
-            },
-            {
-                "type": "import",
-                "values": {
-                    "excludes": [
-                        "SimpleChanges"
-                    ]
-                }
-            }
-        ]
-    },
-    {
-        "fileName": "./import/interface/type.ts",
-        "rules": []
-    },
-    {
-        "fileName": "./import/render3/definition_factory.ts",
-        "rules": [
-            {
-                "type": "custom",
-                "change": "change",
-                "values": {
-                    "selector": "FunctionDeclaration:has(>Identifier[value=getFactoryDef])>Block",
-                    "content": "{return ()=>new type()}"
-                }
-            }
-        ]
-    },
-    {
-        "fileName": "./import/render3/errors_di.ts",
-        "rules": [
-      
-        ]
-    },
-    {
-        "fileName": "./import/errors.ts",
-        "rules": [
-            {
-                "type": "import",
-                "values": {
-                    "excludes": [
-                        "ERROR_DETAILS_PAGE_BASE_URL"
-                    ]
-                }
-            }
-        ]
-    },
-    {
-        "fileName": "./import/render3/fields.ts",
-        "rules": [
-            {
-                "type": "variable",
-                "values": {
-                    "excludes": [
-                        "NG_COMP_DEF",
-                        "NG_DIR_DEF",
-                        "NG_PIPE_DEF",
-                        "NG_MOD_DEF",
-                        "NG_ELEMENT_ID"
-                    ]
-                }
-            }
-        ]
-    },
-    {
-        "fileName": "./import/render3/instructions/di.ts",
-        "rules": [
-       
-            {
-                "type": "import",
-                "values": {
-                    "all": true
-                }
-            },
-            {
-                "type": "function",
-                "values": {
-                    "includes": [
-                        "ɵɵinvalidFactory"
-                    ]
-                }
-            }
-        ]
-    },
-    {
-        "fileName": "./import/render3/util/stringify_utils.ts",
-        "rules": [
-            {
-                "type": "function",
-                "values": {
-                    "excludes": [
-                        "debugStringifyTypeForError",
-                        "stringifyTypeFromDebugInfo"
-                    ]
-                }
-            },
-            {
-                "type": "import",
-                "values": {
-                    "excludes": [
-                        "NG_COMP_DEF"
-                    ]
-                }
-            }
-        ]
-    },
-    {
-        "fileName": "./import/util/closure.ts",
-        "rules": []
-    },
-    {
-        "fileName": "./import/util/decorators.ts",
-        "rules": [
-            {
-                "type": "function",
-                "values": {
-                    "excludes": [
-                        "makeDecorator",
-                        "makePropDecorator"
-                    ]
-                }
-            },
-            {
-                "type": "variable",
-                "values": {
-                    "excludes": [
-                        "ANNOTATIONS",
-                        "PROP_METADATA"
-                    ]
-                }
-            },
-            {
-                "type": "custom",
-                "change": "change",
-                "values": {
-                    "comment": "装饰器已经去掉,所以这个函数如果调用,一定是通过new Self()这种方式",
-                    "selector": "FunctionDeclaration:has(>Identifier[value=ParamDecoratorFactory])>Block",
-                    "replaceSelector": "IfStatement Block"
-                }
-            },
-            {
-                "type": "custom",
-                "change": "remove",
-                "values": {
-                    "selector": "ExpressionStatement:like(ParamDecoratorFactory.prototype),ExpressionStatement:like(annotationCls)"
-                }
-            }
-        ]
-    },
-    {
-        "fileName": "./import/util/empty.ts",
-        "rules": [
-            {
-                "type": "import",
-                "values": {
-                    "all": true
-                }
-            },
-            {
-                "type": "custom",
-                "change": "change" ,
-                "values": {
-                    "selector":"CallExpression[value^=initNgDevMode]" , 
-                    "content": "true"
-               
-                }
-            }
-        ]
-    },
-    {
-        "fileName": "./import/util/property.ts",
-        "rules": [
-            {
-                "type": "function",
-                "values": {
-                    "excludes": [
-                        "fillProperties"
-                    ]
-                }
-            }
-        ]
-    },
-    {
-        "fileName": "./import/util/stringify.ts",
-        "rules": [
-            {
-                "type": "function",
-                "values": {
-                    "excludes": [
-                        "concatStringsWithSpace"
-                    ]
-                }
-            }
-        ]
-    },
-    {
-        "fileName": "./import/render3/errors_di.ts",
-        "rules": []
-    },
-    {
-        "fileName": "./import/di/index.ts",
-        "rules": [
-            {
-                "type": "custom",
-                "change": "change",
-                "values": {
-                    "selector": "SourceFile",
-                    "content": "export {ProviderToken} from './provider_token';export {assertInInjectionContext, runInInjectionContext} from './contextual';export { EnvironmentInjector } from './r3_injector';export { FactoryProvider } from './interface/provider';"
-                }
-            }
-        ]
-    },
-    {
-        "fileName": "./import/render3/reactivity/effect.ts",
-        "rules": [
-            {
-                "type": "interface",
-                "values": {
-                    "excludes": [
-                        "ViewEffectNode"
-                    ]
-                }
-            },
-            {
-                "type": "function",
-                "values": {
-                    "excludes": [
-                        "createViewEffect"
-                    ]
-                }
-            },
-            {
-                "type": "variable",
-                "values": {
-                    "excludes": [
-                        "VIEW_EFFECT_NODE"
-                    ]
-                }
-            },
-            {
-                "type": "custom",
-                "change": "remove",
-                "values": {
-                    "selector": "VariableStatement:like(const viewContext)"
-                }
-            },
-            {
-                "type": "custom",
-                "change": "change",
-                "values": {
-                    "selector": "FunctionDeclaration:has(>[value=effect]) IfStatement:has(BinaryExpression:has(>[value=viewContext]))",
-                    "content": "node = createRootEffect(effectFn, injector.get(EffectScheduler), notifier);"
-                }
-            },
-            {
-                "type": "custom",
-                "change": "remove",
-                "values": {
-                    "selector": "VariableStatement:has(>VariableDeclarationList>SyntaxList>VariableDeclaration:has(>[value=prevRefreshingViews]))"
-                }
-            },
-            {
-                "type": "custom",
-                "change": "remove",
-                "values": {
-                    "selector": "ExpressionStatement:has(>CallExpression:has(>[value=setIsRefreshingViews]))"
-                }
-            }
-          
-        ]
-    },
-    {
-        "fileName": "./import/di/contextual.ts",
-        "rules": [
-        
-        ]
-    },
-    {
-        "fileName": "./import/core_reactivity_export_internal.ts",
-        "rules": [
-            {
-                "type": "custom",
-                "values": {
-                    "selector": "ExportDeclaration ExportSpecifier:has(>::name[value=afterRenderEffect])<SyntaxList<NamedExports<ExportDeclaration"
-                }
-            }
-        ]
-    },
-    {
-        "fileName": "./import/linker/destroy_ref.ts",
-        "rules": [
-            {
-                "type": "class",
-                "values": {
-                    "excludes": [
-                        "NodeInjectorDestroyRef"
-                    ]
-                }
-            },
-            {
-                "type": "function",
-                "values": {
-                    "excludes": [
-                        "injectDestroyRef"
-                    ]
-                }
-            },
-            {
-                "type": "custom",
-                "change": "remove",
-                "values": {
-                    "selector": "PropertyDeclaration:has(>[value=__NG_ELEMENT_ID__])"
-                }
-            }
-        ]
-    },
-    {
-        "fileName": "./import/error_handler.ts",
-        "rules": [
-            {
-                "type": "variable",
-                "values": {
-                    "excludes": [
-                        "globalErrorListeners",
-                        "errorHandlerEnvironmentInitializer"
-                    ]
-                }
-            },
-            {
-                "type": "function",
-                "values": {
-                    "excludes": [
-                        "provideBrowserGlobalErrorListeners"
-                    ]
-                }
-            },
-            {
-                "type": "import",
-                "values": {
-                    "excludes": [
-                        "DOCUMENT"
-                    ]
-                }
-            }
-        ]
-    },
-    {
-        "fileName": "./import/render3/debug/injector_profiler.ts",
-        "rules": [
-            {
-                "type": "interface-property",
-                "values": {
-                    "includes": [
-                        "injectedIn"
-                    ]
-                }
-            }
-         
-        ]
-    }
+  {
+    "fileName": "./import/interface/type.ts",
+    "rules": []
+  },
+  {
+    "fileName": "./import/render3/definition_factory.ts",
+    "rules": [
+      {
+        "type": "custom",
+        "change": "change",
+        "values": {
+          "selector": "FunctionDeclaration:has(>Identifier[value=getFactoryDef])>Block",
+          "content": "{return ()=>new type()}"
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/render3/errors_di.ts",
+    "rules": []
+  },
+  {
+    "fileName": "./import/errors.ts",
+    "rules": [
+      {
+        "type": "import",
+        "values": {
+          "excludes": ["ERROR_DETAILS_PAGE_BASE_URL"]
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/render3/fields.ts",
+    "rules": [
+      {
+        "type": "variable",
+        "values": {
+          "excludes": ["NG_COMP_DEF", "NG_DIR_DEF", "NG_PIPE_DEF", "NG_MOD_DEF", "NG_ELEMENT_ID"]
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/render3/instructions/di.ts",
+    "rules": [
+      {
+        "type": "import",
+        "values": {
+          "all": true
+        }
+      },
+      {
+        "type": "function",
+        "values": {
+          "includes": ["ɵɵinvalidFactory"]
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/render3/util/stringify_utils.ts",
+    "rules": [
+      {
+        "type": "function",
+        "values": {
+          "excludes": ["debugStringifyTypeForError", "stringifyTypeFromDebugInfo"]
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/util/closure.ts",
+    "rules": []
+  },
+  {
+    "fileName": "./import/util/decorators.ts",
+    "rules": [
+      {
+        "type": "function",
+        "values": {
+          "excludes": ["makeDecorator", "makePropDecorator"]
+        }
+      },
+      {
+        "type": "variable",
+        "values": {
+          "excludes": ["ANNOTATIONS", "PROP_METADATA"]
+        }
+      },
+      {
+        "type": "custom",
+        "change": "change",
+        "values": {
+          "comment": "装饰器已经去掉,所以这个函数如果调用,一定是通过new Self()这种方式",
+          "selector": "FunctionDeclaration:has(>Identifier[value=ParamDecoratorFactory])>Block",
+          "replaceSelector": "IfStatement Block"
+        }
+      },
+      {
+        "type": "custom",
+        "change": "remove",
+        "values": {
+          "selector": "ExpressionStatement:like(ParamDecoratorFactory.prototype),ExpressionStatement:like(annotationCls)"
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/util/empty.ts",
+    "rules": [
+      {
+        "type": "import",
+        "values": {
+          "all": true
+        }
+      },
+      {
+        "type": "custom",
+        "change": "change",
+        "values": {
+          "selector": "CallExpression[value^=initNgDevMode]",
+          "content": "true"
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/util/property.ts",
+    "rules": [
+      {
+        "type": "function",
+        "values": {
+          "excludes": ["fillProperties"]
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/util/stringify.ts",
+    "rules": [
+      {
+        "type": "function",
+        "values": {
+          "excludes": ["concatStringsWithSpace"]
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/render3/errors_di.ts",
+    "rules": []
+  },
+  {
+    "fileName": "./import/di/index.ts",
+    "rules": [
+      {
+        "type": "custom",
+        "change": "change",
+        "values": {
+          "selector": "SourceFile",
+          "content": "export {ProviderToken} from './provider_token';export {assertInInjectionContext, runInInjectionContext} from './contextual';export { EnvironmentInjector } from './r3_injector';export { FactoryProvider } from './interface/provider';export { inject } from './injector_compatibility';export { InjectionToken } from './injection_token';export { Injector } from './injector';export { injectAsync, InjectAsyncOptions, PrefetchTrigger, onIdle } from './inject_async';"
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/linker.ts",
+    "rules": [
+      {
+        "type": "custom",
+        "change": "change",
+        "values": {
+          "selector": "SourceFile",
+          "content": "export { DestroyRef } from './linker/destroy_ref';"
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/render3/reactivity/effect.ts",
+    "rules": [
+      {
+        "type": "interface",
+        "values": {
+          "excludes": ["ViewEffectNode"]
+        }
+      },
+      {
+        "type": "function",
+        "values": {
+          "excludes": ["createViewEffect"]
+        }
+      },
+      {
+        "type": "variable",
+        "values": {
+          "excludes": ["VIEW_EFFECT_NODE"]
+        }
+      },
+      {
+        "type": "custom",
+        "change": "remove",
+        "values": {
+          "selector": "VariableStatement:like(const viewContext)"
+        }
+      },
+      {
+        "type": "custom",
+        "change": "change",
+        "values": {
+          "selector": "FunctionDeclaration:has(>[value=effect]) IfStatement:has(BinaryExpression:has(>[value=viewContext]))",
+          "content": "node = createRootEffect(effectFn, injector.get(EffectScheduler), notifier);"
+        }
+      },
+      {
+        "type": "custom",
+        "change": "remove",
+        "values": {
+          "selector": "VariableStatement:has(>VariableDeclarationList>SyntaxList>VariableDeclaration:has(>[value=prevRefreshingViews]))"
+        }
+      },
+      {
+        "type": "custom",
+        "change": "remove",
+        "values": {
+          "selector": "ExpressionStatement:has(>CallExpression:has(>[value=setIsRefreshingViews]))"
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/di/contextual.ts",
+    "rules": []
+  },
+  {
+    "fileName": "./import/core_reactivity_export_internal.ts",
+    "rules": [
+      {
+        "type": "custom",
+        "values": {
+          "selector": "ExportDeclaration ExportSpecifier:has(>::name[value=afterRenderEffect])<SyntaxList<NamedExports<ExportDeclaration"
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/linker/destroy_ref.ts",
+    "rules": [
+      {
+        "type": "class",
+        "values": {
+          "excludes": ["NodeInjectorDestroyRef"]
+        }
+      },
+      {
+        "type": "function",
+        "values": {
+          "excludes": ["injectDestroyRef"]
+        }
+      },
+      {
+        "type": "custom",
+        "change": "remove",
+        "values": {
+          "selector": "PropertyDeclaration:has(>[value=__NG_ELEMENT_ID__])"
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/error_handler.ts",
+    "rules": [
+      {
+        "type": "variable",
+        "values": {
+          "excludes": ["globalErrorListeners", "errorHandlerEnvironmentInitializer"]
+        }
+      },
+      {
+        "type": "function",
+        "values": {
+          "excludes": ["provideBrowserGlobalErrorListeners"]
+        }
+      },
+      {
+        "type": "import",
+        "values": {
+          "excludes": ["DOCUMENT"]
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/render3/debug/injector_profiler.ts",
+    "rules": [
+      {
+        "type": "interface-property",
+        "values": {
+          "includes": ["injectedIn"]
+        }
+      },
+      {
+        "type": "function",
+        "values": {
+          "excludes": ["emitAfterRenderEffectPhaseCreatedEvent"]
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/change_detection/lifecycle_hooks.ts",
+    "rules": [
+      {
+        "type": "interface",
+        "values": {
+          "excludes": ["AfterViewChecked", "AfterViewInit", "AfterContentChecked", "AfterContentInit", "DoCheck", "OnInit", "OnChanges"]
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/application/application_tokens.ts",
+    "rules": [
+      {
+        "type": "variable",
+        "values": {
+          "excludes": ["PLATFORM_INITIALIZER", "validAppIdInitializer", "PLATFORM_ID", "ANIMATION_MODULE_TYPE", "CSP_NONCE", "IMAGE_CONFIG_DEFAULTS", "IMAGE_CONFIG"]
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/zone/ng_zone.ts",
+    "rules": [
+      {
+        "type": "custom",
+        "change": "change",
+        "values": {
+          "selector": "ClassDeclaration:has(>Identifier[value=NgZone]) Constructor>Block",
+          "content": "{}"
+        }
+      },
+      {
+        "type": "custom",
+        "change": "remove",
+        "values": {
+          "selector": "ClassDeclaration:has(>Identifier[value=NgZone]) MethodDeclaration:has(>SyntaxList[value=static])"
+        }
+      },
+      {
+        "type": "custom",
+        "change": "change",
+        "values": {
+          "selector": "ClassDeclaration:has(>Identifier[value=NgZone])>CloseBraceToken",
+          "content": "/** @nocollapse */\nstatic ɵprov = /**\n@pureOrBreakMyCode */ /* @__PURE__ */\nɵɵdefineInjectable({\ntoken: NgZone,\nprovidedIn: \n'root',\nfactory: () => new NoopNgZone(),\n});}"
+        }
+      },
+      {
+        "type": "custom",
+        "change": "change",
+        "values": {
+          "selector": "ImportDeclaration:like(noop)",
+          "content": "{{''|ctxValue}}\nimport { ɵɵdefineInjectable } from '../di/interface/defs';"
+        }
+      },
+      {
+        "type": "function",
+        "values": {
+          "excludes": [
+            "getNgZone",
+            "forkInnerZoneWithAngularBehavior",
+            "onEnter",
+            "onLeave",
+            "delayChangeDetectionForEvents",
+            "updateMicroTaskStatus",
+            "checkStable",
+            "isSchedulerTick",
+            "shouldBeIgnoredByZone",
+            "hasApplyArgsData"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "fileName": "./import/change_detection/scheduling/zoneless_scheduling.ts",
+    "rules": [
+      {
+        "type": "variable",
+        "values": {
+          "excludes": ["SCHEDULE_IN_ROOT_ZONE", "PROVIDED_ZONELESS", "ZONELESS_ENABLED"]
+        }
+      }
+    ]
+  }
 ]

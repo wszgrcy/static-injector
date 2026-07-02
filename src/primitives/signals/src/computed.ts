@@ -14,9 +14,9 @@ import {
   producerUpdateValueVersion,
   REACTIVE_NODE,
   ReactiveNode,
+  runPostProducerCreatedFn,
   setActiveConsumer,
   SIGNAL,
-  runPostProducerCreatedFn,
 } from './graph';
 
 // Required as the signals library is in a separate package, so we need to explicitly ensure the
@@ -80,8 +80,7 @@ export function createComputed<T>(computation: () => T, equal?: ValueEqualityFn<
 
   (computed as ComputedGetter<T>)[SIGNAL] = node;
   if (typeof ngDevMode !== 'undefined' && ngDevMode) {
-    const debugName = node.debugName ? ' (' + node.debugName + ')' : '';
-    computed.toString = () => `[Computed${debugName}: ${node.value}]`;
+    computed.toString = () => `[Computed${node.debugName ? ' (' + node.debugName + ')' : ''}: ${String(node.value)}]`;
   }
 
   runPostProducerCreatedFn(node);
@@ -111,8 +110,7 @@ export const ERRORED: any = /* @__PURE__ */ Symbol('ERRORED');
 
 // Note: Using an IIFE here to ensure that the spread assignment is not considered
 // a side-effect, ending up preserving `COMPUTED_NODE` and `REACTIVE_NODE`.
-// TODO: remove when https://github.com/evanw/esbuild/issues/3392 is resolved.
-const COMPUTED_NODE = /* @__PURE__ */ (() => ({
+const COMPUTED_NODE: Omit<ComputedNode<unknown>, 'computation'> = /* @__PURE__ */ (() => ({
   ...REACTIVE_NODE,
   value: UNSET,
   dirty: true,

@@ -3,7 +3,7 @@
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 
 import { SIGNAL } from './graph';
@@ -44,9 +44,9 @@ const formatter = {
     let value: unknown;
     try {
       value = sig();
-    } catch {
-      // In case the signl throws, we don't want to break the formatting.
-      return ['span', 'Signal(⚠️ Error)'];
+    } catch (e: any) {
+      // In case the signal throws, we don't want to break the formatting.
+      return ['span', `Signal(⚠️ Error)${e.message ? `: ${e.message}` : ''}`];
     }
 
     const kind = 'computation' in (sig[SIGNAL] as any) ? 'Computed' : 'Signal';
@@ -98,7 +98,7 @@ const formatter = {
       ['div', { style: `color: ${color}` }, 'Signal value: '],
       ['div', { style: `padding-left: .5rem;` }, ['object', { object: sig(), config }]],
       ['div', { style: `color: ${color}` }, 'Signal function: '],
-      ['div', { style: `padding-left: .5rem;` }, ['object', { object: sig, config: { ...config, skipFormatting: true } }]],
+      ['div', { style: `padding-left: .5rem;` }, ['object', { object: sig, config: { ...config, ngSkipFormatting: true } }]],
     ];
   },
 };
@@ -129,7 +129,7 @@ function prettifyPreview(value: Record<string | number | symbol, unknown> | Arra
       }
     }
     default: {
-      return ['object', { object: value, config: { skipFormatting: true } }];
+      return ['object', { object: value, config: { ngSkipFormatting: true } }];
     }
   }
 }
@@ -151,3 +151,6 @@ export function installDevToolsSignalFormatter() {
     globalThis.devtoolsFormatters.push(formatter);
   }
 }
+
+// This fixes the RollupError: Exported variable "global" is not defined.
+export {};

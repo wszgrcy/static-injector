@@ -19,7 +19,8 @@ async function bundleImport() {
     packages: 'external',
     define: {
       Zone: 'undefined',
-      ERROR_DETAILS_PAGE_BASE_URL: `'https://v20.angular.dev/errors'`,
+      ERROR_DETAILS_PAGE_BASE_URL: `'https://v22.angular.dev/errors'`,
+      ngServerMode: 'true',
     },
     inject: ['./script/shim.js'],
   };

@@ -12,7 +12,6 @@ import { Injector } from '../../di/injector';
 import { assertNotInReactiveContext } from './asserts';
 import { assertInInjectionContext } from '../../di/contextual';
 import { DestroyRef } from '../../linker/destroy_ref';
-import { noop } from '../../util/noop';
 import { ChangeDetectionScheduler, NotificationSource } from '../../change_detection/scheduling/zoneless_scheduling';
 import { EffectScheduler, SchedulableEffect } from './root_effect_scheduler';
 
@@ -22,6 +21,8 @@ import { emitEffectCreatedEvent, setInjectorProfilerContext } from '../debug/inj
  * A global reactive effect, which can be manually destroyed.
  *
  * @publicApi 20.0
+ *
+ * @see [Destroying effects](guide/signals/effect#destroying-effects)
  */
 export interface EffectRef {
   /**
@@ -140,7 +141,7 @@ export function effect(effectFn: (onCleanup: EffectCleanupRegisterFn) => void, o
 
   if (destroyRef !== null) {
     // If we need to register for cleanup, do that here.
-    node.onDestroyFn = destroyRef.onDestroy(() => node.destroy());
+    node.onDestroyFns = [destroyRef.onDestroy(() => node.destroy())];
   }
 
   const effectRef = new EffectRefImpl(node);
@@ -163,7 +164,7 @@ export interface EffectNode extends BaseEffectNode, SchedulableEffect {
   injector: Injector;
   notifier: ChangeDetectionScheduler;
 
-  onDestroyFn: () => void;
+  onDestroyFns: (() => void)[] | null;
 }
 
 export interface RootEffectNode extends EffectNode {
@@ -174,7 +175,7 @@ export const EFFECT_NODE: Omit<EffectNode, 'fn' | 'destroy' | 'injector' | 'noti
   ...BASE_EFFECT_NODE,
   cleanupFns: undefined,
   zone: null,
-  onDestroyFn: noop,
+  onDestroyFns: null,
   run(this: EffectNode): void {
     if (ngDevMode && isInNotificationPhase()) {
       throw new Error(`Schedulers cannot synchronously execute watches while scheduling.`);
@@ -215,7 +216,13 @@ export const ROOT_EFFECT_NODE: Omit<RootEffectNode, 'fn' | 'scheduler' | 'notifi
   },
   destroy(this: RootEffectNode) {
     consumerDestroy(this);
-    this.onDestroyFn();
+
+    if (this.onDestroyFns !== null) {
+      for (const fn of this.onDestroyFns) {
+        fn();
+      }
+    }
+
     this.cleanup();
     this.scheduler.remove(this);
   },

@@ -2,7 +2,13 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
-    "strict": true
+    "strict": true,
+    "types": [
+      "mocha"
+    ]
   },
-  "include": ["./test","./typings.d.ts"]
+  "include": [
+    "./test",
+    "./typings.d.ts"
+  ]
 }

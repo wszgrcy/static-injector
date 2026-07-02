@@ -7,7 +7,7 @@
  */
 
 import { RuntimeError, RuntimeErrorCode } from '../errors';
-import { OnDestroy } from '../interface/lifecycle_hooks';
+import { OnDestroy } from '../change_detection/lifecycle_hooks';
 import { Type } from '../interface/type';
 import {
   emitInjectorToCreateInstanceEvent,
@@ -393,12 +393,16 @@ export class R3Injector extends EnvironmentInjector implements PrimitivesInjecto
   }
 
   override toString() {
-    const tokens: string[] = [];
-    const records = this.records;
-    for (const token of records.keys()) {
-      tokens.push(stringify(token));
+    if (ngDevMode) {
+      const tokens: string[] = [];
+      const records = this.records;
+      for (const token of records.keys()) {
+        tokens.push(stringify(token));
+      }
+      return `R3Injector[${tokens.join(', ')}]`;
     }
-    return `R3Injector[${tokens.join(', ')}]`;
+
+    return 'R3Injector[...]';
   }
 
   /**
@@ -456,7 +460,7 @@ export class R3Injector extends EnvironmentInjector implements PrimitivesInjecto
   private hydrate<T>(token: ProviderToken<T>, record: Record<T>, flags: InternalInjectFlags): T {
     try {
       if (record.value === CIRCULAR) {
-        throw cyclicDependencyError(stringify(token));
+        throw cyclicDependencyError(ngDevMode ? stringify(token) : '');
       } else if (record.value === NOT_YET) {
         record.value = CIRCULAR;
 
