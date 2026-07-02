@@ -54,7 +54,7 @@ let fn: ScriptFunction = async (util, rule, host, injector) => {
     ],
     'packages',
     'branch',
-    'v22.0.2',
+    'v22.0.5',
   );
   let copyData = require('./copy.json') as {
     source: string;
